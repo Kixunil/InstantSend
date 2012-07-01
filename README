@@ -1,0 +1,29 @@
+Instant Send - simplified
+Version: 0.2
+Author: Martin Habovštiak
+
+Features:
+	Server loads configuration
+	Server uses multithreading - oone thread for each server plugin and connected client
+	Client can send file given in argument using plugins with hard coded configuration (I'll work on this soon)
+	Both client and server use Json for handling communication and config files
+	You can create any imaginable plugin for communication
+
+Issues:
+	Autotools don't work but it's possible to compile with make -f Makefile.in
+	Most things are hard coded
+	jsonArr_t dont have copy constructor and operator= overloaded
+	No authentication is used
+	Resuming of sending is not implemented
+	Plugins can't use another plugins
+	Only POSIX systems (maybe only Linux) are supported
+
+Plugins:
+	ip4tcp - as name suggests, it uses TCP/IP with IPv4
+
+Config files:
+	Should be placed in ~/.instantsend/
+	Json syntax
+	See examples
+
+Work in progress, stay tuned :)
