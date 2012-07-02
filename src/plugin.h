@@ -52,11 +52,16 @@ class plugin_t {
 		~plugin_t();
 		plugin_t &operator=(plugin_t &plugin);
 		pluginHandle_t *operator=(pluginHandle_t *handle);
+
+		inline pluginInstanceCreator_t *creator() {
+			return handle->creator();
+		}
+
 		inline bool loaded() {
 			return handle && handle->loaded();
 		}
 
-		inline clientPlugin_t * newClient(jsonComponent_t *config) {
+		inline peer_t * newClient(jsonComponent_t *config) {
 			return handle->creator()->newClient(config);
 		}
 

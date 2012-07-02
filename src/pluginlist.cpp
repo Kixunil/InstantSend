@@ -17,3 +17,8 @@ pluginList_t &pluginList_t::instance() {
 
 	return *plugins;
 }
+
+pluginInstanceCreator_t &getPluginInstanceCreator(const string &name) { // Interface for plugins
+	pluginList_t &pl = pluginList_t::instance();
+	return *pl[name].creator();
+}

@@ -302,6 +302,12 @@ class jsonArr_t: public jsonStructuredComponent_t {
 		string toString();
 		void fromString(string *str);
 		jsonComponent_t *clone() const;
+
+		jsonArr_t &operator=(const jsonArr_t &other);
+		inline jsonArr_t(const jsonArr_t &other) {
+			*this = other;
+		}
+
 		inline void addVal(jsonComponent_t *value) {
 			data.push_back(itemContainer_t(value, false));
 		}

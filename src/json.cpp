@@ -431,6 +431,18 @@ jsonComponent_t *jsonArr_t::clone() const {
 	return tmp;
 }
 
+jsonArr_t &jsonArr_t::operator=(const jsonArr_t &other) {
+	if(this == &other) return *this;
+	deleteContent();                
+
+	for(unsigned int i = 0; i < other.data.size(); ++i) {
+		if(other.data[i].isOwner()) data[i] = itemContainer_t(other.data[i].item->clone(), true);
+		else data[i] = other.data[i];
+	}
+
+	return *this;
+}
+
 void jsonArr_t::deleteContent() {
 	for(unsigned int i = 0; i < data.size(); ++i) {
 		if(data[i].isOwner()) delete data[i].item;

@@ -7,7 +7,7 @@
 #include "pluginapi.h"
 #include "pluginlist.h"
 
-int sendFile(auto_ptr<clientPlugin_t> client, FILE *file, const char *basename) {
+int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 	try {
 		long fs;
 		if(fseek(file, 0, SEEK_END) < 0) throw "Can't seek";
@@ -66,7 +66,7 @@ int sendFile(auto_ptr<clientPlugin_t> client, FILE *file, const char *basename) 
 
 }
 
-auto_ptr<clientPlugin_t> findWay(jsonArr_t &ways) {
+auto_ptr<peer_t> findWay(jsonArr_t &ways) {
 	pluginList_t &pl = pluginList_t::instance();
 	for(int i = 0; i < ways.count(); ++i) {
 		try {
@@ -75,14 +75,14 @@ auto_ptr<clientPlugin_t> findWay(jsonArr_t &ways) {
 			string pname = dynamic_cast<jsonStr_t &>(way.gie("plugin")).getVal();
 
 			// Load plugin and try to connect
-			auto_ptr<clientPlugin_t> client(pl[pname].newClient(NULL));
-			if(client.get() && client->connectTarget(&way.gie("config"))) return client;
+			auto_ptr<peer_t> client(pl[pname].newClient(&way.gie("config")));
+			return client;
 		}
 		catch(...) {
 			// continue trying
 		}
 	}
-	return auto_ptr<clientPlugin_t>(NULL); // Return empty
+	return auto_ptr<peer_t>(NULL); // Return empty
 }
 
 int main(int argc, char **argv) {
@@ -127,14 +127,18 @@ int main(int argc, char **argv) {
 				if(!file) throw "Can't open file";
 
 				// Find way to send file
-				auto_ptr<clientPlugin_t> client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
+				auto_ptr<peer_t> client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
+				if(!client.get()) {
+					printf("Failed to connet to %s\n", tname);
+					continue;
+				}
 
 				// Find base name TODO: make function and make it multi platform
 				char *basename = argv[i], *ptr = argv[i];
 				while(*ptr) if(*ptr++ == '/') basename = ptr;
 
 				// Really send file
-				sendFile(client, file, basename);
+				if(sendFile(client, file, basename)) printf("File \"%s\" sent to \"%s\".\n", argv[i], tname);
 			}
 		}
 

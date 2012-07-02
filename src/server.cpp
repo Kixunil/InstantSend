@@ -26,7 +26,7 @@ class simpleException : public exception {
 		~simpleException() throw() {;}
 };
 
-void sendErrMsg(client_t &client, const char *msg) {
+void sendErrMsg(peer_t &client, const char *msg) {
 	// Sends information about error to client
 	jsonObj_t msgobj = jsonObj_t("{ \"action\" : \"error\" }"); // Little bit lazy method
 	jsonStr_t tmp(msg);
@@ -39,8 +39,8 @@ void sendErrMsg(client_t &client, const char *msg) {
 }
 
 void *processClient(void *c) {	// This is called as new thread
-	auto_ptr<client_t> cptr((client_t *)c);
-	client_t &client = *cptr.get();
+	auto_ptr<peer_t> cptr((peer_t *)c);
+	peer_t &client = *cptr.get();
 	anyData *data = allocData(1024);
 	int received, hlen;
 	string fname;
@@ -125,7 +125,7 @@ void *startServer(void *config) {
 	try {
 		serverPlugin_t *server = (serverPlugin_t *)config;
 
-		client_t *client;
+		peer_t *client;
 		while((client = server->acceptClient())) {
 			pthread_t *clientthread = new pthread_t;
 			pthread_create(clientthread, NULL, &processClient, client);
