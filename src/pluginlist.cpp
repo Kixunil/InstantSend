@@ -9,11 +9,11 @@ plugin_t &pluginList_t::operator[](const string &name) {
 	}
 }
 
-pluginList_t *pluginList_t::instance() {
+pluginList_t &pluginList_t::instance() {
 	static pluginList_t *plugins;
 	if(!plugins) {
 		plugins = new pluginList_t();
 	}
 
-	return plugins;
+	return *plugins;
 }

@@ -11,6 +11,7 @@
 
 extern "C" const char *lastErr = NULL;
 
+// Helper functions for both client and server
 int toSocket(int fd, anyData *data) {
 	uint32_t tosend = data->size;
 	int sent = htonl(data->size); 

@@ -15,7 +15,7 @@ class pluginList_t { // Singleton DP
 		inline plugin_t &operator[](const char *name) {
 			return (*this)[string(name)];
 		}
-		static pluginList_t *instance();
+		static pluginList_t &instance();
 		inline void addSearchPath(const string &path) {
 			loader.addPath(path);
 		}
