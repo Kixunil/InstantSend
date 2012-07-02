@@ -1,14 +1,14 @@
 CC=g++
-CFLAGS+=-W -Wall -g -rdynamic -pthread -I../include -I.
-LDFLAGS=-ldl
+CFLAGS+=-W -Wall -g -rdynamic -I../include -I.
+LDFLAGS=-ldl -pthread
 
 all: client server
 
 client: json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o client.cpp
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o client.cpp
+	$(CC) $(CFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o client.cpp $(LDFLAGS)
 
 server: json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o server.cpp
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o server.cpp
+	$(CC) $(CFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o server.cpp $(LDFLAGS)
 
 libinstantsend.o: libinstantsend.cpp
 	$(CC) $(CFLAGS) -c -o $@ libinstantsend.cpp
