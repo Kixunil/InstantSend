@@ -12,7 +12,6 @@ Features:
 Issues:
 	Autotools don't work but it's possible to compile with make -f Makefile.in
 	Many things are hard coded
-	jsonArr_t dont have copy constructor and operator= overloaded
 	No authentication is used
 	Resuming of sending is not implemented
 	Plugins can't use another plugins
