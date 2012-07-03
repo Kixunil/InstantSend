@@ -1,0 +1,25 @@
+Program: instantsend - jednoduché a rýchle posielanie súborov cez ľubovoľný komunikačný kanál
+Autor: Martin Habovštiak <martin dot habovstiak at gmail dot com>
+Oficiálny git repozitár: https://github.com/Kixunil/InstantSend-simplified
+
+Použitie
+	server [ -c KONFIGURACNY_SUBOR ]
+	client [ -c KONFIGURACNY_SUBOR ] -t CIEL -f SUBOR [ [ -t CIEL ] [ -f SUBOR ] ... ]
+
+(Pozrite aj príklady konfiguračných súborov server.cfg a client.cfg)
+
+Server zabezpečuje službu prijímania súborov poslaných protokolom instantsend. Je odporúčané službu spustiť ako systémový démon.
+Služba načíta všetky pluginy zo zoznamu, ktorý sa nachádza v konfiguračnom súbore, nakonfiguruje ich a spustí každý v osobitnom vlákne.
+
+Klient zabezpečuje odosielanie súborov serveru. Spúšťa sa pri posielaní súborov. Každý súbor bude poslaný cieľu, ktorý bol na príkazovom
+riadku uvedený ako posledný pred uvedením súboru. (Tzn. ak boli parametre -t PC1 -f subor1 -f subor2 -t PC2 -f subor3 -f subor4
+súbory subor1 a subor2 budú poslané cieľu PC1 a súbory subor3 a subor4 budú poslané cieľu PC2)
+
+Pre každý cieľ musí byť v konfiguračnom súbore uvedený zoznam pluginov a ich konfigurácií, ktoré sa má klient pokúsiť použiť. Klient použije
+prvú kombináciu v poradí, ktorou sa podarí pripojiť. Ak sa nijaká kombinácia nenájde alebo sa vyskytne chyba počas posielania, posielanie bude
+ukončené. V posielaní sa nedá pokračovať, t.j. treba začať od začiatku. (toto bude v niekedy budúcnosti vyriešené).
+
+VAROVANIE:
+Pri posielaní sa nerobí NIJAKÁ kontrola integrity a spojenie sa NEŠIFRUJE! (pokiaľ nepoužívate pluginy, ktoré to dokážu)
+Autor NEZODPOVEDÁ za možné straty dát ani úniky citlivých informácií v súvislosti s činnosťou programu! Používate na vlastnú zodpovednosť!
+Vždy používajte aktuálnu verziu programu AJ pluginov!

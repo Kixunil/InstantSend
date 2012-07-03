@@ -1,20 +1,21 @@
 Instant Send - simplified
-Version: 0.2
+Version: 0.3
 Author: Martin Habovštiak
 
 Features:
 	Server loads configuration
-	Server uses multithreading - oone thread for each server plugin and connected client
+	Server uses multithreading - one thread for each server plugin and connected client
 	Client can send file(s), targets are in its configuration file
 	Both client and server use Json for handling communication and config files
 	You can create any imaginable plugin for communication
+	Plugins can use another plugins. This means you can chain them or add features without changing original plugin.
 
 Issues:
 	Autotools don't work but it's possible to compile with make -f Makefile.in
-	Many things are hard coded
+	Several things are hard coded
 	No authentication is used
+	No integrity checking
 	Resuming of sending is not implemented
-	Plugins can't use another plugins
 	Only POSIX systems (maybe only Linux) are supported
 
 Plugins:

@@ -1,0 +1,53 @@
+Kód je licencovaný pod LGPL
+Program instantsend sa skladá z piatich hlavných častí:
+ - server (server.cpp) - zabezpečuje prijímanie súborov
+ - klient (client.cpp) - zabezpečuje posielanie súborov
+ - správcovia pluginov (pluginlist.cpp, pluginlist.h, pluginloader.cpp, pluginloader.h) - zabezpečujú načítavanie pluginov, ich držanie v pamäti a uvoľňovanie
+ - json parser (json.cpp, json.h) - zabezpečuje spracovanie konfiguračných súborov aj komunikáciu
+ - pluginy (adresár plugins) - zabezpečujú v prvom rade reálne posielanie dát
+
+Protokol:
+	Po pripojení sa k serveru, klient odošle informáciu o názve služby ("filetransfer") a informuje o názve a veľkosti súboru. Používa jazyk Json
+	Server skontroluje platnosť požiadavky a na základe toho odpovie "accept" (prijatie súboru) alebo "reject" (odmietnutie) 
+		V prípade "reject" zároveň pošle informácie o chybe a ukončí spojenie. Opäť sa používa jazyk Json.
+	Klient skontroluje, či bol súbor akceptovaný a ak bol, začne odosielať súbor po častiach. Teoretická maximálna veľkosť častí je 2^32 - 1B, v 
+		praxi sa používa 1023B. Každá časť obsahuje hlavičku v jazyku Json (pozícia v súbore - časti nemusia byť poslané po poradí), za ňou
+		nasleduje nulový znak a potom surové dáta (obsah súboru).
+	Server prečíta hlavičku a zapíše dáta do príslušnej časti súboru. V prípade chyby odošle informáciu o chybe a ukončí spojenie.
+		Ak zistí, že súbor sa preniesol celý, ukončí spojenie.
+	Keď klient odošle všetky dáta, ukončí spojenie.
+
+Server používa viac vlákien - na každý plugin a každého klienta jedno. Server po štarte prečíta konfiguračný súbor, inicializuje pluginy a
+spustí jednotlivé vlákna. Vďaka oddelenosti vlákien synchronizácia nie je potrebná.
+
+Klient po štarte načíta konfiguráciu a iteruje parametre. Parameter -t zmení cieľ, parameter -f spôsobí pokus o poslanie súboru. Pri posielaní sa najskôr vyberie konfigurácia požadovaného cieľa, potom program postupne hľadá kombináciu pluginu a jeho konfigurácie, pomocou ktorej sa pripojí.
+Akonáhle nájde správnu kombináciu, začne odosielať údaje. Ak konfiguráciu nenájde, skončí neúspechom.
+
+Správcovia pluginov:
+	plugin - obsahuje jednoduchý wrapper pre handle z dlopen() a podobných volaní, používa počítanie referencií na určenie, či je potrebné plugin držať v pamäti.
+	pluginlist - návrhový vzor singleton; zabezpečí jednotný zoznam pluginov pre celý program, každý plugin (a informácie o ňom) sa v pamäti nachádza len raz.
+			(avšak funkčných inštancií môže byť teoreticky viac - napr. ak by program používal viac portov)
+
+Json parser:
+Používa návrhový vzor composite na načítanie zo stringu aj zápis do stringu. Stromová štruktúra Json-u umožňuje uzavrieť konfiguráciu pre plugin vnútri konfigurácie pre program. Všetky neštruktúrované komponenty (okrem NULL) obsahujú funkciu getVal(), ktorá vracia skutočnú hodnotu v štandardných údajových typoch. Štruktúrované komponenty majú preťažený operátor [] na prístup k podkomponentom, operátor = na bezpečné prekopírovanie a funkciu clone() na úplnú kópiu. (clone() kopíruje aj podkomponenty, ktoré component nevlastní) Každý z nich si (pomocou itemContainer) pamätá, či podkomponenty vyrobil on (v rámci čítania zo stringu) alebo mu boli externe priradené. Deštruktory uvoľnia všetky podkomponenty, ktoré komponent vlastnil. (rovnaký efekt sa dá dosiahnuť zavolaním deleteContent()) V prípade potreby je možné prideliť vlastníctvo pomocou metódy insertNew(). Odporúčam používať iba v prípadoch typu insertNew(key, new someComponent(value)).
+
+API pluginov
+	Každý plugin musí implementovať funkciu extern "C" pluginInstanceCreator_t *getCreator(void);
+	Funkcia getCreator vráti inštanciu potomka triedy pluginInstanceCreator_t, ktorá je zodpovedná za vytváranie rôznych inštancií pluginov.
+	V prípade, že dôjde k chybe alebo je daný typ pluginu neimplementovaný, creator vráti NULL.
+	Každá metóda triedy pluginInstanceCreator_t dostane ako parameter jsonComponent_t *, ktorý reprezentuje konfiguráciu pluginu.
+	V súčasnosti sa používajú dva hlavné typy pluginov: peer_t a serverPlugin_t.
+	peer_t je zodpovedný za všetku komunikáciu s koncovým bodom.
+		Metóda sendData(anyData *data) má za úlohu odoslať data->size byte-ov údajov koncovému bodu.
+		Metóda recvData(anyData *data) má za úlohu prijať maximálne data->size byte-ov údajov od koncového bodu.
+						(Ich skutočné množstvo uloží do data->size, čiže prepíše pôvodnú hodnotu)
+		Obe metódy majú vrátiť 0 v prípade neúspech a nenulovú hodnotu v prípade úspechu.
+		Deštruktor objektu (ktorý je virtuálny) sa má postarať o ukončenie spojenia (zatvorenie file descriptorov ak treba).
+	
+	serverPlugin_t je zodpovedný za čakanie na klientov a následné vytváranie peer_t, ktorý ich obslúži
+		Metóda accept má vlákno zablokovať, kým nepríde požiadavka od klienta na spojenie.
+		V prípade spojenia má vytvoriť inštanciu potomka triedy peer_t, ktorú vráti
+		V prípade neúspechu má vrátiť NULL
+		Plugin sa môže spoľahnúť, že o uvoľnenie potomkov peer_t sa postará riadiaci program.
+		Deštruktor sa má postarať o zatvorenie file descriptorov, ak je to potrebné
+	Metóda reconfigure sa (zatiaľ) nepoužíva a mala by byť implementovaná ako prázdna.
