@@ -56,10 +56,10 @@ auto_ptr<jsonComponent_t> cfgReadFile(const char *path) {
 		buf[len] = 0;
 		str += buf;
 	}
-	if(len < 0) {
-		fclose(file);
-		throw fileUnreadable(string(path));
-	}
+
+	fclose(file);
+
+	if(len < 0) throw fileUnreadable(string(path));
 
 	return auto_ptr<jsonComponent_t>(loadComponent(&str));
 }

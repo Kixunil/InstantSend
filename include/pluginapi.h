@@ -7,13 +7,15 @@
 
 #include "json.h"
 
+#define DMAXSIZE 1024
+
 typedef struct {
 	uint32_t size;
 	char data[];
 } anyData;
 
-inline anyData *allocData(size_t size) {
-	return (anyData *)malloc(sizeof(anyData) + size);
+inline auto_ptr<anyData> allocData(size_t size) {
+	return auto_ptr<anyData>((anyData *)operator new(sizeof(anyData) + size));
 }
 
 class pluginInstance_t {

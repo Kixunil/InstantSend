@@ -18,5 +18,5 @@ class pluginLoader_t {
 			paths.push_back(path);
 		}
 
-		plugin_t &loadPlugin(string name);
+		plugin_t loadPlugin(string name);
 };

@@ -14,7 +14,7 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 		if((fs = ftell(file)) < 0) throw "Unknown size";
 		rewind(file);
 
-		auto_ptr<anyData> data(allocData(1024));
+		auto_ptr<anyData> data(allocData(DMAXSIZE+1));
 
 		jsonObj_t msgobj;
 		msgobj.insertNew("service", new jsonStr_t("filetransfer"));
@@ -26,7 +26,7 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 		msgobj.deleteContent();
 
 		if(!client->sendData(data.get())) throw "Can't send!";
-		data->size = 1023;
+		data->size = DMAXSIZE;
 		if(!client->recvData(data.get())) throw "No response";
 		data->data[data->size] = 0;
 

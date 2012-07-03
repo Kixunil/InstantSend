@@ -41,13 +41,13 @@ void sendErrMsg(peer_t &client, const char *msg) {
 void *processClient(void *c) {	// This is called as new thread
 	auto_ptr<peer_t> cptr((peer_t *)c);
 	peer_t &client = *cptr.get();
-	anyData *data = allocData(1024);
+	auto_ptr<anyData> data = allocData(DMAXSIZE + 1);
 	int received, hlen;
 	string fname;
 	FILE *file;
 
-	data->size = 1023;
-	received = client.recvData(data);
+	data->size = DMAXSIZE;
+	received = client.recvData(data.get());
 	uint32_t fsize;
 	if(received) {
 		data->data[data->size] = 0; // make sure it won't owerflow
@@ -65,7 +65,7 @@ void *processClient(void *c) {	// This is called as new thread
 
 			strcpy(data->data, "{ \"service\" : \"filetransfer\", \"action\" : \"accept\" }");
 			data->size = 52;
-			client.sendData(data);
+			client.sendData(data.get());
 		}	
 		catch(const exception &e) {
 			if(file) fclose(file);
@@ -77,7 +77,7 @@ void *processClient(void *c) {	// This is called as new thread
 			string retmsg = msgobj.toString();
 			strcpy(data->data, retmsg.c_str());
 			data->size = retmsg.size() + 1;
-			client.sendData(data);
+			client.sendData(data.get());
 			return NULL;
 		}
 	} else return NULL;
@@ -87,7 +87,7 @@ void *processClient(void *c) {	// This is called as new thread
 	do {
 		string header;
 		data->size = 1023;
-		received = client.recvData(data);
+		received = client.recvData(data.get());
 		if(received) {
 			data->data[data->size] = 0;
 			header = string(data->data);
@@ -127,8 +127,9 @@ void *startServer(void *config) {
 
 		peer_t *client;
 		while((client = server->acceptClient())) {
-			pthread_t *clientthread = new pthread_t;
-			pthread_create(clientthread, NULL, &processClient, client);
+			pthread_t clientthread;
+			if(pthread_create(&clientthread, NULL, &processClient, client)) delete client;
+			else pthread_detach(clientthread);
 		}
 	}
 	catch(exception &e) {
@@ -170,6 +171,8 @@ int main(int argc, char **argv) {
 
 		jsonArr_t &complugins = dynamic_cast<jsonArr_t &>(cfg.gie("complugins"));
 
+		vector<pthread_t> threads;
+
 		// Load communication plugins
 		for(int i = 0; i < complugins.count(); ++i) {
 			try {
@@ -181,13 +184,16 @@ int main(int argc, char **argv) {
 
 				// Load plugin, create server instance and start new thread
 				if((srv = pl[pname.getVal()].newServer(&pconf))) {
-					pthread_t *thread = new pthread_t;
-					pthread_create(thread, NULL, &startServer, srv);
+					pthread_t thread;
+					if(pthread_create(&thread, NULL, &startServer, srv)) threads.push_back(thread);
 				}
 			} catch(exception &e) {
 				fprintf(stderr, "Warning, plugin not loaded: %s\n", e.what());
 			}
 		}
+
+		//while(1); // pthread_join makes zombie - WTF?!
+		for(unsigned int i = 0; i < threads.size(); ++i) pthread_join(threads[i], NULL);
 	}
 	catch(const char *msg) {
 		char *dlerr = dlerror();
