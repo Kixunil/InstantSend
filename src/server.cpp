@@ -10,6 +10,7 @@
 #include "pluginlist.h"
 
 string savedir;
+string recvScript;
 
 class simpleException : public exception {
 	private:
@@ -117,6 +118,23 @@ void *processClient(void *c) {	// This is called as new thread
 	fclose(file);
 
 	fprintf(stderr, "Recieving finished.\n");
+	if(recvScript.size()) {
+		pid_t pid = fork();
+		if(!pid) {
+			try {
+				char *args[3];
+				args[0] = new char[recvScript.size() + 1];
+				strcpy(args[0], recvScript.c_str());
+				args[1] = new char[fname.size() + savedir.size() + 1];
+				strcpy(args[1], (savedir + fname).c_str());
+				args[2] = NULL;
+				execv(args[0], args);
+			} catch(...) {
+				// If it didn't execute, it will exit anyway
+			}
+			exit(1);
+		}
+	}
 
 	return NULL;
 }
@@ -168,6 +186,13 @@ int main(int argc, char **argv) {
 		// Load configuration
 		auto_ptr<jsonComponent_t> cfgptr = cfgReadFile(cfgfile.c_str());
 		jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*cfgptr.get());
+
+		try {
+			recvScript = dynamic_cast<jsonStr_t &>(cfg.gie("onrecv")).getVal();
+		}
+		catch(...) {
+			// Just ignore any error
+		}
 
 		jsonArr_t &complugins = dynamic_cast<jsonArr_t &>(cfg.gie("complugins"));
 
