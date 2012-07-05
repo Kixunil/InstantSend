@@ -7,9 +7,11 @@
 #include "pluginapi.h"
 #include "pluginlist.h"
 
+int outputpercentage = 0;
+
 int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 	try {
-		long fs;
+		long fs, sb;
 		if(fseek(file, 0, SEEK_END) < 0) throw "Can't seek";
 		if((fs = ftell(file)) < 0) throw "Unknown size";
 		rewind(file);
@@ -45,6 +47,7 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 
 		auto_ptr<jsonInt_t> fp(new jsonInt_t(0));
 		msgobj["position"] = fp.get();
+		sb = 0;
 
 		do {
 			long fpos = ftell(file);
@@ -54,9 +57,14 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 			strcpy(data->data, msg.c_str());
 			data->size = fread(data->data + msg.size() + 1, 1, 1022 - msg.size(), file);
 			if(ferror(file)) throw "Can't read";
+			sb += data->size;
 			data->size += msg.size() + 1;
 
 			if(!client->sendData(data.get())) throw "Can't send!";
+			if(outputpercentage) {
+				printf("%ld\n", 100*sb / fs);
+				fflush(stdout);
+			}
 		} while(!feof(file));
 		return 1;
 	}
@@ -76,7 +84,7 @@ auto_ptr<peer_t> findWay(jsonArr_t &ways) {
 
 			// Load plugin and try to connect
 			auto_ptr<peer_t> client(pl[pname].newClient(&way.gie("config")));
-			return client;
+			if(client.get()) return client;
 		}
 		catch(...) {
 			// continue trying
@@ -98,11 +106,13 @@ int main(int argc, char **argv) {
 
 	// Find out if config file was specified
 	for(int i = 1; i+1 < argc; ++i) {
-		if(string(argv[i]) == string("-c")) {
+		if(string(argv[i]) == "-c") {
 			cfgfile = string(argv[++i]);
 			continue;
-		}
+		} else
+		if(string(argv[i]) == "-p") outputpercentage = 1;
 	}
+	int failuredetected = 0;
 
 	try {
 		pluginList_t &pl = pluginList_t::instance();
@@ -130,6 +140,7 @@ int main(int argc, char **argv) {
 				auto_ptr<peer_t> client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
 				if(!client.get()) {
 					printf("Failed to connet to %s\n", tname);
+					failuredetected = 1;
 					continue;
 				}
 
@@ -151,5 +162,5 @@ int main(int argc, char **argv) {
 		if(dlerr) fprintf(stderr, "; %s\n", dlerr); else putc('\n', stderr);
 		return 1;
 	}
-	return 0;
+	return failuredetected;
 }

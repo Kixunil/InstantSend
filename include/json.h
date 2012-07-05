@@ -293,6 +293,38 @@ class itemContainer_t {
 		}
 };
 
+class jsonIterator {
+	private:
+		map<string, itemContainer_t>::iterator mapiterator;
+	public:
+		inline jsonIterator(map<string, itemContainer_t>::iterator mi) {
+			mapiterator = mi;
+		}
+
+		inline jsonIterator& operator++() {
+			++mapiterator;
+			return *this;
+		}
+
+		inline jsonIterator operator++(int) {
+			jsonIterator tmp = jsonIterator(mapiterator);
+			++mapiterator;
+			return tmp;
+		}
+
+		inline string key() {
+			return mapiterator->first;
+		}
+
+		inline jsonComponent_t *&value() {
+			return mapiterator->second.item;
+		}
+
+		inline bool operator!=(const jsonIterator &it) {
+			return mapiterator != it.mapiterator;
+		}
+};
+
 class jsonArr_t: public jsonStructuredComponent_t {
 	public:
 		inline jsonArr_t() {;}
@@ -379,6 +411,14 @@ class jsonObj_t: public jsonStructuredComponent_t {
 
 		inline bool empty() {
 			return data.empty();
+		}
+
+		inline jsonIterator begin() {
+			return jsonIterator(data.begin());
+		}
+
+		inline jsonIterator end() {
+			return jsonIterator(data.end());
 		}
 
 		void insertNew(const string &key, jsonComponent_t *value);
