@@ -8,6 +8,8 @@
 	#define SECTOR_SIZE 4096
 #endif
 
+jsonSyntaxErr::~jsonSyntaxErr() throw() { ; }
+
 jsonComponent_t *loadComponent(string *str) {
 	switch((*str)[0]) {
 		case '{': // }
@@ -536,3 +538,50 @@ jsonObj_t::~jsonObj_t() {
 jsonNotExist::~jsonNotExist() throw() { ;}
 fileNotAccesible::~fileNotAccesible() throw() {;}
 fileUnreadable::~fileUnreadable() throw() {;}
+
+// JAL
+
+auto_ptr<JALParser_t> parseJAL(const string &str) {
+	if(str[0] == '.') return auto_ptr<JALParser_t>(new JALObjParser_t(str)); else
+	if(str[0] == '[') return auto_ptr<JALParser_t>(new JALArrParser_t(str)); else
+	throw jsonSyntaxErr(string("Unknown token: '") + str[0] + '\'');
+}
+
+JALParser_t::JALParser_t(const string &str) {
+	string tmp = str;
+	subparser = parseJAL(tmp);
+}
+
+jsonComponent_t *&JALParser_t::access(jsonComponent_t &json) {
+	return subparser->access(json);
+}
+
+JALObjParser_t::JALObjParser_t(const string &str) {
+	if(str[0] != '.') throw jsonSyntaxErr(string("Unknown token: '") + str[0] + '\'');
+	string tmp = str.substr(1);
+	key = jsonStr_t(&tmp).getVal();
+	if(tmp.size() > 0) subparser = parseJAL(tmp);
+}
+
+jsonComponent_t *&JALObjParser_t::access(jsonComponent_t &json) {
+	jsonComponent_t *&child = dynamic_cast<jsonObj_t &>(json)[key];
+	if(subparser.get() && child) return subparser->access(*child);
+	return child;
+}
+
+JALArrParser_t::JALArrParser_t(const string &str) {
+	if(str[0] != '[') throw jsonSyntaxErr(string("Unknown token: '") + str[0] + '\'');
+	string tmp = str.substr(1);
+	index = jsonInt_t(&tmp).getVal();
+	if(tmp[0] != ']') throw jsonSyntaxErr(string("Unknown token: '") + tmp[0] + '\'');
+	if(tmp.size() > 1) {
+		tmp.erase(0, 1);
+		subparser = parseJAL(tmp);
+	}
+}
+
+jsonComponent_t *&JALArrParser_t::access(jsonComponent_t &json) {
+	jsonComponent_t *&child = dynamic_cast<jsonArr_t &>(json)[index];
+	if(subparser.get()) return subparser->access(*child);
+	return child;
+}

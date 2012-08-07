@@ -4,11 +4,11 @@ LDFLAGS=-ldl -pthread -rdynamic
 
 all: client server configtool
 
-client: json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o client.cpp
-	$(CC) $(CFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o client.cpp $(LDFLAGS)
+client: json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o sysapi.o client.cpp
+	$(CC) $(CFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o sysapi.o client.cpp $(LDFLAGS)
 
-server: json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o server.cpp
-	$(CC) $(CFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o server.cpp $(LDFLAGS)
+server: json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o sysapi.o multithread.o server.cpp
+	$(CC) $(CFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o sysapi.o multithread.o server.cpp $(LDFLAGS)
 
 configtool: configtool.cpp json.o
 	$(CC) $(CFLAGS) -o $@ json.o configtool.cpp
@@ -33,6 +33,12 @@ pluginloader-platformindependent.o: pluginloader.cpp
 
 pluginloader.o: sysapi/linux/pluginloader.cpp
 	$(CC) $(CFLAGS) -c -o $@ sysapi/linux/pluginloader.cpp
+
+sysapi.o: sysapi/linux/misc.cpp
+	$(CC) $(CFLAGS) -c -o $@ sysapi/linux/misc.cpp
+
+multithread.o: sysapi/linux/multithread.cpp
+	$(CC) $(CFLAGS) -pthread -c -o $@ sysapi/linux/multithread.cpp
 
 clean:
 	rm -f *.o client server configtool

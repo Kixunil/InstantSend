@@ -6,6 +6,7 @@
 
 #include "pluginapi.h"
 #include "pluginlist.h"
+#include "sysapi.h"
 
 int outputpercentage = 0;
 
@@ -96,13 +97,8 @@ auto_ptr<peer_t> findWay(jsonArr_t &ways) {
 int main(int argc, char **argv) {
 	if(argc < 2) return 1;
 
-	const char *home = getenv("HOME");
-	if(!home) {
-		fprintf(stderr, "HOME variable not specified");
-		return 1;
-	}
-
-	string cfgfile = string(home) + string("/.instantsend/client.cfg");
+	string stddir = getStandardDir();
+	string cfgfile = combinePath(stddir, string("client.cfg"));
 
 	// Find out if config file was specified
 	for(int i = 1; i+1 < argc; ++i) {
@@ -116,7 +112,7 @@ int main(int argc, char **argv) {
 
 	try {
 		pluginList_t &pl = pluginList_t::instance();
-		pl.addSearchPath(string(home) + string("/.instantsend/plugins"));
+		pl.addSearchPath(combinePath(stddir, string("plugins")));
 
 		// Load configuration
 		auto_ptr<jsonComponent_t> configptr(cfgReadFile(cfgfile.c_str()));
