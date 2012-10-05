@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "pluginlist.h"
 
 plugin_t &pluginList_t::operator[](const string &name) {
@@ -5,17 +7,13 @@ plugin_t &pluginList_t::operator[](const string &name) {
 	else {
 		plugin_t plugin = loader.loadPlugin(name);
 		if(plugin.loaded()) return storage[name] = plugin;
-		throw "can't load plugin";
+		throw runtime_error("Can't load plugin");
 	}
 }
 
 pluginList_t &pluginList_t::instance() {
-	static pluginList_t *plugins;
-	if(!plugins) {
-		plugins = new pluginList_t();
-	}
-
-	return *plugins;
+	static pluginList_t plugins;
+	return plugins;
 }
 
 pluginInstanceCreator_t &getPluginInstanceCreator(const string &name) { // Interface for plugins

@@ -1,5 +1,5 @@
 Instant Send - simplified
-Version: 0.3
+Version: 0.4
 Author: Martin Habovštiak
 
 Features:
@@ -9,17 +9,22 @@ Features:
 	Both client and server use Json for handling communication and config files
 	You can create any imaginable plugin for communication
 	Plugins can use another plugins. This means you can chain them or add features without changing original plugin.
+	Server implements some events and uses event plugins
+	Experimental version of gtk-widget can show receiving files
 
 Issues:
-	Autotools don't work but it's possible to compile with make -f Makefile.in
 	Several things are hard coded
 	No authentication is used
 	No integrity checking
 	Resuming of sending is not implemented
 	Only POSIX systems (maybe only Linux) are supported
+	GUI is highly experimental
 
 Plugins:
-	ip4tcp - as name suggests, it uses TCP/IP with IPv4
+	ip4tcp		- as name suggests, it uses TCP/IP with IPv4
+	dbus		- uses dbus for notifying connected applications
+	desktop-notify	- uses libnotify for showing desktop notifications
+	zenity		- uses zenity for showing progress of downloading
 
 Config files:
 	Should be placed in ~/.instantsend/

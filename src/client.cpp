@@ -7,6 +7,7 @@
 #include "pluginapi.h"
 #include "pluginlist.h"
 #include "sysapi.h"
+#include "eventsink.h"
 
 int outputpercentage = 0;
 
@@ -112,12 +113,22 @@ int main(int argc, char **argv) {
 
 	try {
 		pluginList_t &pl = pluginList_t::instance();
-		pl.addSearchPath(combinePath(stddir, string("plugins")));
+		try {
+			pl.addSearchPath(combinePath(stddir, string("plugins")));
+		}
+		catch(...) {
+		}
 
 		// Load configuration
 		auto_ptr<jsonComponent_t> configptr(cfgReadFile(cfgfile.c_str()));
 		jsonObj_t &config = dynamic_cast<jsonObj_t &>(*configptr.get());
 		jsonObj_t &targets = dynamic_cast<jsonObj_t &>(config.gie("targets"));
+
+		try {
+			eventSink_t::instance().autoLoad(dynamic_cast<jsonObj_t &>(config.gie("eventhandlers")));
+		}
+		catch(...) {
+		}           
 
 		char *tname = NULL;
 		for(int i = 1; i+1 < argc; ++i) {

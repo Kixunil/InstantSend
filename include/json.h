@@ -29,11 +29,21 @@ class jsonNotExist : public exception {
 class jsonSyntaxErr : public exception {
 	private:
 		string *s;
+		auto_ptr<string> ownstr;
 		int p;
 	public:
 		inline jsonSyntaxErr(string *str, int pos) {
 			s = str;
 			p = pos;
+		}
+
+		inline jsonSyntaxErr(const string &str) {
+			s = (ownstr = auto_ptr<string>(new string(str))).get();
+			p = 0;
+		}
+
+		inline jsonSyntaxErr(const jsonSyntaxErr &err) {
+			if(err.ownstr.get()) ownstr = auto_ptr<string>(new string(*err.ownstr));
 		}
 
 		virtual const char *what() const throw() {
@@ -43,6 +53,8 @@ class jsonSyntaxErr : public exception {
 		inline int where() {
 			return p;
 		}
+
+		~jsonSyntaxErr() throw();
 };
 
 class fileNotAccesible : public exception {
@@ -344,6 +356,10 @@ class jsonArr_t: public jsonStructuredComponent_t {
 			data.push_back(itemContainer_t(value, false));
 		}
 
+		inline void addNew(jsonComponent_t *value) {
+			data.push_back(itemContainer_t(value, true));
+		}
+
 		inline jsonComponent_t *&operator[] (int ptr) {
 			return data[ptr].item;
 		}
@@ -441,9 +457,38 @@ class jsonObj_t: public jsonStructuredComponent_t {
 		map<string, itemContainer_t> data;
 };
 
+/* // Idea for universal access to Json components
+class JALParser_t {
+	protected:
+		auto_ptr<JALParser_t> subparser;
+		inline JALParser_t() {;}
+	public:
+		JALParser_t(const string &str);
+		virtual jsonComponent_t *&access(jsonComponent_t &json);
+};
+
+class JALObjParser_t : public JALParser_t {
+	private:
+		string key;
+	public:
+		JALObjParser_t(const string &str);
+		jsonComponent_t *&access(jsonComponent_t &json);
+};
+
+class JALArrParser_t : public JALParser_t {
+	private:
+		int index;
+	public:
+		JALArrParser_t(const string &str);
+		jsonComponent_t *&access(jsonComponent_t &json);
+};
+*/
+
 // Wrapper functions
 auto_ptr<jsonComponent_t> cfgReadStr(const char *str);
 auto_ptr<jsonComponent_t> cfgReadFile(const char *path);
+
+/*Obsolette
 int cfgIsObj(jsonComponent_t *config);
 int cfgIsArr(jsonComponent_t *config);
 int cfgIsInt(jsonComponent_t *config);
@@ -462,5 +507,5 @@ jsonComponent_t *cfgGetItem(jsonArr_t *config, int ptr);
 int cfgItemCount(jsonComponent_t *config);		// can be eighter jsonArr_t or jsonObj_t
 int cfgIsEmpty(jsonComponent_t *config);		// can be eighter jsonArr_t or jsonObj_t
 int cfgChildExists(jsonObj_t *config, const char *key);
-
+*/
 #endif

@@ -4,19 +4,22 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdexcept>
 
 #include "pluginapi.h"
 
 #define min(a, b) ((a < b)?a:b)
 
-extern "C" const char *lastErr = NULL;
-
 class i4tPeer : public peer_t {
 	private:
 		int fd;
+		string machineId;
 	public:
-		inline i4tPeer(int newfd) {
+		inline i4tPeer(int newfd, const string &mId) {
 			fd = newfd;
+			machineId = mId;
 		}
 
 		~i4tPeer() {
@@ -70,6 +73,10 @@ class i4tPeer : public peer_t {
 			return 1;
 		}
 
+		string getMachineIdentifier() {
+			return machineId;
+		}
+
 };
 
 class i4tserver : public serverPlugin_t {
@@ -79,7 +86,6 @@ class i4tserver : public serverPlugin_t {
 		i4tserver(jsonComponent_t *config) {
 			struct sockaddr_in srvaddr;
 			int backlog;
-			try {
 				srvaddr.sin_family = AF_INET;
 				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
 				srvaddr.sin_port = htons(dynamic_cast<jsonInt_t &>(cfg.gie("port")).getVal());
@@ -98,24 +104,21 @@ class i4tserver : public serverPlugin_t {
 				}
 
 				fd = socket(AF_INET, SOCK_STREAM, 0);
-				if(fd < 0) throw "socket";
+				if(fd < 0) throw runtime_error(string("socket: ") + strerror(errno));
 
-				if(bind(fd, (struct sockaddr *)&srvaddr, sizeof(struct sockaddr_in)) < 0) throw "bind";
+				if(bind(fd, (struct sockaddr *)&srvaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("bind: ") + strerror(errno));
 
-				if(listen(fd, backlog) < 0) throw "listen";
+				if(listen(fd, backlog) < 0) throw runtime_error(string("listen: ") + strerror(errno));
 
-			}
-			catch(const char *msg) {
-				if(fd > -1) close(fd);
-				fd = -1;
-				throw msg;
-			}
 		}
 
 		peer_t *acceptClient() {
-			int res = accept(fd, NULL, NULL);
+			struct sockaddr_in saddr;
+			saddr.sin_family = AF_INET;
+			socklen_t socksize = sizeof(struct sockaddr_in);
+			int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
 			if(res < 0) return NULL;
-			return new i4tPeer(res);
+			return new i4tPeer(res, string(inet_ntoa(saddr.sin_addr)));
 		}
 
 		void reconfigure(jsonComponent_t *config) { ; }
@@ -125,11 +128,16 @@ class i4tserver : public serverPlugin_t {
 		}
 };
 
-class i4tCreator : public pluginInstanceCreator_t {
+class i4tCreator : public connectionCreator_t {
+	private:
+		string lastErr;
 	public:
+		i4tCreator() {
+			lastErr = "No error";
+		}
 		peer_t *newClient(jsonComponent_t *config) {
 			int fd;
-			try {
+			//try {
 				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
 				struct sockaddr_in dstaddr, srcaddr;
 				jsonStr_t &dstIP = dynamic_cast<jsonStr_t &>(cfg.gie("destIP"));
@@ -153,37 +161,40 @@ class i4tCreator : public pluginInstanceCreator_t {
 					srcaddr.sin_port = 0;
 				}
 				fd = socket(AF_INET, SOCK_STREAM, 0);
-				if(fd < 0) throw "socket";
+				if(fd < 0) throw runtime_error("socket");
 
 
-				if(srcaddr.sin_family == AF_INET && bind(fd, (struct sockaddr *)&srcaddr, sizeof(struct sockaddr_in)) < 0) throw "bind";
+				if(srcaddr.sin_family == AF_INET && bind(fd, (struct sockaddr *)&srcaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error("bind");
 
 				dstaddr.sin_family = AF_INET;
 				inet_aton(dstIP.getVal().c_str(), &dstaddr.sin_addr);
 				dstaddr.sin_port = htons(dstPort.getVal());
 
-				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in)) < 0) throw "connect";
-				return new i4tPeer(fd);
-			}
-			catch(char const* pch) {
+				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error("connect");
+				return new i4tPeer(fd, dstIP.getVal());
+			/*}
+			catch(exception &e) {
 				if(fd > -1) close(fd);
 				fd = -1;
-				lastErr = pch;
-				return NULL;
+				lastErr = e.what();
 			}
 			catch(...) {
 				if(fd > -1) close(fd);
 				fd = -1;
-			}
-
+			}*/
+	//		return NULL;
 	}
 
 	serverPlugin_t *newServer(jsonComponent_t *config) {
 		try {
 			return new i4tserver(config);
 		}
-		catch(const char *msg) {
-			lastErr = msg;
+		catch(exception &e) {
+			lastErr = e.what();
+			return NULL;
+		}
+		catch(...) {
+			lastErr = "Unknown error";
 			return NULL;
 		}
 	}
@@ -191,12 +202,16 @@ class i4tCreator : public pluginInstanceCreator_t {
 	authenticationPlugin_t *newAuth(jsonComponent_t *config) {
 		return NULL;
 	}
-};
 
-pluginInstanceCreator_t *creator = NULL;
+	const char *getErr() {
+		return lastErr.c_str();
+	}
+};
 
 extern "C" {
 	pluginInstanceCreator_t *getCreator() {
+		static pluginInstanceCreator_t *creator = NULL;
+
 		if(!creator) creator = new i4tCreator();
 		return creator;
 	}
