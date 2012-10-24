@@ -65,7 +65,7 @@ class fileNotAccesible : public exception {
 			msg = string("Can't access file ") + filename;
 		}
 
-		virtual const char *what() {
+		const char *what() {
 			return msg.c_str();
 		}
 

@@ -183,7 +183,13 @@ class SimpleFileInfoRenderer : public FileInfoBaseRenderer {
 
 class instSendWidget : public Window {
 	public:
-		instSendWidget();
+		instSendWidget() {
+			string cfgfile = combinePath(getStandardDir(), "widget-gtk.cfg");
+			auto_ptr<jsonComponent_t> cfgptr = cfgReadFile(cfgfile.c_str());
+			jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*cfgptr.get());
+
+			set_icon_from_file(dynamic_cast<jsonStr_t &>cfg.gie("icon").getVal());
+		}
 
 		void addFile(unsigned int id, const ustring &fileName, const ustring &machineId, uint64_t fileSize, char direction) {
 			FileInfoItem &finfo = *new FileInfoItem();

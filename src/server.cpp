@@ -192,12 +192,6 @@ class serverThread_t : public thread_t {
 int main(int argc, char **argv) {
 	pluginList_t &pl = pluginList_t::instance();
 
-	// Prepare environment
-	const char *home = getenv("HOME");
-	if(!home) {
-		fprintf(stderr, "HOME variable not specified");
-		return 1;
-	}
 	try {
 		string stddir = getStandardDir();
 		pl.addSearchPath(combinePath(stddir, string("plugins")));

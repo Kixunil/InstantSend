@@ -1,3 +1,6 @@
+#ifndef MULTITHREAD
+#define MULTITHREAD
+
 #include <memory>
 
 using namespace std;
@@ -18,10 +21,15 @@ class threadData_t {
 class thread_t {
 	private:
 		auto_ptr<threadData_t> threadData;
+	protected:
+		void pausePoint();
 	public:
 		virtual void run() = 0;
 		void start();
+		void pause();
+		void resume();
+		bool running();
 		virtual bool autoDelete() = 0;
 		virtual ~thread_t();
 };
-
+#endif

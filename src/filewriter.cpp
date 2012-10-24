@@ -100,8 +100,8 @@ void fileWriter_t::writeBuffer() {
 		DMG;
 		mutex->get();
 		if(!queue.top().writeData(f)) {
-			pause();
 			mutex->release();
+			pause();
 			pausePoint();
 		} else {
 			bytes += queue.top().size();

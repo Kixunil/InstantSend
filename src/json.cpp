@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <typeinfo>
+#include <stdexcept>
 
 #include "json.h"
 
@@ -48,7 +49,7 @@ auto_ptr<jsonComponent_t> cfgReadFile(const char *path) {
 	ssize_t len;
 	char buf[SECTOR_SIZE + 1];
 
-	if(file == NULL) throw fileNotAccesible(string(path));
+	if(file == NULL) throw runtime_error((string("Can't access file ") + path).c_str()); //fileNotAccesible(string(path));
 	if(fseek(file, 0, SEEK_END) == 0) {
 		str.reserve(ftell(file));
 		rewind(file);
@@ -540,7 +541,7 @@ fileNotAccesible::~fileNotAccesible() throw() {;}
 fileUnreadable::~fileUnreadable() throw() {;}
 
 // JAL
-
+/*
 auto_ptr<JALParser_t> parseJAL(const string &str) {
 	if(str[0] == '.') return auto_ptr<JALParser_t>(new JALObjParser_t(str)); else
 	if(str[0] == '[') return auto_ptr<JALParser_t>(new JALArrParser_t(str)); else
@@ -584,4 +585,4 @@ jsonComponent_t *&JALArrParser_t::access(jsonComponent_t &json) {
 	jsonComponent_t *&child = dynamic_cast<jsonArr_t &>(json)[index];
 	if(subparser.get()) return subparser->access(*child);
 	return child;
-}
+}*/

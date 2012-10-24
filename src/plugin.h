@@ -62,14 +62,18 @@ class plugin_t {
 		}
 
 		inline peer_t * newClient(jsonComponent_t *config) {
-			return handle->creator()->newClient(config);
+			return dynamic_cast<connectionCreator_t &>(*handle->creator()).newClient(config);
 		}
 
 		inline serverPlugin_t *newServer(jsonComponent_t *config) {
-			return handle->creator()->newServer(config);
+			return dynamic_cast<connectionCreator_t &>(*handle->creator()).newServer(config);
 		}
 
 		inline authenticationPlugin_t *newAuth(jsonComponent_t *config) {
-			return handle->creator()->newAuth(config);
+			return dynamic_cast<connectionCreator_t &>(*handle->creator()).newAuth(config);
+		}
+
+		inline const char *lastError() {
+			return handle->creator()->getErr();
 		}
 };
