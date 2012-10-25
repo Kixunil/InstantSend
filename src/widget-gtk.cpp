@@ -17,7 +17,8 @@
 #include <map>
 #include <memory>
 
-//#include "messages.h"
+#include "json.h"
+#include "sysapi.h"
 
 using namespace Gtk;
 using namespace std;
@@ -183,13 +184,7 @@ class SimpleFileInfoRenderer : public FileInfoBaseRenderer {
 
 class instSendWidget : public Window {
 	public:
-		instSendWidget() {
-			string cfgfile = combinePath(getStandardDir(), "widget-gtk.cfg");
-			auto_ptr<jsonComponent_t> cfgptr = cfgReadFile(cfgfile.c_str());
-			jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*cfgptr.get());
-
-			set_icon_from_file(dynamic_cast<jsonStr_t &>cfg.gie("icon").getVal());
-		}
+		instSendWidget();
 
 		void addFile(unsigned int id, const ustring &fileName, const ustring &machineId, uint64_t fileSize, char direction) {
 			FileInfoItem &finfo = *new FileInfoItem();
@@ -286,6 +281,16 @@ filter_func (DBusConnection *connection,
 }
 
 instSendWidget::instSendWidget() {
+	try {
+		string cfgfile = combinePath(getStandardDir(), "widget-gtk.cfg");
+		auto_ptr<jsonComponent_t> cfgptr = cfgReadFile(cfgfile.c_str());
+		jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*cfgptr.get());
+
+		set_icon_from_file(dynamic_cast<jsonStr_t &>(cfg.gie("icon")).getVal());
+	} catch(exception &e) {
+		printf("Excepion occured during loading of icon: %s\n", e.what());
+	}
+
 	set_title("Files");
 	set_default_size(400, 200);
 

@@ -10,8 +10,8 @@ client: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plug
 server: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
 	$(CC) $(CFLAGS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS)
 
-widget-gtk: widget-gtk.cpp
-	$(CC) $(CFLAGS) -o $@ widget-gtk.cpp `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`
+widget-gtk: json.o sysapi.o widget-gtk.cpp
+	$(CC) $(CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`
 
 configtool: configtool.cpp json.o
 	$(CC) $(CFLAGS) -o $@ json.o configtool.cpp
