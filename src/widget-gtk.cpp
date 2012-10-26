@@ -282,8 +282,14 @@ filter_func (DBusConnection *connection,
 
 instSendWidget::instSendWidget() {
 	try {
-		string cfgfile = combinePath(getStandardDir(), "widget-gtk.cfg");
-		auto_ptr<jsonComponent_t> cfgptr = cfgReadFile(cfgfile.c_str());
+		auto_ptr<jsonComponent_t> cfgptr;
+		try {
+			string cfgfile = combinePath(getUserDir(), "widget-gtk.cfg");
+			cfgptr = cfgReadFile(cfgfile.c_str());
+		} catch(fileNotAccesible &e) {
+			string cfgfile = combinePath(getSystemCfgDir(), "widget-gtk.cfg");
+			cfgptr = cfgReadFile(cfgfile.c_str());
+		}
 		jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*cfgptr.get());
 
 		set_icon_from_file(dynamic_cast<jsonStr_t &>(cfg.gie("icon")).getVal());

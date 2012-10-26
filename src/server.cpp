@@ -193,10 +193,9 @@ int main(int argc, char **argv) {
 	pluginList_t &pl = pluginList_t::instance();
 
 	try {
-		string stddir = getStandardDir();
-		pl.addSearchPath(combinePath(stddir, string("plugins")));
-		savedir = combinePath(stddir, string("files"));
-		string cfgfile = combinePath(stddir, string("server.cfg"));;
+		string userdir = getUserDir();
+		savedir = combinePath(userdir, string("files"));
+		string cfgfile = combinePath(userdir, string("server.cfg"));;
 
 		// Process arguments
 		for(int i = 1; i < argc; ++i) {
@@ -215,24 +214,20 @@ int main(int argc, char **argv) {
 		jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*cfgptr.get());
 
 		try {
-			recvScript = dynamic_cast<jsonStr_t &>(cfg.gie("onrecv")).getVal();
-		}
-		catch(...) {
-			// Just ignore any error
-		}
-
-		try {
 			savedir = dynamic_cast<jsonStr_t &>(cfg.gie("savedir")).getVal();
 		}
 		catch(...) {
 		}
 
+// Explicitly defined paths have bigger priority than system path, which has bigger priority than user path
 		try {
 			jsonArr_t &pluginpaths = dynamic_cast<jsonArr_t &>(cfg.gie("pluginsearchpaths"));
 			for(int i = 0; i < pluginpaths.count(); ++i) pl.addSearchPath(dynamic_cast<jsonStr_t &>(*pluginpaths[i]).getVal());
 		}
 		catch(...) {
 		}
+		pl.addSearchPath(getSystemPluginDir()); 
+		pl.addSearchPath(combinePath(userdir, string("plugins")));
 
 		try {
 			eventSink_t::instance().autoLoad(dynamic_cast<jsonObj_t &>(cfg.gie("eventhandlers")));

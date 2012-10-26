@@ -1,0 +1,7 @@
+widget-gtk:
+	gtkmm-2.4
+	dbus-1
+desktop-notify.so:
+	libnotify
+dbus.so:
+	dbus-1

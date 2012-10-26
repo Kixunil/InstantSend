@@ -79,14 +79,18 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 auto_ptr<peer_t> findWay(jsonArr_t &ways) {
 	pluginList_t &pl = pluginList_t::instance();
 	for(int i = 0; i < ways.count(); ++i) {
+		string pname = "UNKNOWN";
 		try {
 			// Prepare plugin configuration
 			jsonObj_t &way = dynamic_cast<jsonObj_t &>(*ways[i]);
-			string pname = dynamic_cast<jsonStr_t &>(way.gie("plugin")).getVal();
+			pname = dynamic_cast<jsonStr_t &>(way.gie("plugin")).getVal();
 
 			// Load plugin and try to connect
 			auto_ptr<peer_t> client(pl[pname].newClient(&way.gie("config")));
 			if(client.get()) return client;
+		}
+		catch(exception &e) {
+			printf("Skipping %s: %s\n", pname.c_str(), e.what());
 		}
 		catch(...) {
 			// continue trying
@@ -98,13 +102,17 @@ auto_ptr<peer_t> findWay(jsonArr_t &ways) {
 int main(int argc, char **argv) {
 	if(argc < 2) return 1;
 
-	string stddir = getStandardDir();
-	string cfgfile = combinePath(stddir, string("client.cfg"));
+	string userdir = getUserDir();
+	string cfgfile = combinePath(userdir, string("client.cfg"));
 
 	// Find out if config file was specified
 	for(int i = 1; i+1 < argc; ++i) {
 		if(string(argv[i]) == "-c") {
-			cfgfile = string(argv[++i]);
+			if(!argv[++i]) {
+				fprintf(stderr, "Too few arguments after '-c'\n");
+				return 1;
+			}
+			cfgfile = string(argv[i]);
 			continue;
 		} else
 		if(string(argv[i]) == "-p") outputpercentage = 1;
@@ -113,11 +121,8 @@ int main(int argc, char **argv) {
 
 	try {
 		pluginList_t &pl = pluginList_t::instance();
-		try {
-			pl.addSearchPath(combinePath(stddir, string("plugins")));
-		}
-		catch(...) {
-		}
+		pl.addSearchPath(getSystemPluginDir());
+		pl.addSearchPath(combinePath(userdir, string("plugins")));
 
 		// Load configuration
 		auto_ptr<jsonComponent_t> configptr(cfgReadFile(cfgfile.c_str()));
@@ -133,7 +138,11 @@ int main(int argc, char **argv) {
 		char *tname = NULL;
 		for(int i = 1; i+1 < argc; ++i) {
 			if(string(argv[i]) == string("-t")) {
-				tname = argv[++i];
+				if(!argv[++i]) {
+					fprintf(stderr, "Too few arguments after '-t'\n");
+					return 1;
+				}
+				tname = argv[i];
 				continue;
 			}
 
@@ -151,12 +160,10 @@ int main(int argc, char **argv) {
 					continue;
 				}
 
-				// Find base name TODO: make function and make it multi platform
-				char *basename = argv[i], *ptr = argv[i];
-				while(*ptr) if(*ptr++ == '/') basename = ptr;
+				const char *fileName = getFileName(argv[i]);
 
 				// Really send file
-				if(sendFile(client, file, basename)) printf("File \"%s\" sent to \"%s\".\n", argv[i], tname);
+				if(sendFile(client, file, fileName)) printf("File \"%s\" sent to \"%s\".\n", argv[i], tname);
 			}
 		}
 
