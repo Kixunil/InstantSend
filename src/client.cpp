@@ -3,6 +3,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <memory>
+#include <stdexcept>
 
 #include "pluginapi.h"
 #include "pluginlist.h"
@@ -147,15 +148,19 @@ int main(int argc, char **argv) {
 			}
 
 			if(string(argv[i]) == string("-f") && tname) {
-				++i;
+				if(!argv[++i]) {
+					fprintf(stderr, "Too few arguments after '-f'\n");
+					return 1;
+				}
 				// Open file
 				FILE *file = fopen(argv[i], "r");
-				if(!file) throw "Can't open file";
+				if(!file) throw runtime_error("Can't open file");
 
 				// Find way to send file
 				auto_ptr<peer_t> client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
 				if(!client.get()) {
 					printf("Failed to connet to %s\n", tname);
+					fflush(stdout);
 					failuredetected = 1;
 					continue;
 				}
@@ -167,9 +172,7 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		//string cfg = string("{ \"destIP\" : \"127.0.0.1\",  \"destPort\" : 4242 }");
-
-		}
+	}
 	catch(const char *msg) {
 		char *dlerr = dlerror();
 		fprintf(stderr, "Error: %s", msg);

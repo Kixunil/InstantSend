@@ -294,7 +294,14 @@ instSendWidget::instSendWidget() {
 
 		set_icon_from_file(dynamic_cast<jsonStr_t &>(cfg.gie("icon")).getVal());
 	} catch(exception &e) {
-		printf("Excepion occured during loading of icon: %s\n", e.what());
+		try {
+			set_icon_from_file(combinePath(getSystemDataDir(), "icon_32.png"));
+		}
+		catch(exception &e) {
+			printf("Excepion occured during loading of icon: %s\n", e.what());
+		}
+		catch(...) {
+		}
 	}
 
 	set_title("Files");

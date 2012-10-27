@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo This script does nothing
+
+while [ $# -gt 1 ];
+do
+	if echo $1 | grep '^prefix=';
+	then
+		PREFIX="`echo $1 | sed 's/^prefix=//'`"
+	fi
+	shift
+done
+
+if [ -n "$PREFIX" ];
+then
+	./setup-prefix.sh "$PREFIX"
+fi
+

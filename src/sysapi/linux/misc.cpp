@@ -17,19 +17,27 @@ string getUserDir() {
 }
 
 string getSystemDataDir() {
-	return PREFIX "/share/instantsend";
+	return PREFIX "/share/instantsend/data";
 }
 
 string getSystemPluginDir() {
+#ifdef SYSPLUGINDIR
+	return SYSPLUGINDIR;
+#else
 	return PREFIX "/lib/instantsend/plugins";
+#endif
 }
 
 string getSystemCfgDir() {
+#ifdef SYSCFGNDIR
+	return SYSCFGNDIR;
+#else
 	return "/etc/instantsend";
+#endif
 }
 
 const char *getFileName(const char *path) {
 	const char *fileName = path;
 	while(*path) if(*path++ == '/') fileName = path;
-	return path;
+	return fileName;
 }

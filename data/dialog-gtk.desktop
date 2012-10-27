@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=InstantSend
+GenericName=instantsend
+Comment=Toolkit for sending files over multiple protocols
+Comment[sk]=Sada nástrojov na posielanie súborov cez rôzne protokoly
+Icon=/usr/share/instantsend/data/icon_32.png
+Exec=instsend-dialog-gtk
+Terminal=false
+Categories=FileTransfer;

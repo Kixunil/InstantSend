@@ -1,4 +1,4 @@
-CFLAGS+=-W -Wall -g -O0 -I../include -I. -I../
+CFLAGS+=-W -Wall -I../include -I. -I../
 LDFLAGS=-ldl -pthread -rdynamic 
 
 all: client server configtool widget-gtk
