@@ -1,35 +1,86 @@
-CC=g++
-CFLAGS+=-W -Wall -g -rdynamic -I../include -I.
-LDFLAGS=-ldl -pthread
+CFLAGS+=-W -Wall -I../include -I. -I../ -DPREFIX=\"$(PREFIX)\"
 
-all: client server
+PREFIX=@prefix@
+HOST=@host_alias@
 
-client: json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o client.cpp
-	$(CC) $(CFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o client.cpp $(LDFLAGS)
+ifndef OS
+	OS=linux
+	LDFLAGS+=-ldl -pthread -rdynamic
+endif
 
-server: json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o server.cpp
-	$(CC) $(CFLAGS) -o $@ json.o pluginloader.o pluginloader-platformindependent.o pluginlist.o plugin.o server.cpp $(LDFLAGS)
+ifeq ($(OS),windows)
+	CXX=i686-w64-mingw32-g++
+	CFLAGS+=-I/usr/i686-w64-mingw32/include/
+endif
+
+ifeq ($(HOST),i686-linux-gnu)
+	CFLAGS+=-march=i686 -m32
+endif
+
+all: client server configtool widget-gtk
+
+client: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp
+	$(CXX) $(CFLAGS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp $(LDFLAGS)
+
+server: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
+	$(CXX) $(CFLAGS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS)
+
+widget-gtk: json.o sysapi.o widget-gtk.cpp
+	$(CXX) $(CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`
+
+configtool: configtool.cpp json.o
+	$(CXX) $(CFLAGS) -o $@ json.o configtool.cpp
 
 libinstantsend.o: libinstantsend.cpp
-	$(CC) $(CFLAGS) -c -o $@ libinstantsend.cpp
+	$(CXX) $(CFLAGS) -c -o $@ libinstantsend.cpp
 
 json.o: json.cpp
-	$(CC) $(CFLAGS) -c -o $@ json.cpp
+	$(CXX) $(CFLAGS) -c -o $@ json.cpp
 
 pluginlist.o: pluginlist.cpp
-	$(CC) $(CFLAGS) -c -o $@ pluginlist.cpp
+	$(CXX) $(CFLAGS) -c -o $@ pluginlist.cpp
 
 plugin.o: plugin.cpp
-	$(CC) $(CFLAGS) -c -o $@ plugin.cpp
+	$(CXX) $(CFLAGS) -c -o $@ plugin.cpp
 
-environment.o: sysapi/linux/environment.cpp
-	$(CC) $(CFLAGS) -c -o $@ sysapi/linux/environment.cpp
+environment.o: sysapi/$(OS)/environment.cpp
+	$(CXX) $(CFLAGS) -c -o $@ sysapi/$(OS)/environment.cpp
 
-pluginloader-platformindependent.o: pluginloader.cpp
-	$(CC) $(CFLAGS) -c -o $@ pluginloader.cpp
+pluginloader.o: pluginloader.cpp
+	$(CXX) $(CFLAGS) -c -o $@ pluginloader.cpp
 
-pluginloader.o: sysapi/linux/pluginloader.cpp
-	$(CC) $(CFLAGS) -c -o $@ sysapi/linux/pluginloader.cpp
+pluginloader-platformdependent.o: sysapi/$(OS)/pluginloader-$(OS).cpp
+	$(CXX) $(CFLAGS) -c -o $@ sysapi/$(OS)/pluginloader-$(OS).cpp
+
+sysapi.o: sysapi/$(OS)/misc.cpp
+	$(CXX) $(CFLAGS) -c -o $@ sysapi/$(OS)/misc.cpp
+
+multithread.o: sysapi/$(OS)/multithread.cpp
+	$(CXX) $(CFLAGS) $(LDFLAGS) -c -o $@ sysapi/$(OS)/multithread.cpp
+
+filewriter.o: filewriter.cpp
+	$(CXX) $(CFLAGS) -c -o $@ filewriter.cpp
+
+filelist.o: filelist.cpp
+	$(CXX) $(CFLAGS) -c -o $@ filelist.cpp
+
+eventsink.o: eventsink.cpp
+	$(CXX) $(CFLAGS) -c -o $@ eventsink.cpp
+
+check:
 
 clean:
-	rm -f *.o client server
+	rm -f *.o client server configtool widget-gtk
+
+distclean: clean
+	rm -f Makefile
+
+install:
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp server $(DESTDIR)$(PREFIX)/bin/instsendd
+	cp client $(DESTDIR)$(PREFIX)/bin/isend # Short name for better user experience
+	cp widget-gtk $(DESTDIR)$(PREFIX)/bin/instsend-dialog-gtk
+	cp configtool $(DESTDIR)$(PREFIX)/bin/instsend-config
+	chmod 755 $(DESTDIR)$(PREFIX)/bin/instsendd $(DESTDIR)$(PREFIX)/bin/isend $(DESTDIR)$(PREFIX)/bin/instsend-config $(DESTDIR)$(PREFIX)/bin/instsend-dialog-gtk
+
+.PHONY: all check clean distclean install
