@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.65])
 AC_INIT([instantsend], [0.5], [martin.habovstiak@gmail.com])
 AM_INIT_AUTOMAKE(instantsend, 0.5)
 AC_CONFIG_SRCDIR([config.h.in])
@@ -16,6 +16,15 @@ AC_PROG_INSTALL
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h malloc.h netdb.h netinet/in.h stdint.h string.h sys/socket.h sys/time.h unistd.h])
+
+# Check for modules
+# Test libnotify version
+PKG_CHECK_MODULES([LIBNOTIFY4], [libnotify >= 0.7.5],
+		  [AC_DEFINE([HAVE_LIBNOTIFY4], [1], [Use libnotify4])],
+		  [PKG_CHECK_MODULES([LIBNOTIFY1], [libnotify >= 0.4.5],
+				     [AC_DEFINE([HAVE_LIBNOTIFY1], [1], [Use libnotify1])
+		  ])
+])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include "pluginapi.h"
+#include "config.h"
 
 using namespace std;
 
@@ -17,7 +18,12 @@ class notifyProgressHandler : public eventProgress_t{
 	private:
 		string *icon;
 		void sendNotification(const string &msg) {
-			NotifyNotification *notify = notify_notification_new ("Instant send", msg.c_str(), (icon)?icon->c_str():NULL);
+#ifdef HAVE_LIBNOTIFY4
+			NotifyNotification *notify = notify_notification_new("Instant send", msg.c_str(), (icon)?icon->c_str():NULL);
+#endif
+#ifdef HAVE_LIBNOTIFY1
+			NotifyNotification *notify = notify_notification_new("Instant send", msg.c_str(), (icon)?icon->c_str():NULL, NULL);
+#endif
 			GError *err = NULL;
 			notify_notification_set_timeout(notify, 3000);
 			if(!notify_notification_show(notify, &err)) {

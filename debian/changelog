@@ -1,5 +1,11 @@
+instantsend (0.5-2~lucid) unstable; urgency=low
+
+  * Support of libnotify1
+
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Tue, 30 Oct 2012 19:04:28 +0100
+
 instantsend (0.5) unstable; urgency=low
 
   * Initial release. (Closes: #XXXXXX)
 
- -- Martin Habovštiak <martin@TARDIS>  Fri, 26 Oct 2012 13:48:45 +0200
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Fri, 26 Oct 2012 13:48:45 +0200
