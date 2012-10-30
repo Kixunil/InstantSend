@@ -1,0 +1,8 @@
+FIELD_FULLNAME[1]="Port"
+FIELD_INFO[1]="Toto číslo TCP portu identifikuje aplikáciu na vašom počítači. Musí byť z rozsahu <1, 65535>. Odporúča sa rozsah <1025, 65535>."
+
+FIELD_FULLNAME[2]="IP adresa rozhrania"
+FIELD_INFO[2]="IP adresa počúvajúceho rozhrania identifikuje sieťové rozhranie (ethernet, wifi...) na vašom počítači. Musia to byť štyri čísla z rozsahu <0,255> oddelené bodkami. Predvolene sa použijú všetky rozhrania."
+
+FIELD_FULLNAME[3]="Najviac čakajúcich spojení"
+FIELD_INFO[3]="Maximálne množstvo spojení čakajúcich vo fronte. Musí byť aspoň 1, predvojená hodnota je 10."

@@ -1,0 +1,6 @@
+FIRSTRUN_QUESTION="Zdá sa, že ste spustili InstantSend prvý krát. Chcete ho teraz nakonfigurovať?"
+FIRSTRUN_INFO="InstantSend môžete nakonfigurovať kedykoľvek spustením príkazu instsend-config-wizard alebo manuálne úpravou konfiguračných súborov (pozrite dokumentáciu)."
+INSTSENDD_QUESTION_NOTRUNNING="Zdá sa, že IstantSend server (instsendd) nie je spustený. Bez neho nie je možné prijímať súbory."
+INSTSENDD_QUESTION_NOTRUNNING_BTN_OK="Spustiť server"
+INSTSENDD_QUESTION_NOTRUNNING_BTN_CANCEL="Pokračovať bez spustenia servera"
+INSTSENDD_ERR_CANTRUN="Chyba, nepodarilo sa spustiť InstantSend server. Nahláste prosím chybu na martin.habovstiak@gmail.com"

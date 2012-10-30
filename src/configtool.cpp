@@ -13,6 +13,9 @@ void printHelp() {
 			"\t--list-groups, -G\tPrints all groups\n"
 			"\t--add-targets, -At TARGETS\t\tAdds target(s) argument TARGETS have to be json object\n"
 			"\t--add-ways, -Aw NAME WAYS\t\t Adds WAYS to target NAME. WAYS can be eighter json object (for one way) or json array of objects (for multiple ways)\n"
+			"\t--add-com-plugin, -Acp CONFIG\t\tAdds communication plugin for server. CONFIG have to be json object\n"
+			"\t--init-server, -is\t\tDoesn't load configuration but creates empty instead. Use -S or -c FILE after this argument\n"
+			"\t--init-client, -ic\t\tDoesn't load configuration but creates empty instead. Use -C or -c FILE after this argument\n"
 			"\t--client, -C\t\tLoads client configuration from standard directory\n"
 			"\t--server, -S\t\tLoads server configuration from standard directory\n"
 			"\t--config, -c FILE\tLoads configuration from FILE\n");
@@ -62,6 +65,12 @@ void addWays(jsonComponent_t &cfg, const char *target, const char *waycfg) {
 	}
 }
 
+void addComPlugin(jsonComponent_t &cfg, const char *plugconf) {
+	string pcfgstr(plugconf);
+	jsonArr_t &cplugins = dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(cfg).gie("complugins"));
+	cplugins.addNew(new jsonObj_t(&pcfgstr));
+}
+
 void saveCfg(jsonComponent_t &cfg, string file) {
 	string cfgstr = cfg.toString();
 	FILE *tmp = fopen(string(file + "_tmp").c_str(), "w");
@@ -83,14 +92,54 @@ void saveCfg(jsonComponent_t &cfg, string file) {
 	rename(string(file + "_tmp").c_str(), file.c_str());
 }
 
+void initClientCfg(auto_ptr<jsonComponent_t> &cfg) {
+	jsonObj_t *rootObj = new jsonObj_t();
+	rootObj->insertNew("targets", new jsonObj_t());
+	cfg = auto_ptr<jsonComponent_t>(rootObj);
+}
+
+void initServerCfg(auto_ptr<jsonComponent_t> &cfg) {
+	jsonObj_t *rootObj = new jsonObj_t();
+	rootObj->insertNew("complugins", new jsonArr_t());
+	cfg = auto_ptr<jsonComponent_t>(rootObj);
+}
+
+void changeCfg(auto_ptr<jsonComponent_t> &cfg, const string &newpath, string &oldpath, int &save, int &load) {
+	if(load) {
+		if(save) {
+			saveCfg(*cfg.get(), oldpath);
+			save = 0;             
+		}
+		cfg = cfgReadFile(newpath.c_str());
+	}
+	else {
+		load = 1;
+	}
+
+	oldpath = newpath;
+}
+
 int main(int argc, char **argv) {
 	if(argc < 2) printHelp();
 	auto_ptr<jsonComponent_t> cfg;
 	char *homedir = getenv("HOME");
 	string cfgpath;
 	int save = 0;
+	int load = 1;
 	for(int i = 1; i < argc; ++i) {
 		if(string(argv[i]) == "--help" || string(argv[i]) == "-h") printHelp(); else
+		if(string(argv[i]) == "--init-client" || string(argv[i]) == "-ic") {
+			if(save) saveCfg(*cfg.get(), cfgpath);
+			initClientCfg(cfg);
+			save = 1;
+			load = 0;
+		} else
+		if(string(argv[i]) == "--init-server" || string(argv[i]) == "-is") {
+			if(save) saveCfg(*cfg.get(), cfgpath);
+			initServerCfg(cfg);
+			save = 1;
+			load = 0;
+		} else
 		if(string(argv[i]) == "--list-targets" || string(argv[i]) == "-T") listTargets(cfg.get()); else
 		if(string(argv[i]) == "--list-groups" || string(argv[i]) == "-G") listGroups(cfg.get()); else
 		if(string(argv[i]) == "--add-targets" || string(argv[i]) == "-At") {
@@ -110,41 +159,37 @@ int main(int argc, char **argv) {
 			save = 1;
 			i += 2;
 		} else
+		if(string(argv[i]) == "--add-com-plugin" || string(argv[i]) == "-Acp") {
+			if(i + 1 >= argc) {
+				fprintf(stderr, "Not enough arguments!\n");
+				return 1;
+			}
+			addComPlugin(*cfg.get(), argv[++i]);
+			save = 1;
+		} else
 		if(string(argv[i]) == "--client" || string(argv[i]) == "-C") { 
 			if(!homedir) {
 				fprintf(stderr, "Config not found!\n");
 				return 1;
 			}
-			if(save) {
-				saveCfg(*cfg.get(), cfgpath);
-				save = 0;             
-			}
-			cfgpath = string(homedir) + "/.instantsend/client.cfg";
-			cfg = cfgReadFile(cfgpath.c_str());
+
+			changeCfg(cfg, string(homedir) + "/.instantsend/client.cfg", cfgpath, save, load);
 		} else
 		if(string(argv[i]) == "--server" || string(argv[i]) == "-S") {
 			if(!homedir) {
 				fprintf(stderr, "Config not found!\n");
 				return 1;
 			}
-			if(save) {
-				saveCfg(*cfg.get(), cfgpath);
-				save = 0;
-			}
-			cfgpath = string(homedir) + "/.instantsend/server.cfg";
-			cfg = cfgReadFile(cfgpath.c_str());                    
+
+			changeCfg(cfg, string(homedir) + "/.instantsend/server.cfg", cfgpath, save, load);
 		} else
 		if(string(argv[i]) == "--config" || string(argv[i]) == "-c") {
 			if(i + 1 >= argc) {
 				fprintf(stderr, "Not enough arguments!\n");
 				return 1;
 			}
-			if(save) {
-				saveCfg(*cfg.get(), cfgpath);
-				save = 0;             
-			}
-			cfgpath = argv[++i];
-			cfg = cfgReadFile(cfgpath.c_str());                    
+
+			changeCfg(cfg, argv[++i], cfgpath, save, load);
 		}
 		
 	}

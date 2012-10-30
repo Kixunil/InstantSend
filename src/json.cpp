@@ -429,7 +429,7 @@ void jsonArr_t::fromString(string *str) {
 jsonComponent_t *jsonArr_t::clone() const {
 	jsonArr_t *tmp = new jsonArr_t();
 	for(unsigned int i = 0; i < data.size(); ++i) {
-		tmp->data[i] = itemContainer_t(data[i].item->clone(), true);
+		tmp->addNew(data[i].item->clone());
 	}
 	return tmp;
 }
@@ -439,8 +439,8 @@ jsonArr_t &jsonArr_t::operator=(const jsonArr_t &other) {
 	deleteContent();                
 
 	for(unsigned int i = 0; i < other.data.size(); ++i) {
-		if(other.data[i].isOwner()) data[i] = itemContainer_t(other.data[i].item->clone(), true);
-		else data[i] = other.data[i];
+		if(other.data[i].isOwner()) addNew(other.data[i].item->clone());
+		else addVal(other.data[i].item);
 	}
 
 	return *this;

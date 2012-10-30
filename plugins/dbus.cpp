@@ -69,9 +69,11 @@ class progressHandler : public eventProgress_t {
 		}
 
 		void onPause(fileStatus_t &fStatus) {
+			(void)fStatus;
 		}
 
 		void onResume(fileStatus_t &fStatus) {
+			(void)fStatus;
 		}
 
 		void onEnd(fileStatus_t &fStatus) {
@@ -114,6 +116,7 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 		}
 
 		void regEvents(eventRegister_t &reg, jsonComponent_t *config) {
+			(void)config;
 			reg.regProgress(progress);
 		}
 

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "eventsink.h"
 #include "pluginlist.h"
 
@@ -38,7 +39,7 @@ void eventSink_t::autoLoad(jsonObj_t &plugins) {
 			dynamic_cast<eventHandlerCreator_t &>(*pl[it.key()].creator()).regEvents(*this, it.value());
 		}
 		catch(exception &e) {
-			printf("Can't load event handler plugin '%s': %s\n", it.key().c_str(), e.what());
+			fprintf(stderr, "Can't load event handler plugin '%s': %s\n", it.key().c_str(), e.what());
 		}
 	}
 }

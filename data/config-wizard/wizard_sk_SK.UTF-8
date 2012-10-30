@@ -1,0 +1,16 @@
+WIZARD_SERVER_COMPLUGINS_LIST="Zvoľte typ komunikácie, ktorý chcete použiť na prijímanie súborov. Môžete nastaviť viac typov a/alebo rovnaký typ rôznymi spôsobmi"
+WIZARD_CLIENT_COMPLUGINS_LIST="Zvoľte typ komunikácie, ktorý chcete použiť na odosielanie súborov. Môžete nastaviť viac typov a/alebo rovnaký typ rôznymi spôsobmi"
+WIZARD_ERR_NOCOMPLUGIN="Žiadne komunikačné moduly neboli nájdené. Nebudete môcť používať InstantSend, kým nenainštalujete aspoň jeden."
+WIZARD_PLUGIN_NAME="Názov modulu"
+WIZARD_PLUGIN_DESCRIPTION="Popis modulu"
+WIZARD_ERR_NUMBERTOOLARGE='Chyba, číslo presahuje maximálnu povolenú hranicu!'
+WIZARD_ERR_NUMBERTOOSMALL='Chyba, číslo je menšie ako minimálna povolená hranica!'
+WIZARD_ERR_NOTNUMBER='Chyba, nezadali ste číslo!'
+WIZARD_ERR_STRINGINVALIDFORMAT='Chyba, zadaný vstup je v nesprávnom formáte!'
+WIZARD_ERR_EMTYSTRING='Chyba, zadali ste prázdny vstup!'
+WIZARD_ERR_TARGETEXISTS='Chyba, cieľ už existuje!'
+WIZARD_LIST_FIELDS_OPTIONAL="Ak chcete, nastavte voliteľné položky"
+WIZARD_LIST_FIELDS_MANDATORY="Ubezpečte sa, že všetky položky sú nastavené"
+WIZARD_LIST_FIELDS_ALL="Zvoľte položky, ktoré chcete nastaviť alebo kliknite na Zrušiť"
+WIZARD_LIST_FIELD_NAME="Názov nastavenia"
+WIZARD_ENTRY_TARGET="Ak chcete nastaviť nový cieľ, vložte jeho meno a stlačte OK"

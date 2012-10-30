@@ -1,0 +1,41 @@
+FIELD_COUNT=4
+
+FIELD_NAME[1]="destIP"
+FIELD_FULLNAME[1]="IP address of destination"
+FIELD_INFO[1]="IPv4 address of remote machine. Purpose of IP address is similar to telephone number. Must be four numbers in range <0,255> separated with dots."
+FIELD_TYPE[1]="STRING"
+FIELD_CHECKFORMAT[1]="TRUE"
+FIELD_REGEX[1]='^(([0-9])|([1-9][0-9])|(1[0-9][0-9])|(2[0-4][0-9])|(25[0-5]))\.(([0-9])|([1-9][0-9])|(1[0-9][0-9])|(2[0-4][0-9])|(25[0-5]))\.(([0-9])|([1-9][0-9])|(1[0-9][0-9])|(2[0-4][0-9])|(25[0-5]))\.(([0-9])|([1-9][0-9])|(1[0-9][0-9])|(2[0-4][0-9])|(25[0-5]))$'
+FIELD_SUGGESTION[1]=""
+FIELD_MANDATORY[1]="TRUE"
+
+FIELD_NAME[2]="destPort"
+FIELD_FULLNAME[2]="Destination port"
+FIELD_INFO[2]="Number of TCP port. This identifies application on remote computer. Must be within range <1, 65535>."
+FIELD_TYPE[2]="NUMBER"
+FIELD_CHECKMIN[2]="TRUE"
+FIELD_CHECKMAX[2]="TRUE"
+FIELD_MINVAL[2]="1"
+FIELD_MAXVAL[2]="65535"
+FIELD_SUGGESTION[2]=42000
+FIELD_MANDATORY[2]="TRUE"
+
+FIELD_NAME[3]="sourceIP"
+FIELD_FULLNAME[3]="IP address of interface"
+FIELD_INFO[3]="IPv4 address of local network interface. Must be four numbers in range <0,255> separated with dots. This is only for experts."
+FIELD_TYPE[3]="STRING"
+FIELD_CHECKFORMAT[3]="TRUE"
+FIELD_REGEX[3]='^(([0-9])|([1-9][0-9])|(1[0-9][0-9])|(2[0-4][0-9])|(25[0-5]))\.(([0-9])|([1-9][0-9])|(1[0-9][0-9])|(2[0-4][0-9])|(25[0-5]))\.(([0-9])|([1-9][0-9])|(1[0-9][0-9])|(2[0-4][0-9])|(25[0-5]))\.(([0-9])|([1-9][0-9])|(1[0-9][0-9])|(2[0-4][0-9])|(25[0-5]))$'
+FIELD_SUGGESTION[3]=""
+FIELD_MANDATORY[3]="FALSE"
+
+FIELD_NAME[4]="sourcePort"
+FIELD_FULLNAME[4]="Source port"
+FIELD_INFO[4]="Number of TCP port. This identifies application on your computer. Must be within range <1, 65535>. This is only for experts."
+FIELD_TYPE[4]="NUMBER"
+FIELD_CHECKMIN[4]="TRUE"
+FIELD_CHECKMAX[4]="TRUE"
+FIELD_MINVAL[4]="1"
+FIELD_MAXVAL[4]="65535"
+FIELD_SUGGESTION[4]=47000
+FIELD_MANDATORY[4]="FALSE"

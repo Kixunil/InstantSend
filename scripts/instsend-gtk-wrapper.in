@@ -1,0 +1,46 @@
+#!/bin/bash
+
+FIRSTRUN_QUESTION="It seems like you are running InstantSend for the first time. Do you want to configure it now?"
+FIRSTRUN_INFO="You can configure InstantSend anytime by running instsend-config-wizard or manualy by editing configuration files (see documentation)."
+INSTSENDD_QUESTION_NOTRUNNING="It seems like InstantSend server (instsendd) is not running. You won't be able to receive files without it."
+INSTSENDD_QUESTION_NOTRUNNING_BTN_OK="Run server"
+INSTSENDD_QUESTION_NOTRUNNING_BTN_CANCEL="Continue without server"
+INSTSENDD_ERR_CANTRUN="Error, couldn't run InstantSend server. Please report bug at martin.habovstiak@gmail.com"
+
+PREFIX= ###PREFIX###
+
+if [ -r "$PREFIX/share/instantsend/config-wizard/firstrun_$LANG" ];
+then
+	. "$PREFIX/share/instantsend/config-wizard/firstrun_$LANG"
+fi
+
+if [ '!' -d ~/.instantsend ];
+then
+	if zenity --question --title="InstantSend" --text="$FIRSTRUN_QUESTION";
+	then
+		instsend-config-wizard
+	else
+		mkdir ~/.instantsend
+		zenity --info --title="InstantSend" --text="$FIRSTRUN_INFO"
+	fi
+fi
+
+if [ -r ~/.instantsend/server.cfg ];
+then
+	if instsendd-wrapper check;
+	then
+		echo -n
+	else
+		if zenity --question --title="InstantSend" --text="$INSTSENDD_QUESTION_NOTRUNNING" --ok-label="$INSTSENDD_QUESTION_NOTRUNNING_BTN_OK" --cancel-label="$INSTSENDD_QUESTION_NOTRUNNING_BTN_CANCEL";
+		then
+			if instsendd-wrapper start;
+			then
+				echo -n
+			else
+				zenity --error --title="InstantSend" --text="$INSTSENDD_ERR_CANTRUN"
+			fi
+		fi
+	fi
+fi
+
+instsend-dialog-gtk

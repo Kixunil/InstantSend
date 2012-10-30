@@ -1,0 +1,6 @@
+PLUGIN_FULLNAME="TCP/IPv4"
+PLUGIN_DESCRIPTION="Používa lokálnu sieť a/alebo Internet. (TCP/IPv4)"
+PLUGIN_VERSION="0.5"
+PLUGIN_AUTHOR="Martin Habovštiak"
+PLUGIN_CONTACT="martin.habovstiak@gmail.com"
+PLUGIN_TYPE="COMMUNICATION"

@@ -1,0 +1,11 @@
+FIELD_FULLNAME[1]="IP adresa cieľa"
+FIELD_INFO[1]="IPv4 adresa vzdialeného zariadenia. IP adresy majú podobný účel ako telefónne čísla. Musia to byť štyri čísla z rozsahu <0, 255> oddelené bodkami."
+
+FIELD_FULLNAME[2]="Cieľový port"
+FIELD_INFO[2]="Toto číslo TCP portu identifikuje aplikáciu na vzdialenom zariadení. Musí byť z rozsahu <1, 65535>."
+
+FIELD_FULLNAME[3]="IP adresa rozhrania"
+FIELD_INFO[3]="IPv4 adresa lokálneho sieťového rozhrania. Musia to byť štyri čísla z rozsahu <0, 255> oddelené bodkami. Určené iba pre pokročilých používateľov."
+
+FIELD_FULLNAME[4]="Lokálny port"
+FIELD_INFO[4]="Toto číslo TCP portu identifikuje aplikáciu na vašom počítači. Musí byť z rozsahu <1, 65535>. Určené iba pre pokročilých používateľov."

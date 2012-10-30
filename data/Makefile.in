@@ -1,0 +1,21 @@
+PREFIX=@prefix@
+
+all:
+
+check:
+
+clean:
+
+distclean: clean
+	rm -f Makefile
+
+install:
+	mkdir -p $(DESTDIR)$(PREFIX)/share/instantsend/data
+	mkdir -p $(DESTDIR)$(PREFIX)/share/applications
+	cp icon_*.png $(DESTDIR)$(PREFIX)/share/instantsend/data/
+	cp dialog-gtk.desktop $(DESTDIR)$(PREFIX)/share/applications/instsend-dialog-gtk.desktop
+	cp -r plugins $(DESTDIR)$(PREFIX)/share/instantsend/
+	cp -r config-wizard $(DESTDIR)$(PREFIX)/share/instantsend/
+	chmod 644 $(DESTDIR)$(PREFIX)/share/instantsend/data/icon_*.png $(DESTDIR)$(PREFIX)/share/applications/instsend-dialog-gtk.desktop
+
+.PHONY: all check clean distclean install

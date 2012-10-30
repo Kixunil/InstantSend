@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dlfcn.h>
 #include <memory>
 #include <stdexcept>
 
@@ -87,8 +86,9 @@ auto_ptr<peer_t> findWay(jsonArr_t &ways) {
 			pname = dynamic_cast<jsonStr_t &>(way.gie("plugin")).getVal();
 
 			// Load plugin and try to connect
+			fprintf(stderr, "Connecting...\n");
 			auto_ptr<peer_t> client(pl[pname].newClient(&way.gie("config")));
-			if(client.get()) return client;
+			if(client.get()) return client; else fprintf(stderr, "Couldn't connect with way %d: %s\n", i, pl[pname].lastError());
 		}
 		catch(exception &e) {
 			printf("Skipping %s: %s\n", pname.c_str(), e.what());
@@ -174,9 +174,9 @@ int main(int argc, char **argv) {
 
 	}
 	catch(const char *msg) {
-		char *dlerr = dlerror();
-		fprintf(stderr, "Error: %s", msg);
-		if(dlerr) fprintf(stderr, "; %s\n", dlerr); else putc('\n', stderr);
+		//char *dlerr = dlerror();
+		fprintf(stderr, "Error: %s\n", msg);
+		//if(dlerr) fprintf(stderr, "; %s\n", dlerr); else putc('\n', stderr);
 		return 1;
 	}
 	return failuredetected;

@@ -26,7 +26,9 @@ class i4tPeer : public peer_t {
 			if(fd > -1) close(fd);
 		}
 
-		void reconfigure(jsonComponent_t *config) {;}
+		void reconfigure(jsonComponent_t *config) {
+			(void)config;
+		}
 
 		int sendData(anyData *data) {
 			uint32_t tosend = data->size;
@@ -121,7 +123,7 @@ class i4tserver : public serverPlugin_t {
 			return new i4tPeer(res, string(inet_ntoa(saddr.sin_addr)));
 		}
 
-		void reconfigure(jsonComponent_t *config) { ; }
+		void reconfigure(jsonComponent_t *config) { (void)config; }
 
 		~i4tserver() {
 			if(fd > -1) close(fd);
@@ -161,16 +163,16 @@ class i4tCreator : public connectionCreator_t {
 					srcaddr.sin_port = 0;
 				}
 				fd = socket(AF_INET, SOCK_STREAM, 0);
-				if(fd < 0) throw runtime_error("socket");
+				if(fd < 0) throw runtime_error(string("socket: ") + strerror(errno));
 
 
-				if(srcaddr.sin_family == AF_INET && bind(fd, (struct sockaddr *)&srcaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error("bind");
+				if(srcaddr.sin_family == AF_INET && bind(fd, (struct sockaddr *)&srcaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("bind: ") + strerror(errno));
 
 				dstaddr.sin_family = AF_INET;
 				inet_aton(dstIP.getVal().c_str(), &dstaddr.sin_addr);
 				dstaddr.sin_port = htons(dstPort.getVal());
 
-				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error("connect");
+				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("connect: ") + strerror(errno));
 				return new i4tPeer(fd, dstIP.getVal());
 			/*}
 			catch(exception &e) {
@@ -200,6 +202,7 @@ class i4tCreator : public connectionCreator_t {
 	}
 
 	authenticationPlugin_t *newAuth(jsonComponent_t *config) {
+		(void)config;
 		return NULL;
 	}
 

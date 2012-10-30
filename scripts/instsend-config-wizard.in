@@ -1,0 +1,362 @@
+#!/bin/bash
+
+PREFIX= ###PREFIX###
+
+WIZARD_SERVER_COMPLUGINS_LIST="Chose communication type which you want to use for receiving files. You can setup multiple types and/or same type in multiple ways."
+WIZARD_CLIENT_COMPLUGINS_LIST="Chose communication type which you want to use for sending files. You can setup multiple types and/or same type in multiple ways."
+WIZARD_ERR_NOCOMPLUGIN="No communication plugins were found. You won't be able to use InstantSend until you install at least one."
+WIZARD_PLUGIN_NAME="Plugin name"
+WIZARD_PLUGIN_DESCRIPTION="Plugin description"
+WIZARD_ERR_NUMBERTOOLARGE='Error, number exceeds maximum!'
+WIZARD_ERR_NUMBERTOOSMALL="Error, number is bigger than minimum"
+WIZARD_ERR_NOTNUMBER='Error, your input is not a number!'
+WIZARD_ERR_STRINGINVALIDFORMAT="Error, your input has invalid format"
+WIZARD_ERR_EMPTYSTRING='Error, input must be non-empty'
+WIZARD_ERR_TARGETEXISTS='Error, this target already exists!'
+WIZARD_LIST_FIELDS_OPTIONAL="Chose optional settings, if you want to."
+WIZARD_LIST_FIELDS_MANDATORY="Make sure all of these settings are set"
+WIZARD_LIST_FIELDS_ALL="Chose setting or press cancel to continue"
+WIZARD_LIST_FIELD_NAME="Name of setting"
+WIZARD_ENTRY_TARGET="If you want to setup new target, enter its' name an press OK"
+
+if [ -r "$PREFIX/share/instantsend/config-wizard/wizard_$LANG" ];
+then
+	. "$PREFIX/share/instantsend/config-wizard/wizard_$LANG"
+fi
+
+get_plugin_name() {
+	echo "$1" | sed 's/\/*$//g' | sed 's/^.*\///g'
+}
+
+scan_plugins() {
+	PTYPE=$1
+	ACTION=$2
+
+	COUNT=0
+	for PLUGIN in "$PREFIX/share/instantsend/plugins/"*;
+	do
+		if [ -r "$PLUGIN/metadata" ];
+		then
+			. "$PLUGIN/metadata"
+			if [ -r "$PLUGIN/metadata_$LANG" ];
+			then
+				. "$PLUGIN/metadata_$LANG"
+			fi
+			if [ "$PTYPE" = "$PLUGIN_TYPE" ];
+			then
+				COUNT=`expr $COUNT + 1`
+				if [ $ACTION = "LIST" ];
+				then
+					echo "$PLUGIN"
+					echo "$PLUGIN_FULLNAME"
+					echo "$PLUGIN_DESCRIPTION"
+				fi
+			fi
+		fi
+	done
+
+	if [ $ACTION = "COUNT" ];
+	then
+		echo $COUNT
+	fi
+}
+
+check_number() {
+	if echo "$1" | grep -qE '^-?[0-9]+$';
+	then
+		if [ $2 = TRUE -a $1 -gt $3 ];
+		then
+			zenity --error --title="InstantSend" --text="$WIZARD_ERR_NUMBERTOOLARGE ($3)"
+			return 1
+		fi
+
+		if [ $4 = TRUE -a $1 -lt $5 ];
+		then
+			zenity --error --title="InstantSend" --text="$WIZARD_ERR_NUMBERTOOSMALL ($5)"
+			return 1
+		fi
+
+		return 0
+	else
+		zenity --error --title="InstantSend" --text="$WIZARD_ERR_NOTNUMBER"
+		return 1
+	fi
+}
+
+ask_number() {
+	USERINPUT=`zenity --entry --title="InstantSend" --text="${FIELD_INFO[$i]}" --entry-text="${FIELD_SUGGESTION[$i]}"` || return 1
+	until check_number "$USERINPUT" "${FIELD_CHECKMAX[$i]}" "${FIELD_MAXVAL[$i]}" "${FIELD_CHECKMIN[$i]}" "${FIELD_MINVAL[$i]}";
+	do
+		USERINPUT=`zenity --entry --title="InstantSend" --text="${FIELD_INFO[$i]}" --entry-text="${FIELD_SUGGESTION[$i]}"` || return 1
+	done
+	echo $USERINPUT
+	return 0
+}
+
+check_string() {
+	if [ $2 = TRUE ];
+	then
+		if echo "$1" | grep -qE "$3";
+		then
+			return 0
+		else
+			zenity --error --title="InstantSend" --text="$WIZARD_ERR_STRINGINVALIDFORMAT"
+			return 1
+		fi
+	else
+		return 0
+	fi
+}
+
+json_encode_str() {
+	echo \""$(echo "$1" |\
+	      	sed -e 's/\\/\\\\/g' |\
+	       	sed -e 's/"/\\"/g' |\
+	       	sed -e 's/\f/\\f/g' |\
+	       	sed -e 's/\n/\\n/g' |\
+	       	sed -e 's/\r/\\r/g' |\
+		sed -e 's/\t/\\t/g')"\"
+}
+
+ask_string() {
+	USERINPUT=`zenity --entry --title="InstantSend" --text="${FIELD_INFO[$i]}" --entry-text="${FIELD_SUGGESTION[$i]}"` || return 1
+	until check_string "$USERINPUT" "${FIELD_CHECKFORMAT[$i]}" "${FIELD_REGEX[$i]}";
+	do
+		USERINPUT=`zenity --entry --title="InstantSend" --text="${FIELD_INFO[$i]}" --entry-text="${FIELD_SUGGESTION[$i]}"` || return 1
+	done
+
+	json_encode_str "$USERINPUT"
+
+	return 0
+}
+
+ask_value() {
+	case "${FIELD_TYPE[$i]}" in
+		NUMBER)
+			ask_number && return 0 || return 1
+			;;
+		STRING)
+			ask_string && return 0 || return 1
+			;;
+	esac
+}
+
+print_field() {
+	echo $i
+	echo ${FIELD_FULLNAME[$i]}
+}
+
+print_fields() {
+	for i in `seq 1 $FIELD_COUNT`;
+	do
+		if [ "$1" = MANDATORY -a "${FIELD_MANDATORY[$i]}" = TRUE ];
+		then
+			print_field
+			continue
+		fi
+
+		if [ "$1" = OPTIONAL -a "${FIELD_MANDATORY[$i]}" = FALSE ];
+		then
+			print_field
+			continue
+		fi
+
+		if [ "$1" = ALL ];
+		then
+			print_field
+		fi
+
+	done
+}
+
+ask_fields() {
+	case "$1" in
+		OPTIONAL)
+			QTEXT="$WIZARD_LIST_FIELDS_OPTIONAL"
+			;;
+		MANDATORY)
+			QTEXT="$WIZARD_LIST_FIELDS_MANDATORY"
+			;;
+		ALL)
+			QTEXT="$WIZARD_LIST_FIELDS_ALL"
+			;;
+	esac
+
+	if CHOSENFIELD=`print_fields "$1" | zenity --list --title="InstantSend" --text="$QTEXT" --print-column=1 --hide-column=1 --column="index" --column="$WIZARD_LIST_FIELD_NAME"`;
+	then
+		i="$CHOSENFIELD"
+		if VALUE=`ask_value`;
+		then
+			echo "\"${FIELD_NAME[$i]}\":$VALUE"
+			return 0
+		else
+			return 1
+		fi
+	else
+		return 1
+	fi
+}
+
+setup_plugin() {
+	PLUGIN_PATH="$1"
+	TYPE="$2"
+
+	. "$PLUGIN_PATH/$TYPE"
+
+	FIELDS=""
+
+	FOUNDOPTIONAL=FALSE
+
+	if [ -r "$PLUGIN_PATH/${TYPE}_$LANG" ];
+	then
+		. "$PLUGIN_PATH/${TYPE}_$LANG"
+	fi
+
+	for i in `seq 1 $FIELD_COUNT`;
+	do
+		if [ "${FIELD_MANDATORY[$i]}" = TRUE ];
+		then
+			if VALUE=`ask_value`;
+			then
+				if [ -n "$FIELDS" ];
+				then
+					FIELDS="$FIELDS,\"${FIELD_NAME[$i]}\":$VALUE"
+				else
+					FIELDS="\"${FIELD_NAME[$i]}\":$VALUE"
+				fi
+			else
+				return 1
+			fi
+		else
+			FOUNDOPTIONAL=TRUE
+		fi
+	done
+
+	if [ "$FOUNDOPTIONAL" = TRUE ];
+	then
+		while NEWFIELD=`ask_fields OPTIONAL`;
+		do
+			if [ -n "$FIELDS" ];
+			then
+				FIELDS="$FIELDS,$NEWFIELD"
+			else
+				FIELDS="$NEWFIELD"
+			fi
+		done
+	fi
+
+	case $TYPE in
+		server)
+			instsend-config -S -Acp "{\"config\":{$FIELDS},\"name\":$(json_encode_str $(get_plugin_name "$PLUGIN_PATH"))}"
+			;;
+		client)
+			echo "{\"config\":{$FIELDS},\"plugin\":$(json_encode_str $(get_plugin_name "$PLUGIN_PATH"))}"
+			;;
+	esac
+	return 0
+}
+
+conf_server() {
+	# This is temporary hack - just testing
+	if [ -r /usr/lib/instantsend/plugins/dbus.so ]; 
+	then
+		echo '{"complugins" : [], "eventhandlers" : {"dbus" : null}}' > ~/.instantsend/server.cfg
+	else
+		instsend-config --init-server -S
+	fi
+	# End of temporary hack
+
+	if [ `scan_plugins COMMUNICATION COUNT` -eq 0 ];
+	then
+		zenity --error --no-markup --title="InstantSend" --text="$WIZARD_ERR_NOCOMPLUGIN"
+		exit 1
+	fi
+	while TOCONF=`scan_plugins COMMUNICATION LIST | zenity --list --title="InstantSend" --text="$WIZARD_SERVER_COMPLUGINS_LIST" --hide-column=1 --print-column=1 --column="plugin" --column="$WIZARD_PLUGIN_NAME" --column="$WIZARD_PLUGIN_DESCRIPTION"`;
+	do
+		setup_plugin "$TOCONF" server
+	done
+}
+
+conf_client() {
+	instsend-config --init-client -C
+	if [ `scan_plugins COMMUNICATION COUNT` -eq 0 ];
+	then
+		zenity --error --no-markup --title="InstantSend" --text="$WIZARD_ERR_NOCOMPLUGIN"
+		exit 1
+	fi
+
+	while TARGNAME=`zenity --entry --title="InstantSend" --text="$WIZARD_ENTRY_TARGET"`;
+	do
+		if [ -z "$TARGNAME" ];
+		then
+			zenity --error --title="InstantSend" --text="$WIZARD_ERR_EMPTYSTRING"
+			continue
+		fi
+
+		if instsend-config -C --list-targets | grep -qF "$TARGNAME";
+		then
+			zenity --error --title="InstantSend" --text="$WIZARD_ERR_TARGETEXISTS"
+			continue
+		fi
+
+		WAYS=""
+
+		while TOCONF=`scan_plugins COMMUNICATION LIST | zenity --list --title="InstantSend" --text="$WIZARD_CLIENT_COMPLUGINS_LIST" --hide-column=1 --print-column=1 --column="plugin" --column="$WIZARD_PLUGIN_NAME" --column="$WIZARD_PLUGIN_DESCRIPTION"`;
+		do
+			if NEWWAY=`setup_plugin "$TOCONF" client`;
+			then
+				if [ -n "$WAYS" ];
+				then
+					WAYS="$WAYS,$NEWWAY"
+				else
+					WAYS="$NEWWAY"
+				fi
+			fi
+		done
+
+		if [ -n "$WAYS" ];
+		then
+			instsend-config -C -At "{`json_encode_str $TARGNAME`:{\"ways\":[$WAYS]}}"
+		fi
+	done
+}
+
+mkdir -p ~/.instantsend/files
+
+CONF_SERVER=NO
+CONF_CLIENT=NO
+
+while [ $# -gt 0 ];
+do
+	if [ $1 = "--conf-server" ];
+	then
+		CONF_SERVER=YES
+	fi
+
+	if [ $1 = "--conf-client" ];
+	then
+		CONF_CLIENT=YES
+	fi
+
+	shift
+done
+
+if [ '!' -f ~/.instantsend/server.cfg ];
+then
+	CONF_SERVER=YES
+fi
+
+if [ '!' -f ~/.instantsend/server.cfg ];
+then
+	CONF_CLIENT=YES
+fi
+
+if [ $CONF_SERVER = YES ];
+then
+	conf_server
+fi
+
+if [ $CONF_CLIENT = YES ];
+then
+	conf_client
+fi
