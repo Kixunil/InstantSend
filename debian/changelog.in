@@ -1,4 +1,4 @@
-instantsend (0.5-2~lucid) unstable; urgency=low
+instantsend (0.5-2~###DISTRIBUTION###) unstable; urgency=low
 
   * Support of libnotify1
 
