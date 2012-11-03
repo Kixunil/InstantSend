@@ -1,4 +1,4 @@
-CFLAGS+=-W -Wall -I../include -I. -I../ -DPREFIX=\"$(PREFIX)\"
+CFLAGS+=-W -Wall -g -I../include -I. -I../ -DPREFIX=\"$(PREFIX)\"
 
 PREFIX=@prefix@
 HOST=@host_alias@
@@ -9,27 +9,37 @@ ifndef OS
 endif
 
 ifeq ($(OS),windows)
-	CXX=i686-w64-mingw32-g++
-	CFLAGS+=-I/usr/i686-w64-mingw32/include/
+	CXX=$(ARCH)-w64-mingw32-g++
+	CFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS
+	NOWIDGET=1
+	EXTENSION=.exe
 endif
 
 ifeq ($(HOST),i686-linux-gnu)
 	CFLAGS+=-march=i686 -m32
 endif
 
+ifeq ($(HOST),arm-linux-gnueabihf)
+	CXX=arm-linux-gnueabihf-g++
+endif
+
+ifeq ($(HOST),arm-linux-gnueabi)
+	CXX=arm-linux-gnueabi-g++
+endif
+
 all: client server configtool widget-gtk
 
-client: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp
+client$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp
 	$(CXX) $(CFLAGS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp $(LDFLAGS)
 
-server: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
+server$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
 	$(CXX) $(CFLAGS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS)
 
 widget-gtk: json.o sysapi.o widget-gtk.cpp
-	$(CXX) $(CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`
+	if [ "$(NOWIDGET)" -eq 1 ]; then echo No widget support; touch widget-gtk; else $(CXX) $(CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`; fi
 
-configtool: configtool.cpp json.o
-	$(CXX) $(CFLAGS) -o $@ json.o configtool.cpp
+configtool$(EXTENSION): configtool.cpp json.o sysapi.o
+	$(CXX) $(CFLAGS) -o $@ json.o sysapi.o configtool.cpp
 
 libinstantsend.o: libinstantsend.cpp
 	$(CXX) $(CFLAGS) -c -o $@ libinstantsend.cpp
@@ -70,7 +80,7 @@ eventsink.o: eventsink.cpp
 check:
 
 clean:
-	rm -f *.o client server configtool widget-gtk
+	rm -f *.o client$(EXTENSION) server$(EXTENSION) configtool$(EXTENSION) widget-gtk
 
 distclean: clean
 	rm -f Makefile
