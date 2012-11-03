@@ -256,11 +256,6 @@ class i6tCreator : public connectionCreator_t {
 		}
 	}
 
-	authenticationPlugin_t *newAuth(jsonComponent_t *config) {
-		(void)config;
-		return NULL;
-	}
-
 	const char *getErr() {
 		return lastErr.c_str();
 	}
