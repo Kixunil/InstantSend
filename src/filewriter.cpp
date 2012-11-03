@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <string.h>
+#include <cstdio>
 
 #include "filewriter.h"
 #include "debug.h"
@@ -18,14 +19,14 @@ bool dataFragment_t::operator<(const dataFragment_t &df) const {
 }
 
 bool dataFragment_t::writeData(FILE *file) const {
-	flockfile(file);
+	//flockfile(file);
 	fseek(file, pos, SEEK_SET);
 	bool success = fwrite(dat->data, dat->size, 1, file);
 	if(!success) {
 		printf("Error occured: %s\n", strerror(ferror(file)));
 		fflush(stdout);
 	}
-	funlockfile(file);
+	//funlockfile(file);
 	return success;
 }
 
