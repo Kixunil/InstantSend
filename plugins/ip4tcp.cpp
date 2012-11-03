@@ -139,7 +139,7 @@ class i4tCreator : public connectionCreator_t {
 		}
 		peer_t *newClient(jsonComponent_t *config) {
 			int fd;
-			//try {
+			try {
 				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
 				struct sockaddr_in dstaddr, srcaddr;
 				jsonStr_t &dstIP = dynamic_cast<jsonStr_t &>(cfg.gie("destIP"));
@@ -174,7 +174,7 @@ class i4tCreator : public connectionCreator_t {
 
 				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("connect: ") + strerror(errno));
 				return new i4tPeer(fd, dstIP.getVal());
-			/*}
+			}
 			catch(exception &e) {
 				if(fd > -1) close(fd);
 				fd = -1;
@@ -183,7 +183,7 @@ class i4tCreator : public connectionCreator_t {
 			catch(...) {
 				if(fd > -1) close(fd);
 				fd = -1;
-			}*/
+			}
 	//		return NULL;
 	}
 
@@ -199,11 +199,6 @@ class i4tCreator : public connectionCreator_t {
 			lastErr = "Unknown error";
 			return NULL;
 		}
-	}
-
-	authenticationPlugin_t *newAuth(jsonComponent_t *config) {
-		(void)config;
-		return NULL;
 	}
 
 	const char *getErr() {
