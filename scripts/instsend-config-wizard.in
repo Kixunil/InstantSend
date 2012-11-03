@@ -257,14 +257,17 @@ setup_plugin() {
 }
 
 conf_server() {
-	# This is temporary hack - just testing
-	if [ -r /usr/lib/instantsend/plugins/dbus.so ]; 
+	if [ "$1" = "YES" ];
 	then
-		echo '{"complugins" : [], "eventhandlers" : {"dbus" : null}}' > ~/.instantsend/server.cfg
-	else
-		instsend-config --init-server -S
+		# This is temporary hack - just testing
+		if [ -r /usr/lib/instantsend/plugins/dbus.so ]; 
+		then
+			echo '{"complugins" : [], "eventhandlers" : {"dbus" : null}}' > ~/.instantsend/server.cfg
+		else
+			instsend-config --init-server -S
+		fi
+		# End of temporary hack
 	fi
-	# End of temporary hack
 
 	if [ `scan_plugins COMMUNICATION COUNT` -eq 0 ];
 	then
@@ -278,7 +281,11 @@ conf_server() {
 }
 
 conf_client() {
-	instsend-config --init-client -C
+	if [ "$1" = "YES" ];
+	then
+		instsend-config --init-client -C
+	fi
+
 	if [ `scan_plugins COMMUNICATION COUNT` -eq 0 ];
 	then
 		zenity --error --no-markup --title="InstantSend" --text="$WIZARD_ERR_NOCOMPLUGIN"
@@ -325,6 +332,8 @@ mkdir -p ~/.instantsend/files
 
 CONF_SERVER=NO
 CONF_CLIENT=NO
+INIT_SERVER=NO
+INIT_CLIENT=NO
 
 while [ $# -gt 0 ];
 do
@@ -344,19 +353,21 @@ done
 if [ '!' -f ~/.instantsend/server.cfg ];
 then
 	CONF_SERVER=YES
+	INIT_SERVER=YES
 fi
 
 if [ '!' -f ~/.instantsend/server.cfg ];
 then
 	CONF_CLIENT=YES
+	INIT_CLIENT=YES
 fi
 
 if [ $CONF_SERVER = YES ];
 then
-	conf_server
+	conf_server $INIT_SERVER
 fi
 
 if [ $CONF_CLIENT = YES ];
 then
-	conf_client
+	conf_client $INIT_CLIENT
 fi
