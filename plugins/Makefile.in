@@ -1,9 +1,20 @@
-CFLAGS+=-W -Wall -g -O0 -shared -fPIC -I../include -I../
+CFLAGS+=-W -Wall -g -O2 -shared -fPIC -I../include -I../
 PREFIX=@prefix@
 
 ifndef OS
 	OS=linux                        
 	LDFLAGS+=-ldl -pthread -rdynamic
+endif
+
+ifeq ($(OS),windows)
+	CXX=$(ARCH)-w64-mingw32-g++
+	CFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS
+	EXTENSION=.dll
+	DLLTOOL=$(ARCH)-w64-mingw32-dlltool
+endif
+
+ifeq ($(HOST),i686-linux-gnu)
+	CFLAGS+=-march=i686 -m32
 endif
 
 ifeq ($(HOST),i686-linux-gnu)
@@ -15,8 +26,20 @@ all: ip4tcp.so ip6tcp.so dbus.so desktop-notify.so
 ip4tcp.so: ../include/pluginapi.h ip4tcp.cpp
 	 $(CXX) -o $@ ip4tcp.cpp $(CFLAGS)
 
+ip4tcp-windows.o: ../include/pluginapi.h ip4tcp-windows.cpp
+	$(CXX) -c -o $@ ip4tcp-windows.cpp $(CFLAGS)
+
+ip4tcp-exports.o: ip4tcp-windows.o
+	$(DLLTOOL) --export-all-symbols -e ip4tcp-exports.o -l ip4tcp-windows.lib ip4tcp-windows.o
+
+ip4tcp.dll: ip4tcp-windows.o ip4tcp-exports.o
+	$(CXX) -o $@ ip4tcp-windows.o ip4tcp-exports.o
+
 ip6tcp.so: ../include/pluginapi.h ip6tcp.cpp
 	$(CXX) -o $@ ip6tcp.cpp $(CFLAGS)
+
+ip6tcp.dll: ../include/pluginapi.h ip6tcp-windows.cpp
+	$(CXX) -o $@ ip6tcp-windows.cpp $(CFLAGS)
 
 zenityprogress.so: zenityprogress.cpp
 	$(CXX) -o $@ zenityprogress.cpp $(CFLAGS)

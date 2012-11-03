@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <string>
 #include <stdlib.h>
+#include <stdexcept>
 
 #include "config.h"
 
@@ -11,20 +12,22 @@ string combinePath(string dir, string file) {
 }
 
 string getUserDir() {
-	char *s = getenv("%APPDATA%");
-	if(!s) throw "HOME variable undefined";
+	char *s = getenv("AppData");
+	if(!s) throw runtime_error("APPDATA variable undefined");
 	return string(s) + "\\instantsend";
 }
 
 string getSystemDataDir() {
-	return PREFIX "c:\\Program Files\\instantsend\\data";
+	char *s = getenv("ProgramFiles");
+	if(!s) throw runtime_error("ProgramFiles variable undefined");
+	return string(s) + "\\instantsend\\data";
 }
 
 string getSystemPluginDir() {
 #ifdef SYSPLUGINDIR
 	return SYSPLUGINDIR;
 #else
-	return PREFIX "c:\\Program Files\\instantsend\\plugins";
+	return getSystemDataDir() + "\\instantsend\\plugins";
 #endif
 }
 
@@ -32,7 +35,7 @@ string getSystemCfgDir() {
 #ifdef SYSCFGNDIR
 	return SYSCFGNDIR;
 #else
-	return "c:\\Program Files\\instantsend\\config";
+	return getSystemDataDir() + "\\instantsend\\config";
 #endif
 }
 

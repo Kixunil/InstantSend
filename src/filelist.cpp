@@ -1,7 +1,13 @@
 #include <stdlib.h>
+#include <cstdio>
+#include <ctime>
 
 #include "filelist.h"
 #include "debug.h"
+
+#ifdef WINDOWS
+	#define random() rand()
+#endif
 
 fileController_t::fileController_t(int id) {
 	identifier = id;
