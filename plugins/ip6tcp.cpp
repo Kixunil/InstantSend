@@ -143,10 +143,10 @@ class i6tCreator : public connectionCreator_t {
 		i6tCreator() {
 			lastErr = "No error";
 		}
-		peer_t *newClient(jsonComponent_t *config) {
+		peer_t *newClient(const jsonComponent_t &config) {
 			int fd;
 			try {
-				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
+				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(config);
 				struct sockaddr_in6 srcaddr;
 				string dstHost;
 				try {
@@ -242,7 +242,7 @@ class i6tCreator : public connectionCreator_t {
 			return NULL;
 	}
 
-	serverPlugin_t *newServer(jsonComponent_t *config) {
+	serverPlugin_t *newServer(const jsonComponent_t &config) {
 		try {
 			return new i6tserver(config);
 		}

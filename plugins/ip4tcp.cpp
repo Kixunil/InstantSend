@@ -85,11 +85,11 @@ class i4tserver : public serverPlugin_t {
 	private:
 		int fd;
 	public:
-		i4tserver(jsonComponent_t *config) {
+		i4tserver(jsonComponent_t &config) {
 			struct sockaddr_in srvaddr;
 			int backlog;
 				srvaddr.sin_family = AF_INET;
-				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
+				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(config);
 				srvaddr.sin_port = htons(dynamic_cast<jsonInt_t &>(cfg.gie("port")).getVal());
 				try {
 					inet_aton(dynamic_cast<jsonStr_t &>(cfg.gie("IP")).getVal().c_str(), &srvaddr.sin_addr);
@@ -137,10 +137,10 @@ class i4tCreator : public connectionCreator_t {
 		i4tCreator() {
 			lastErr = "No error";
 		}
-		peer_t *newClient(jsonComponent_t *config) {
+		peer_t *newClient(const jsonComponent_t &config) {
 			int fd;
 			try {
-				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
+				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(config);
 				struct sockaddr_in dstaddr, srcaddr;
 				jsonStr_t &dstIP = dynamic_cast<jsonStr_t &>(cfg.gie("destIP"));
 				jsonInt_t &dstPort = dynamic_cast<jsonInt_t &>(cfg.gie("destPort"));
@@ -187,7 +187,7 @@ class i4tCreator : public connectionCreator_t {
 	//		return NULL;
 	}
 
-	serverPlugin_t *newServer(jsonComponent_t *config) {
+	serverPlugin_t *newServer(const jsonComponent_t &config) {
 		try {
 			return new i4tserver(config);
 		}
