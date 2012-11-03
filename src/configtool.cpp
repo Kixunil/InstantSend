@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "json.h"
+#include "sysapi.h"
 
 using namespace std;
 
@@ -11,6 +12,7 @@ void printHelp() {
 			"\t--help, -h \t\tPrints this message\n"
 			"\t--list-targets, -T\tPrints all targets\n"
 			"\t--list-groups, -G\tPrints all groups\n"
+			"\t--export-target, -Et\tPrints target configuration\n"
 			"\t--add-targets, -At TARGETS\t\tAdds target(s) argument TARGETS have to be json object\n"
 			"\t--add-ways, -Aw NAME WAYS\t\t Adds WAYS to target NAME. WAYS can be eighter json object (for one way) or json array of objects (for multiple ways)\n"
 			"\t--add-com-plugin, -Acp CONFIG\t\tAdds communication plugin for server. CONFIG have to be json object\n"
@@ -35,6 +37,13 @@ void listGroups(jsonComponent_t *cfg) {
 	for(; it != end; ++it) {
 		puts(it.key().c_str());
 	}
+}
+
+void exportTarget(jsonComponent_t *cfg, const char *targname) {
+	jsonObj_t &targets = dynamic_cast<jsonObj_t &>(dynamic_cast<jsonObj_t &>(*cfg).gie("targets"));
+	jsonObj_t targconf;
+	targconf[targname] = targets[targname];
+	puts(targconf.toString().c_str());
 }
 
 void addTargets(jsonComponent_t *cfg, const char *targconf) {
@@ -73,9 +82,10 @@ void addComPlugin(jsonComponent_t &cfg, const char *plugconf) {
 
 void saveCfg(jsonComponent_t &cfg, string file) {
 	string cfgstr = cfg.toString();
-	FILE *tmp = fopen(string(file + "_tmp").c_str(), "w");
+	FILE *tmp = fopen((file + "_tmp").c_str(), "w");
 	if(!tmp) {
 		perror("fopen");
+		fprintf(stderr, "File: %s\n", (file + "_tmp").c_str());
 		return;
 	}
 
@@ -122,7 +132,13 @@ void changeCfg(auto_ptr<jsonComponent_t> &cfg, const string &newpath, string &ol
 int main(int argc, char **argv) {
 	if(argc < 2) printHelp();
 	auto_ptr<jsonComponent_t> cfg;
-	char *homedir = getenv("HOME");
+	const char *homedir;
+	try {
+		homedir = getUserDir().c_str();
+	} catch(exception &e) {
+		fprintf(stderr, "Warning: Home directory (%s) not found!\n", e.what());
+		homedir = NULL;
+	}
 	string cfgpath;
 	int save = 0;
 	int load = 1;
@@ -142,6 +158,13 @@ int main(int argc, char **argv) {
 		} else
 		if(string(argv[i]) == "--list-targets" || string(argv[i]) == "-T") listTargets(cfg.get()); else
 		if(string(argv[i]) == "--list-groups" || string(argv[i]) == "-G") listGroups(cfg.get()); else
+		if(string(argv[i]) == "--export-target" || string(argv[i]) == "-Et") {
+			if(i + 1 >= argc) {
+				fprintf(stderr, "Not enough arguments!\n");
+				return 1;
+			}
+			exportTarget(cfg.get(), argv[++i]);
+		} else
 		if(string(argv[i]) == "--add-targets" || string(argv[i]) == "-At") {
 			if(i + 1 >= argc) {
 				fprintf(stderr, "Not enough arguments!\n");
@@ -173,7 +196,7 @@ int main(int argc, char **argv) {
 				return 1;
 			}
 
-			changeCfg(cfg, string(homedir) + "/.instantsend/client.cfg", cfgpath, save, load);
+			changeCfg(cfg, combinePath(string(homedir), "client.cfg"), cfgpath, save, load);
 		} else
 		if(string(argv[i]) == "--server" || string(argv[i]) == "-S") {
 			if(!homedir) {
@@ -181,7 +204,7 @@ int main(int argc, char **argv) {
 				return 1;
 			}
 
-			changeCfg(cfg, string(homedir) + "/.instantsend/server.cfg", cfgpath, save, load);
+			changeCfg(cfg, combinePath(string(homedir), "server.cfg"), cfgpath, save, load);
 		} else
 		if(string(argv[i]) == "--config" || string(argv[i]) == "-c") {
 			if(i + 1 >= argc) {
