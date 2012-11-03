@@ -110,7 +110,7 @@ class jsonInt_t: public jsonComponent_t {
 			return new jsonInt_t(val);
 		}
 
-		inline intL_t getVal() {
+		inline intL_t getVal() const {
 			return val;
 		}
 
@@ -160,7 +160,7 @@ class jsonFloat_t: public jsonComponent_t {
 			return new jsonFloat_t(val);
 		}
 
-		inline floatL_t getVal() {
+		inline floatL_t getVal() const {
 			return val;
 		}
 		inline void setVal(floatL_t value) {
@@ -193,7 +193,7 @@ class jsonStr_t: public jsonComponent_t {
 		string toString();
 		void fromString(string *str);
 
-		string getVal() {
+		string getVal() const {
 			return val;
 		}
 
@@ -246,7 +246,7 @@ class jsonBool_t:  public jsonComponent_t {
 			return new jsonBool_t(val);
 		}
 
-		inline bool getVal() {
+		inline bool getVal() const {
 			return val;
 		}
 
@@ -405,8 +405,16 @@ class jsonObj_t: public jsonStructuredComponent_t {
 			return data[key].item;
 		}
 
+		inline const jsonComponent_t *operator[] (const string &key) const {
+			return data.find(key)->second.item;
+		}
+
 		inline jsonComponent_t *&operator[] (const char *key) {
 			return data[string(key)].item;
+		}
+
+		inline const jsonComponent_t *operator[] (const char *key) const {
+			return data.find(string(key))->second.item;
 		}
 
 		inline bool exists(const string &key) {
@@ -419,6 +427,10 @@ class jsonObj_t: public jsonStructuredComponent_t {
 
 		inline jsonComponent_t &gie(const string &key) {
 			if(data.count(key) > 0 && data[key].item) return *data[key].item; else throw jsonNotExist(key);
+		}
+
+		inline const jsonComponent_t &gie(const string &key) const {
+			if(data.count(key) > 0 && data.find(key)->second.item) return *data.find(key)->second.item; else throw jsonNotExist(key);
 		}
 
 		inline jsonComponent_t &gie(const char *key) {

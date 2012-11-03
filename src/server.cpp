@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dlfcn.h>
+#ifndef WINDOWS
+	#include <dlfcn.h>
+	#include <pthread.h>
+#endif
 #include <unistd.h>
-#include <pthread.h>
 #include <memory>
 #include <stdexcept>
 
@@ -126,7 +128,7 @@ class clientThread_t : public thread_t {
 			} while(received && fileUncompleted);
 
 			fprintf(stderr, "Receiving finished.\n");
-			if(recvScript.size()) {
+			/*if(recvScript.size()) {
 				pid_t pid = fork();
 				if(!pid) {
 					try {
@@ -143,7 +145,7 @@ class clientThread_t : public thread_t {
 					}
 					exit(1);
 				}
-			}
+			}*/ //TODO make event
 			writer->decRC();
 			return;
 		}
@@ -247,7 +249,7 @@ int main(int argc, char **argv) {
 				serverPlugin_t *srv;
 
 				// Load plugin, create server instance and start new thread
-				if((srv = pl[pname.getVal()].newServer(&pconf))) {
+				if((srv = pl[pname.getVal()].newServer(pconf))) {
 					(new serverThread_t(srv))->start();
 				} else {
 					const char *errmsg = pl[pname.getVal()].lastError();
@@ -262,9 +264,13 @@ int main(int argc, char **argv) {
 		}
 	}
 	catch(const char *msg) {
+#ifndef WINDOWS
 		char *dlerr = dlerror();
 		if(dlerr) fprintf(stderr, "Error: %s; %s\n", msg, dlerror());
 		else fprintf(stderr, "Error: %s", msg);
+#else
+		fprintf(stderr, "Error: %s", msg);
+#endif
 
 		return 1;
 	}
@@ -277,5 +283,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+#ifndef WINDOWS
 	pthread_exit(NULL);
+#endif
 }

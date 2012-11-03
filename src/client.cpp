@@ -87,7 +87,7 @@ auto_ptr<peer_t> findWay(jsonArr_t &ways) {
 
 			// Load plugin and try to connect
 			fprintf(stderr, "Connecting...\n");
-			auto_ptr<peer_t> client(pl[pname].newClient(&way.gie("config")));
+			auto_ptr<peer_t> client(pl[pname].newClient(way.gie("config")));
 			if(client.get()) return client; else fprintf(stderr, "Couldn't connect with way %d: %s\n", i, pl[pname].lastError());
 		}
 		catch(exception &e) {

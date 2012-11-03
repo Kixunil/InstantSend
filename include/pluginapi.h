@@ -29,22 +29,12 @@ class peer_t : public pluginInstance_t {
 	public:
 		virtual int sendData(anyData *data) = 0;
 		virtual int recvData(anyData *data) = 0;
-		//virtual string getMachineIdentifier() = 0;
-//		virtual int sentBytes() = 0;				// Returns number of sent bytes.
-//		virtual int recdBytes() = 0;				// Returns number of recieved bytes.
-//		virtual void disconnect() = 0;				// This function should allways succeed
+		virtual string getMachineIdentifier() = 0;
 };
 
 class serverPlugin_t : public pluginInstance_t {
 	public:
-		virtual peer_t *acceptClient() = 0;				// On success returns instance of client; on error returns NULL
-//		virtual void closeAll() = 0;				// It should iterate whole list of clients and disconnect each of them
-};
-
-class authenticationPlugin_t : public pluginInstance_t {
-	public:
-		virtual int onConnect(peer_t *peer) = 0;	// It should authenticate from client side
-		virtual int onAccept(peer_t *client) = 0;			// It should authenticate from server side
+		virtual peer_t *acceptClient() = 0;
 };
 
 #define IS_DIRECTION_DOWNLOAD 0
@@ -66,6 +56,17 @@ class fileStatus_t {
 		virtual ~fileStatus_t();
 };
 
+class connectionStatus_t {
+	public:
+		virtual int actualStatus();
+		virtual bool isSecure() = 0;
+		virtual const string &peerId() = 0;
+		virtual size_t transferedBytes() = 0;
+		virtual const string &pluginName() = 0;
+
+		virtual void disconnect() = 0;
+};
+
 class pluginInstanceCreator_t {
 	public:
 		virtual const char *getErr() = 0;
@@ -74,9 +75,27 @@ class pluginInstanceCreator_t {
 
 class connectionCreator_t : public pluginInstanceCreator_t {
 	public:
-		virtual peer_t *newClient(jsonComponent_t *config) = 0;
-		virtual serverPlugin_t *newServer(jsonComponent_t *config) = 0;
-		virtual authenticationPlugin_t *newAuth(jsonComponent_t *config) = 0;
+		virtual peer_t *newClient(const jsonComponent_t &config) = 0;
+		virtual serverPlugin_t *newServer(const jsonComponent_t &config) = 0;
+};
+
+class asyncDataCallback_t : public peer_t {
+	public:
+		virtual void processData(anyData &data) = 0;
+
+};
+
+class asyncDataReceiver_t {
+	public:
+		asyncDataReceiver_t(peer_t &peer, asyncDataCallback_t &callback);
+};
+
+class securityCreator_t : public pluginInstanceCreator_t {
+	public:
+		virtual jsonComponent_t *getSupportedSettings(jsonComponent_t &config) = 0;
+		virtual jsonComponent_t *chooseSettings(jsonComponent_t &config) = 0;
+		virtual peer_t *seconnect(peer_t &peer, jsonComponent_t &config, jsonComponent_t &chosenSettings) = 0;
+		virtual peer_t *seaccept(jsonComponent_t &config, jsonComponent_t &requestedConfig) = 0;
 };
 
 #define IS_TRANSFER_IN_PROGRESS 0
