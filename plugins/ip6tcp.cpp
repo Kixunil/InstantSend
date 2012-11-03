@@ -86,23 +86,23 @@ class i6tserver : public serverPlugin_t {
 	private:
 		int fd;
 	public:
-		i6tserver(jsonComponent_t *config) {
+		i6tserver(const jsonComponent_t &config) {
 			struct sockaddr_in6 srvaddr;
 			int backlog;
 				srvaddr.sin6_family = AF_INET6;
 				srvaddr.sin6_scope_id = 0;
 				srvaddr.sin6_flowinfo = 0;
-				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
-				srvaddr.sin6_port = htons(dynamic_cast<jsonInt_t &>(cfg.gie("port")).getVal());
+				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
+				srvaddr.sin6_port = htons(dynamic_cast<const jsonInt_t &>(cfg.gie("port")).getVal());
 				try {
-					inet_pton(AF_INET6, dynamic_cast<jsonStr_t &>(cfg.gie("IP")).getVal().c_str(), (void *)&srvaddr.sin6_addr);
+					inet_pton(AF_INET6, dynamic_cast<const jsonStr_t &>(cfg.gie("IP")).getVal().c_str(), (void *)&srvaddr.sin6_addr);
 				}
 				catch(exception &e) {
 					memcpy(srvaddr.sin6_addr.s6_addr, &in6addr_any, sizeof(in6addr_any));
 				}
 
 				try {
-					backlog = dynamic_cast<jsonInt_t &>(cfg.gie("backlog")).getVal();
+					backlog = dynamic_cast<const jsonInt_t &>(cfg.gie("backlog")).getVal();
 				}
 				catch(exception &e) {
 					backlog = 10;
@@ -146,27 +146,27 @@ class i6tCreator : public connectionCreator_t {
 		peer_t *newClient(const jsonComponent_t &config) {
 			int fd;
 			try {
-				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(config);
+				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
 				struct sockaddr_in6 srcaddr;
 				string dstHost;
 				try {
-					dstHost = dynamic_cast<jsonStr_t &>(cfg.gie("destIP")).getVal();
+					dstHost = dynamic_cast<const jsonStr_t &>(cfg.gie("destIP")).getVal();
 				} catch(...) {
-					dstHost = dynamic_cast<jsonStr_t &>(cfg.gie("destHost")).getVal();
+					dstHost = dynamic_cast<const jsonStr_t &>(cfg.gie("destHost")).getVal();
 				}
 		/*		string dstPort;
 				try {
-					int port = dynamic_cast<jsonInt_t &>(cfg.gie("destPort")).getVal(); // use port number
+					int port = dynamic_cast<const jsonInt_t &>(cfg.gie("destPort")).getVal(); // use port number
 					if(port < 1 || port > 65535) throw runtime_error("Destination port out of range");
 					char buf[256];
 					snprintf(buf, 256, "%d", port);
 					dstPort = buf;
 				} catch(const std::bad_cast &e) {
-					dstPort = dynamic_cast<jsonStr_t &>(cfg.gie("destPort")).getVal(); // use service name
+					dstPort = dynamic_cast<const jsonStr_t &>(cfg.gie("destPort")).getVal(); // use service name
 				}
 
 		*/
-				int dstPort = dynamic_cast<jsonInt_t &>(cfg.gie("destPort")).getVal();
+				int dstPort = dynamic_cast<const jsonInt_t &>(cfg.gie("destPort")).getVal();
 				if(dstPort < 1 || dstPort > 65535) throw runtime_error("Destination port out of range");
 
 				// We will skip bind if no value is set
@@ -175,7 +175,7 @@ class i6tCreator : public connectionCreator_t {
 				srcaddr.sin6_flowinfo = 0;
 
 				try {
-					inet_pton(AF_INET6, dynamic_cast<jsonStr_t &>(cfg.gie("sourceIP")).getVal().c_str(), &srcaddr.sin6_addr);
+					inet_pton(AF_INET6, dynamic_cast<const jsonStr_t &>(cfg.gie("sourceIP")).getVal().c_str(), &srcaddr.sin6_addr);
 					srcaddr.sin6_family = AF_INET6;
 				}
 				catch(exception &e) {
@@ -183,7 +183,7 @@ class i6tCreator : public connectionCreator_t {
 				}
 
 				try {
-					srcaddr.sin6_port = htons(dynamic_cast<jsonInt_t &>(cfg.gie("sourcePort")).getVal());
+					srcaddr.sin6_port = htons(dynamic_cast<const jsonInt_t &>(cfg.gie("sourcePort")).getVal());
 					srcaddr.sin6_family = AF_INET6;
 				}
 				catch(exception &e) {
