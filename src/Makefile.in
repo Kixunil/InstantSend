@@ -28,8 +28,8 @@ server: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plug
 widget-gtk: json.o sysapi.o widget-gtk.cpp
 	$(CXX) $(CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`
 
-configtool: configtool.cpp json.o
-	$(CXX) $(CFLAGS) -o $@ json.o configtool.cpp
+configtool: configtool.cpp json.o sysapi.o
+	$(CXX) $(CFLAGS) -o $@ json.o sysapi.o configtool.cpp
 
 libinstantsend.o: libinstantsend.cpp
 	$(CXX) $(CFLAGS) -c -o $@ libinstantsend.cpp

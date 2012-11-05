@@ -10,6 +10,7 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/image.h>
 #include <glibmm/markup.h>
+#include <gtkmm/statusicon.h>
 #include <stdint.h>
 #include <dbus/dbus.h>
 
@@ -119,6 +120,152 @@ class FileInfoItem {
 		}
 };
 
+class dialogControl {
+	public:
+		virtual void show() = 0;
+		virtual void hide() = 0;
+		virtual void togle() = 0;
+		virtual void quit() = 0;
+		virtual bool isVisible() = 0;
+		virtual unsigned int recvInProgress() = 0;
+		virtual unsigned int sendInProgress() = 0;
+		virtual unsigned int recvPending() = 0;
+		virtual unsigned int sendPending() = 0;
+};
+
+class trayIcon {
+	protected:
+		dialogControl *dlg;
+	public:
+		inline trayIcon() : dlg(NULL) {}
+		inline void assignDialog(dialogControl *dialog) { dlg = dialog; };
+		virtual void show() = 0;
+		virtual void hide() = 0;
+		virtual void timer() = 0;
+		virtual void statusChanged() = 0;
+};
+
+#define LOAD_ICON(PATH) Gdk::Pixbuf::create_from_file(combinePath(getSystemDataDir(), PATH) /*, statusIcon->get_size(), statusIcon->get_size()*/)
+
+class gtkTrayIcon : public trayIcon {
+	private:
+		unsigned int animPtr, cnt;
+		bool animating, excmark, animem;
+		Glib::RefPtr<Gdk::Pixbuf> mainIcon, dlStaticIcon, ulStaticIcon, udStaticIcon, excmarkIcon;
+		vector<Glib::RefPtr<Gdk::Pixbuf> > dlAnim, ulAnim;
+		Glib::RefPtr<Gtk::StatusIcon> statusIcon;
+	protected:
+		void on_icon_activate() {
+			dlg->togle();
+			show();
+		}
+	public:
+		gtkTrayIcon() {
+			try {
+				mainIcon = LOAD_ICON("icon_64.png");
+				dlStaticIcon = LOAD_ICON("icon_download_64.png");
+				ulStaticIcon = LOAD_ICON("icon_upload_64.png");
+				udStaticIcon = LOAD_ICON("icon_uploaddownload_64.png");
+				excmarkIcon = LOAD_ICON("icon_exclamationmark_64.png");
+
+				dlAnim.push_back(LOAD_ICON("icon_download_1_64.png"));
+				dlAnim.push_back(LOAD_ICON("icon_download_2_64.png"));
+				dlAnim.push_back(LOAD_ICON("icon_download_3_64.png"));
+
+				ulAnim.push_back(LOAD_ICON("icon_upload_1_64.png"));
+				ulAnim.push_back(LOAD_ICON("icon_upload_2_64.png"));
+				ulAnim.push_back(LOAD_ICON("icon_upload_3_64.png"));
+
+				animating = false;
+				statusIcon = StatusIcon::create(mainIcon);
+				statusIcon->signal_activate().connect(sigc::mem_fun(*this, &gtkTrayIcon::on_icon_activate));
+			} catch(Glib::FileError &e) {
+				printf("Error: %s\n", e.what().c_str());
+			}
+		}
+
+		void show() {
+			statusIcon->set_visible();
+		}
+
+		void hide() {
+			statusIcon->set_visible(false);
+		}
+
+		void timer() {
+			if(animating) {
+				animPtr = (animPtr + 1) % 3;
+				if(dlg->recvInProgress()) statusIcon->set(dlAnim[animPtr]); else statusIcon->set(ulAnim[animPtr]);
+			}
+
+			if(++cnt > 10) {
+				cnt = 0;
+				if(excmark) {
+					bool rpe = dlg->recvPending(), rip = dlg->recvInProgress(), spe = dlg->sendPending(), sip = dlg->sendInProgress();
+					if((rpe || rip) && (spe || sip)) {
+						statusIcon->set(ulStaticIcon);
+						animating = false;
+					} else {
+						if(rip) {
+							animating = true;
+							statusIcon->set(dlAnim[animPtr]);
+						} else
+						if(sip) {
+							animating = true;
+							statusIcon->set(dlAnim[animPtr]);
+						} else
+						if(rpe) {
+							animating = false;
+							statusIcon->set(dlStaticIcon);
+						} else
+						if(spe) {
+							animating = false;
+							statusIcon->set(ulStaticIcon);
+						}
+					}
+				} else {
+					if(animem) {
+						statusIcon->set(excmarkIcon);
+					}
+				}
+				excmark = !excmark;
+			}
+		}
+
+		void statusChanged() {
+			bool rpe = dlg->recvPending(), rip = dlg->recvInProgress(), spe = dlg->sendPending(), sip = dlg->sendInProgress();
+			animem = rpe;
+			excmark = false;
+			if((rpe || rip) && (spe || sip)) {
+				statusIcon->set(ulStaticIcon);
+				animating = false;
+			} else {
+				if(rip) {
+					animating = true;
+					statusIcon->set(dlAnim[animPtr]);
+				} else
+				if(sip) {
+					animating = true;
+					statusIcon->set(dlAnim[animPtr]);
+				} else
+				if(rpe) {
+					animating = false;
+					statusIcon->set(dlStaticIcon);
+				} else
+				if(spe) {
+					animating = false;
+					statusIcon->set(ulStaticIcon);
+				} else {
+					animating = false;
+					statusIcon->set(mainIcon);	
+				}
+			
+			}
+
+		}
+
+};
+
 class SimpleFileInfoRenderer : public FileInfoBaseRenderer {
 	private:
 		FileInfoItem *finfo;
@@ -182,7 +329,9 @@ class SimpleFileInfoRenderer : public FileInfoBaseRenderer {
 		}
 };
 
-class instSendWidget : public Window {
+Main *appPtr;
+
+class instSendWidget : public Window, dialogControl {
 	public:
 		instSendWidget();
 
@@ -201,6 +350,7 @@ class instSendWidget : public Window {
 			finfo.setRenderer(auto_ptr<FileInfoBaseRenderer>(finfoRenderer.release()));
 
 			show_all_children();
+			trIcon.statusChanged();
 		}
 
 		inline void updateBytes(unsigned int id, uint64_t bytes) {
@@ -209,6 +359,42 @@ class instSendWidget : public Window {
 		}
 
 		virtual ~instSendWidget() {}
+
+		virtual void show() {
+			Window::show();
+		}
+
+		virtual void hide() {
+			Window::hide();
+		}
+
+		virtual void togle() {
+			if(Window::is_visible()) Window::hide(); else Window::show();
+		}
+
+		virtual void quit() {
+			appPtr->quit();
+		}
+
+		virtual bool isVisible() {
+			return Window::is_visible();
+		}
+
+		virtual unsigned int recvInProgress() {
+			return files.size();
+		}
+
+		virtual unsigned int sendInProgress() {
+			return 0;
+		}
+
+		virtual unsigned int recvPending() {
+			return 0;
+		}
+
+		virtual unsigned int sendPending() {
+			return 0;
+		}
 
 	protected:
 
@@ -222,6 +408,7 @@ class instSendWidget : public Window {
 
 		DBusError dberr;
 		DBusConnection *dbconn;
+		gtkTrayIcon trIcon;
 
 
 		bool on_timeout() {
@@ -230,6 +417,11 @@ class instSendWidget : public Window {
 			for(; it != e; ++it) {
 				it->second.update();
 			}*/
+			return true;
+		}
+
+		bool on_icon_timeout() {
+			trIcon.timer();
 			return true;
 		}
 };
@@ -281,6 +473,7 @@ filter_func (DBusConnection *connection,
 }
 
 instSendWidget::instSendWidget() {
+	trIcon.assignDialog(this);
 	try {
 		auto_ptr<jsonComponent_t> cfgptr;
 		try {
@@ -390,11 +583,13 @@ instSendWidget::instSendWidget() {
 	show_all_children();
 
 	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_timeout), 100);
+	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_icon_timeout), 200);
 }
 
 int main(int argc, char *argv[]) {
 	Main app(argc, argv, "sk.pixelcomp.instantsend.widget");
+	appPtr = &app;
 	instSendWidget window;
-	app.run(window);
+	app.run();
 	return 0;
 }
