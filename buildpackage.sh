@@ -79,4 +79,4 @@ echo Distribution: $DISTRIBUTION
 cp debian/control.$DISTRIBUTION debian/control
 sed -e 's/###DISTRIBUTION###/'$DISTRIBUTION'/g' debian/changelog.in > debian/changelog
 
-dpkg-buildpackage -b
+dpkg-buildpackage -b "$@"
