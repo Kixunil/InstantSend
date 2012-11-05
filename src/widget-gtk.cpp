@@ -156,22 +156,26 @@ class gtkTrayIcon : public trayIcon {
 		Glib::RefPtr<Gtk::StatusIcon> statusIcon;
 	public:
 		gtkTrayIcon() {
-			mainIcon = LOAD_ICON("icon_64.png");
-			dlStaticIcon = LOAD_ICON("icon_download_64.png");
-			ulStaticIcon = LOAD_ICON("icon_upload_64.png");
-			udStaticIcon = LOAD_ICON("icon_uploaddownload_64.png");
-			excmarkIcon = LOAD_ICON("icon_exclamationmark_64.png");
+			try {
+				mainIcon = LOAD_ICON("icon_64.png");
+				dlStaticIcon = LOAD_ICON("icon_download_64.png");
+				ulStaticIcon = LOAD_ICON("icon_upload_64.png");
+				udStaticIcon = LOAD_ICON("icon_uploaddownload_64.png");
+				excmarkIcon = LOAD_ICON("icon_exclamationmark_64.png");
 
-			dlAnim.push_back(LOAD_ICON("icon_download_1_64.png"));
-			dlAnim.push_back(LOAD_ICON("icon_download_2_64.png"));
-			dlAnim.push_back(LOAD_ICON("icon_download_3_64.png"));
+				dlAnim.push_back(LOAD_ICON("icon_download_1_64.png"));
+				dlAnim.push_back(LOAD_ICON("icon_download_2_64.png"));
+				dlAnim.push_back(LOAD_ICON("icon_download_3_64.png"));
 
-			ulAnim.push_back(LOAD_ICON("icon_upload_1_64.png"));
-			ulAnim.push_back(LOAD_ICON("icon_upload_2_64.png"));
-			ulAnim.push_back(LOAD_ICON("icon_upload_3_64.png"));
+				ulAnim.push_back(LOAD_ICON("icon_upload_1_64.png"));
+				ulAnim.push_back(LOAD_ICON("icon_upload_2_64.png"));
+				ulAnim.push_back(LOAD_ICON("icon_upload_3_64.png"));
 
-			animating = false;
-			statusIcon = StatusIcon::create(mainIcon);
+				animating = false;
+				statusIcon = StatusIcon::create(mainIcon);
+			} catch(Glib::FileError &e) {
+				printf("Error: %s\n", e.what().c_str());
+			}
 		}
 
 		void show() {
@@ -340,6 +344,7 @@ class instSendWidget : public Window, dialogControl {
 			finfo.setRenderer(auto_ptr<FileInfoBaseRenderer>(finfoRenderer.release()));
 
 			show_all_children();
+			trIcon.statusChanged();
 		}
 
 		inline void updateBytes(unsigned int id, uint64_t bytes) {
@@ -406,6 +411,11 @@ class instSendWidget : public Window, dialogControl {
 			for(; it != e; ++it) {
 				it->second.update();
 			}*/
+			return true;
+		}
+
+		bool on_icon_timeout() {
+			trIcon.timer();
 			return true;
 		}
 };
@@ -567,6 +577,7 @@ instSendWidget::instSendWidget() {
 	show_all_children();
 
 	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_timeout), 100);
+	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_icon_timeout), 200);
 }
 
 int main(int argc, char *argv[]) {
