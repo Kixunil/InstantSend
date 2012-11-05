@@ -154,6 +154,11 @@ class gtkTrayIcon : public trayIcon {
 		Glib::RefPtr<Gdk::Pixbuf> mainIcon, dlStaticIcon, ulStaticIcon, udStaticIcon, excmarkIcon;
 		vector<Glib::RefPtr<Gdk::Pixbuf> > dlAnim, ulAnim;
 		Glib::RefPtr<Gtk::StatusIcon> statusIcon;
+	protected:
+		void on_icon_activate() {
+			dlg->togle();
+			show();
+		}
 	public:
 		gtkTrayIcon() {
 			try {
@@ -173,6 +178,7 @@ class gtkTrayIcon : public trayIcon {
 
 				animating = false;
 				statusIcon = StatusIcon::create(mainIcon);
+				statusIcon->signal_activate().connect(sigc::mem_fun(*this, &gtkTrayIcon::on_icon_activate));
 			} catch(Glib::FileError &e) {
 				printf("Error: %s\n", e.what().c_str());
 			}
@@ -584,6 +590,6 @@ int main(int argc, char *argv[]) {
 	Main app(argc, argv, "sk.pixelcomp.instantsend.widget");
 	appPtr = &app;
 	instSendWidget window;
-	app.run(window);
+	app.run();
 	return 0;
 }
