@@ -172,7 +172,7 @@ class gtkTrayIcon : public trayIcon {
 			statusIcon->popup_menu_at_position(*popupmenu, button, activate_time);
 		}
 	public:
-		gtkTrayIcon(dialogControl *dlg) : trayIcon(dlg), uimanager(Gtk::UIManager::create()) {
+		gtkTrayIcon(dialogControl *dlg) : trayIcon(dlg), uimanager(Gtk::UIManager::create()), animPtr(0) {
 			try {
 				mainIcon = LOAD_ICON("icon_64.png");
 				dlStaticIcon = LOAD_ICON("icon_download_64.png");
