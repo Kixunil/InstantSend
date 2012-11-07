@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <gtkmm/action.h>
+#include <gtkmm/actiongroup.h>
 #include <gtkmm/window.h>
 #include <gtkmm/button.h>
 #include <gtkmm/treeview.h>
@@ -11,6 +13,7 @@
 #include <gtkmm/image.h>
 #include <glibmm/markup.h>
 #include <gtkmm/statusicon.h>
+#include <gtkmm/uimanager.h>
 #include <stdint.h>
 #include <dbus/dbus.h>
 
@@ -136,9 +139,12 @@ class dialogControl {
 class trayIcon {
 	protected:
 		dialogControl *dlg;
+		Glib::RefPtr<ActionGroup> actions;
 	public:
-		inline trayIcon() : dlg(NULL) {}
-		inline void assignDialog(dialogControl *dialog) { dlg = dialog; };
+		inline trayIcon(dialogControl *dialog) : dlg(dialog), actions(Gtk::ActionGroup::create()) {
+			actions->add( Gtk::Action::create("Quit", Gtk::Stock::QUIT), sigc::mem_fun(*dlg, &dialogControl::quit));
+		}
+
 		virtual void show() = 0;
 		virtual void hide() = 0;
 		virtual void timer() = 0;
@@ -154,13 +160,19 @@ class gtkTrayIcon : public trayIcon {
 		Glib::RefPtr<Gdk::Pixbuf> mainIcon, dlStaticIcon, ulStaticIcon, udStaticIcon, excmarkIcon;
 		vector<Glib::RefPtr<Gdk::Pixbuf> > dlAnim, ulAnim;
 		Glib::RefPtr<Gtk::StatusIcon> statusIcon;
+		Glib::RefPtr<Gtk::UIManager> uimanager;
+		Gtk::Menu* popupmenu;
 	protected:
 		void on_icon_activate() {
 			dlg->togle();
 			show();
 		}
+
+		void on_popup_menu(guint button, guint32 activate_time) {
+			statusIcon->popup_menu_at_position(*popupmenu, button, activate_time);
+		}
 	public:
-		gtkTrayIcon() {
+		gtkTrayIcon(dialogControl *dlg) : trayIcon(dlg), uimanager(Gtk::UIManager::create()) {
 			try {
 				mainIcon = LOAD_ICON("icon_64.png");
 				dlStaticIcon = LOAD_ICON("icon_download_64.png");
@@ -179,6 +191,19 @@ class gtkTrayIcon : public trayIcon {
 				animating = false;
 				statusIcon = StatusIcon::create(mainIcon);
 				statusIcon->signal_activate().connect(sigc::mem_fun(*this, &gtkTrayIcon::on_icon_activate));
+
+				Glib::ustring ui_info =
+					"<ui>"
+					"  <popup name='TrayIconPopup'>"
+					"    <menuitem action='Quit'/>"
+					"  </popup>"
+					"</ui>";
+				uimanager->add_ui_from_string(ui_info);
+
+				uimanager->insert_action_group(actions);
+				popupmenu = dynamic_cast<Gtk::Menu*>(uimanager->get_widget("/TrayIconPopup"));
+				statusIcon->signal_popup_menu().connect(sigc::mem_fun(*this, &gtkTrayIcon::on_popup_menu));
+
 			} catch(Glib::FileError &e) {
 				printf("Error: %s\n", e.what().c_str());
 			}
@@ -472,8 +497,7 @@ filter_func (DBusConnection *connection,
 	return (handled ? DBUS_HANDLER_RESULT_HANDLED : DBUS_HANDLER_RESULT_NOT_YET_HANDLED);
 }
 
-instSendWidget::instSendWidget() {
-	trIcon.assignDialog(this);
+instSendWidget::instSendWidget() : trIcon(this) {
 	try {
 		auto_ptr<jsonComponent_t> cfgptr;
 		try {
