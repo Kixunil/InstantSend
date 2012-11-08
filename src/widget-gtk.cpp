@@ -375,12 +375,18 @@ class instSendWidget : public Window, dialogControl {
 			finfo.setRenderer(auto_ptr<FileInfoBaseRenderer>(finfoRenderer.release()));
 
 			show_all_children();
+			++recvInProgressCount;
 			trIcon.statusChanged();
 		}
 
 		inline void updateBytes(unsigned int id, uint64_t bytes) {
-			if(files.count(id))
-			files[id]->setBytes(bytes);
+			if(files.count(id)) {
+				files[id]->setBytes(bytes);
+				if(files[id]->getProgress() == 100) {
+					--recvInProgressCount;
+					trIcon.statusChanged();
+				}
+			}
 		}
 
 		virtual ~instSendWidget() {}
@@ -406,7 +412,7 @@ class instSendWidget : public Window, dialogControl {
 		}
 
 		virtual unsigned int recvInProgress() {
-			return files.size();
+			return recvInProgressCount;
 		}
 
 		virtual unsigned int sendInProgress() {
@@ -427,7 +433,7 @@ class instSendWidget : public Window, dialogControl {
 		VBox allBox;
 
 		std::map<unsigned int, FileInfoItem *> files;
-		unsigned int nextid;
+		unsigned int nextid, recvInProgressCount;
 
 		Notebook notebook;
 
@@ -497,7 +503,7 @@ filter_func (DBusConnection *connection,
 	return (handled ? DBUS_HANDLER_RESULT_HANDLED : DBUS_HANDLER_RESULT_NOT_YET_HANDLED);
 }
 
-instSendWidget::instSendWidget() : trIcon(this) {
+instSendWidget::instSendWidget() : trIcon(this), recvInProgressCount(0) {
 	try {
 		auto_ptr<jsonComponent_t> cfgptr;
 		try {
