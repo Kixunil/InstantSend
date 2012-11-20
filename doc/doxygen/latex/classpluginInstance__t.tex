@@ -1,0 +1,70 @@
+\hypertarget{classpluginInstance__t}{\section{plugin\-Instance\-\_\-t \-Class \-Reference}
+\label{classpluginInstance__t}\index{plugin\-Instance\-\_\-t@{plugin\-Instance\-\_\-t}}
+}
+
+
+\-Ancestor of all plugin instances. \-All plugin instances should inherit from this class.  
+
+
+
+
+{\ttfamily \#include $<$pluginapi.\-h$>$}
+
+\-Inheritance diagram for plugin\-Instance\-\_\-t\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classpluginInstance__t}
+\end{center}
+\end{figure}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classpluginInstance__t_a4e74ae8a2a9b9655d9de35f423d49152}{\hyperlink{classpluginInstance__t_a4e74ae8a2a9b9655d9de35f423d49152}{plugin\-Instance\-\_\-t} ()}\label{classpluginInstance__t_a4e74ae8a2a9b9655d9de35f423d49152}
+
+\begin{DoxyCompactList}\small\item\em \-Default constructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classpluginInstance__t_a81df28e84fba35ab9d2c2dacc94dfebb}{reconfigure} (\hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} $\ast$config)=0
+\begin{DoxyCompactList}\small\item\em change configuration during run-\/time. \end{DoxyCompactList}\item 
+virtual \hyperlink{classpluginInstance__t_a92a1080a37261387f4b823ef6fadea38}{$\sim$plugin\-Instance\-\_\-t} ()
+\begin{DoxyCompactList}\small\item\em \-Destructor made virtual. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Ancestor of all plugin instances. \-All plugin instances should inherit from this class. 
+
+\subsection{\-Constructor \& \-Destructor \-Documentation}
+\hypertarget{classpluginInstance__t_a92a1080a37261387f4b823ef6fadea38}{\index{plugin\-Instance\-\_\-t@{plugin\-Instance\-\_\-t}!$\sim$plugin\-Instance\-\_\-t@{$\sim$plugin\-Instance\-\_\-t}}
+\index{$\sim$plugin\-Instance\-\_\-t@{$\sim$plugin\-Instance\-\_\-t}!pluginInstance_t@{plugin\-Instance\-\_\-t}}
+\subsubsection[{$\sim$plugin\-Instance\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}{\bf plugin\-Instance\-\_\-t\-::$\sim$plugin\-Instance\-\_\-t} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}\label{classpluginInstance__t_a92a1080a37261387f4b823ef6fadea38}
+
+
+\-Destructor made virtual. 
+
+\-Purpose is, instance can be easily deleted anywhere in the code. 
+
+\subsection{\-Member \-Function \-Documentation}
+\hypertarget{classpluginInstance__t_a81df28e84fba35ab9d2c2dacc94dfebb}{\index{plugin\-Instance\-\_\-t@{plugin\-Instance\-\_\-t}!reconfigure@{reconfigure}}
+\index{reconfigure@{reconfigure}!pluginInstance_t@{plugin\-Instance\-\_\-t}}
+\subsubsection[{reconfigure}]{\setlength{\rightskip}{0pt plus 5cm}virtual void {\bf plugin\-Instance\-\_\-t\-::reconfigure} (
+\begin{DoxyParamCaption}
+\item[{{\bf json\-Component\-\_\-t} $\ast$}]{config}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}\label{classpluginInstance__t_a81df28e84fba35ab9d2c2dacc94dfebb}
+
+
+change configuration during run-\/time. 
+
+\-This function has no purpose now and \-I'm unsure, if it'll have. \-It may be removed in the future. 
+\begin{DoxyParams}{\-Parameters}
+{\em config} & \-New configuration of plugin instance. \\
+\hline
+\end{DoxyParams}
+
+
+\-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+include/pluginapi.\-h\item 
+src/plugin.\-cpp\end{DoxyCompactItemize}

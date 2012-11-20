@@ -1,0 +1,68 @@
+\hypertarget{classi6tserver}{\section{i6tserver \-Class \-Reference}
+\label{classi6tserver}\index{i6tserver@{i6tserver}}
+}
+\-Inheritance diagram for i6tserver\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classi6tserver}
+\end{center}
+\end{figure}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classi6tserver_ace0ce8dd1a0cc69a809c9ead4dab4f60}{{\bfseries i6tserver} (const \hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} \&config)}\label{classi6tserver_ace0ce8dd1a0cc69a809c9ead4dab4f60}
+
+\item 
+\hyperlink{classpeer__t}{peer\-\_\-t} $\ast$ \hyperlink{classi6tserver_a03255aedc20719481408e10405e94e5a}{accept\-Client} ()
+\begin{DoxyCompactList}\small\item\em \-Waits for client to connect. \end{DoxyCompactList}\item 
+void \hyperlink{classi6tserver_a13f0144c61068f7eb394207f0f84b3d4}{reconfigure} (\hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} $\ast$config)
+\begin{DoxyCompactList}\small\item\em change configuration during run-\/time. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Member \-Function \-Documentation}
+\hypertarget{classi6tserver_a03255aedc20719481408e10405e94e5a}{\index{i6tserver@{i6tserver}!accept\-Client@{accept\-Client}}
+\index{accept\-Client@{accept\-Client}!i6tserver@{i6tserver}}
+\subsubsection[{accept\-Client}]{\setlength{\rightskip}{0pt plus 5cm}{\bf peer\-\_\-t}$\ast$ {\bf i6tserver\-::accept\-Client} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}\label{classi6tserver_a03255aedc20719481408e10405e94e5a}
+
+
+\-Waits for client to connect. 
+
+\begin{DoxyReturn}{\-Returns}
+\-Instance of \hyperlink{classpeer__t}{peer\-\_\-t} which should communicate with connected client 
+\end{DoxyReturn}
+\begin{DoxyAttention}{\-Attention}
+\-This function \-M\-U\-S\-T block! 
+\end{DoxyAttention}
+
+
+\-Implements \hyperlink{classserverPlugin__t_a49883e21e6bbf0bc83ce4f575df421df}{server\-Plugin\-\_\-t}.
+
+\hypertarget{classi6tserver_a13f0144c61068f7eb394207f0f84b3d4}{\index{i6tserver@{i6tserver}!reconfigure@{reconfigure}}
+\index{reconfigure@{reconfigure}!i6tserver@{i6tserver}}
+\subsubsection[{reconfigure}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf i6tserver\-::reconfigure} (
+\begin{DoxyParamCaption}
+\item[{{\bf json\-Component\-\_\-t} $\ast$}]{config}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}\label{classi6tserver_a13f0144c61068f7eb394207f0f84b3d4}
+
+
+change configuration during run-\/time. 
+
+\-This function has no purpose now and \-I'm unsure, if it'll have. \-It may be removed in the future. 
+\begin{DoxyParams}{\-Parameters}
+{\em config} & \-New configuration of plugin instance. \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classpluginInstance__t_a81df28e84fba35ab9d2c2dacc94dfebb}{plugin\-Instance\-\_\-t}.
+
+
+
+\-The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+plugins/ip6tcp.\-cpp\end{DoxyCompactItemize}
