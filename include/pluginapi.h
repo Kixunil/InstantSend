@@ -260,12 +260,12 @@ class eventProgress_t : public event_t {
 		 */
 		virtual void onUpdate(fileStatus_t &fStatus) = 0;
 
-		/*! brief This event is called, when transfer was paused 
+		/*! \brief This event is called, when transfer was paused 
 		 * \param fStatus Reference to file controller assigned to file
 		 */
 		virtual void onPause(fileStatus_t &fStatus) = 0;
 
-		/*! brief This event is called, when (previously paused) transfer was resumed
+		/*! \brief This event is called, when (previously paused) transfer was resumed
 		 * \param fStatus Reference to file controller assigned to file
 		 */
 		virtual void onResume(fileStatus_t &fStatus) = 0;
@@ -339,6 +339,10 @@ class eventHandlerCreator_t : public pluginInstanceCreator_t {
 		virtual void regEvents(eventRegister_t &reg, jsonComponent_t *config) = 0;
 };
 
+/*! \brief Loads other plugin
+ * \param name File name of plugin without extension.
+ * \return Instance of pluginInstanceCreator_t
+ */
 pluginInstanceCreator_t &getPluginInstanceCreator(const string &name); // Plugins can use other plugins
 
 #endif
