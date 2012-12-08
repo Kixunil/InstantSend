@@ -107,7 +107,9 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classprogressHandler.html#a1cc0ac0946febded7adf510bc08c45cf">onUpdate</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called periodically, during transfer, if status of file was updated.  <a href="#a1cc0ac0946febded7adf510bc08c45cf"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classprogressHandler.html#a125f323ccbe4292024823aa730ddf3ca">onPause</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called, when transfer was paused.  <a href="#a125f323ccbe4292024823aa730ddf3ca"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classprogressHandler.html#a09c83b28def90dffd42d9d7e19583348">onResume</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called, when (previously paused) transfer was resumed.  <a href="#a09c83b28def90dffd42d9d7e19583348"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classprogressHandler.html#ae9350ddb97fa047658973bbe7cee1fff">onEnd</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called every time, when transfer ended.  <a href="#ae9350ddb97fa047658973bbe7cee1fff"></a><br/></td></tr>
 </table>
@@ -180,7 +182,8 @@ Public Member Functions</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>brief This event is called, when transfer was paused </p>
+
+<p>This event is called, when transfer was paused. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">fStatus</td><td>Reference to file controller assigned to file </td></tr>
@@ -206,7 +209,8 @@ Public Member Functions</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>brief This event is called, when (previously paused) transfer was resumed </p>
+
+<p>This event is called, when (previously paused) transfer was resumed. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">fStatus</td><td>Reference to file controller assigned to file </td></tr>
@@ -266,7 +270,7 @@ Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Nov 19 2012 10:32:21 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Dec 6 2012 15:56:18 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

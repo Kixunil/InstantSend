@@ -104,15 +104,15 @@ Inheritance diagram for ehCreator_t:</div>
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classehCreator__t.html#aaa2d6c061a4a23eac251c6dee5e10e4b">getErr</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad5a102976aae3c4f10b6c7f10f94093c"></a><!-- doxytag: member="ehCreator_t::regEvents" ref="ad5a102976aae3c4f10b6c7f10f94093c" args="(eventRegister_t &amp;reg, jsonComponent_t *config)" -->
-void&#160;</td><td class="memItemRight" valign="bottom"><b>regEvents</b> (<a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;reg, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *config)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classehCreator__t.html#ad5a102976aae3c4f10b6c7f10f94093c">regEvents</a> (<a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;reg, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *config)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Tells plugin to register its' events.  <a href="#ad5a102976aae3c4f10b6c7f10f94093c"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af267e643e97acbfb8ce48f3b32516e22"></a><!-- doxytag: member="ehCreator_t::sendMsg" ref="af267e643e97acbfb8ce48f3b32516e22" args="(DBusMessage *dbmsg)" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>sendMsg</b> (DBusMessage *dbmsg)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aba397e81f4e4150e0afbf9b8d1cebae2"></a><!-- doxytag: member="ehCreator_t::printError" ref="aba397e81f4e4150e0afbf9b8d1cebae2" args="()" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>printError</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classehCreator__t.html#aaa2d6c061a4a23eac251c6dee5e10e4b">getErr</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad5a102976aae3c4f10b6c7f10f94093c"></a><!-- doxytag: member="ehCreator_t::regEvents" ref="ad5a102976aae3c4f10b6c7f10f94093c" args="(eventRegister_t &amp;reg, jsonComponent_t *config)" -->
-void&#160;</td><td class="memItemRight" valign="bottom"><b>regEvents</b> (<a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;reg, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *config)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classehCreator__t.html#ad5a102976aae3c4f10b6c7f10f94093c">regEvents</a> (<a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;reg, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *config)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Tells plugin to register its' events.  <a href="#ad5a102976aae3c4f10b6c7f10f94093c"></a><br/></td></tr>
 </table>
 <hr/><h2>Member Function Documentation</h2>
 <a class="anchor" id="aaa2d6c061a4a23eac251c6dee5e10e4b"></a><!-- doxytag: member="ehCreator_t::getErr" ref="aaa2d6c061a4a23eac251c6dee5e10e4b" args="()" -->
@@ -153,6 +153,84 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>regEvents</b> (<a cla
 
 </div>
 </div>
+<a class="anchor" id="ad5a102976aae3c4f10b6c7f10f94093c"></a><!-- doxytag: member="ehCreator_t::regEvents" ref="ad5a102976aae3c4f10b6c7f10f94093c" args="(eventRegister_t &amp;reg, jsonComponent_t *config)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classehCreator__t.html#ad5a102976aae3c4f10b6c7f10f94093c">ehCreator_t::regEvents</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>reg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td><code> [inline, virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Tells plugin to register its' events. </p>
+<p>This method is called after plugin is loaded, so it can create event handlers and register them. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reg</td><td>Interface for registering events </td></tr>
+    <tr><td class="paramname">config</td><td>User configuration stored in Json </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classeventHandlerCreator__t.html#a89472cf383359bbfd86595050a277263">eventHandlerCreator_t</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ad5a102976aae3c4f10b6c7f10f94093c"></a><!-- doxytag: member="ehCreator_t::regEvents" ref="ad5a102976aae3c4f10b6c7f10f94093c" args="(eventRegister_t &amp;reg, jsonComponent_t *config)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classehCreator__t.html#ad5a102976aae3c4f10b6c7f10f94093c">ehCreator_t::regEvents</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>reg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td><code> [inline, virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Tells plugin to register its' events. </p>
+<p>This method is called after plugin is loaded, so it can create event handlers and register them. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reg</td><td>Interface for registering events </td></tr>
+    <tr><td class="paramname">config</td><td>User configuration stored in Json </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classeventHandlerCreator__t.html#a89472cf383359bbfd86595050a277263">eventHandlerCreator_t</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>plugins/dbus.cpp</li>
 <li>plugins/zenityprogress.cpp</li>
@@ -175,7 +253,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>regEvents</b> (<a cla
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Nov 19 2012 10:32:13 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Dec 6 2012 15:56:17 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

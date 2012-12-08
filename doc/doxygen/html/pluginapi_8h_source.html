@@ -216,9 +216,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00257"></a>00257 
 <a name="l00261"></a>00261                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classeventProgress__t.html#a45cd93449caa60707382aadbcb92fb38" title="This event is called periodically, during transfer, if status of file was updated.">onUpdate</a>(<a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a> &amp;fStatus) = 0;
 <a name="l00262"></a>00262 
-<a name="l00266"></a>00266                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classeventProgress__t.html#a5388f17e70d3e850a2eb1a8964f5e6b6">onPause</a>(<a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a> &amp;fStatus) = 0;
+<a name="l00266"></a>00266                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classeventProgress__t.html#a5388f17e70d3e850a2eb1a8964f5e6b6" title="This event is called, when transfer was paused.">onPause</a>(<a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a> &amp;fStatus) = 0;
 <a name="l00267"></a>00267 
-<a name="l00271"></a>00271                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classeventProgress__t.html#a8c92bb6b39128cc9561b699650fbbcf1">onResume</a>(<a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a> &amp;fStatus) = 0;
+<a name="l00271"></a>00271                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classeventProgress__t.html#a8c92bb6b39128cc9561b699650fbbcf1" title="This event is called, when (previously paused) transfer was resumed.">onResume</a>(<a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a> &amp;fStatus) = 0;
 <a name="l00272"></a>00272 
 <a name="l00276"></a>00276                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classeventProgress__t.html#a1d6b642128f364fd964fc16f855187cf" title="This event is called every time, when transfer ended.">onEnd</a>(<a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a> &amp;fStatus) = 0;
 <a name="l00277"></a>00277 };
@@ -258,9 +258,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00339"></a>00339                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classeventHandlerCreator__t.html#a89472cf383359bbfd86595050a277263" title="Tells plugin to register its&#39; events.">regEvents</a>(<a class="code" href="classeventRegister__t.html" title="Interface for registering events.">eventRegister_t</a> &amp;reg, <a class="code" href="classjsonComponent__t.html">jsonComponent_t</a> *config) = 0;
 <a name="l00340"></a>00340 };
 <a name="l00341"></a>00341 
-<a name="l00342"></a>00342 <a class="code" href="classpluginInstanceCreator__t.html" title="Base for creator of plugin instances.">pluginInstanceCreator_t</a> &amp;getPluginInstanceCreator(<span class="keyword">const</span> <span class="keywordtype">string</span> &amp;name); <span class="comment">// Plugins can use other plugins</span>
-<a name="l00343"></a>00343 
-<a name="l00344"></a>00344 <span class="preprocessor">#endif</span>
+<a name="l00346"></a>00346 <a class="code" href="classpluginInstanceCreator__t.html" title="Base for creator of plugin instances.">pluginInstanceCreator_t</a> &amp;getPluginInstanceCreator(<span class="keyword">const</span> <span class="keywordtype">string</span> &amp;name); <span class="comment">// Plugins can use other plugins</span>
+<a name="l00347"></a>00347 
+<a name="l00348"></a>00348 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
@@ -279,7 +279,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Nov 20 2012 16:20:45 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Dec 8 2012 23:17:11 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>
