@@ -1,0 +1,108 @@
+\hypertarget{classeventSink__t}{\section{event\-Sink\-\_\-t \-Class \-Reference}
+\label{classeventSink__t}\index{event\-Sink\-\_\-t@{event\-Sink\-\_\-t}}
+}
+\-Inheritance diagram for event\-Sink\-\_\-t\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classeventSink__t}
+\end{center}
+\end{figure}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classeventSink__t_a3f62b9ded6e0d2f3f24de68ba895e496}{void {\bfseries send\-Event} (vector$<$ \hyperlink{classevent__t}{event\-\_\-t} $\ast$ $>$ \&handlers, \hyperlink{classeventData__t}{event\-Data\-\_\-t} \&event\-Data)}\label{classeventSink__t_a3f62b9ded6e0d2f3f24de68ba895e496}
+
+\item 
+void \hyperlink{classeventSink__t_a7339c49521260767b8fe4f916b537530}{reg\-Progress} (\hyperlink{classeventProgress__t}{event\-Progress\-\_\-t} \&progress\-Event)
+\begin{DoxyCompactList}\small\item\em \-Registers progress event. \end{DoxyCompactList}\item 
+\hypertarget{classeventSink__t_abdaba9df57257931847ef02afd358b66}{void {\bfseries reg\-Connections} (\hyperlink{classeventConnections__t}{event\-Connections\-\_\-t} \&connection\-Event)}\label{classeventSink__t_abdaba9df57257931847ef02afd358b66}
+
+\item 
+void \hyperlink{classeventSink__t_a23bbd3acc81245047d7e75befdb0b828}{reg\-Receive} (\hyperlink{classeventReceive__t}{event\-Receive\-\_\-t} \&receive\-Event)
+\begin{DoxyCompactList}\small\item\em \-Registers receive event. \end{DoxyCompactList}\item 
+void \hyperlink{classeventSink__t_aba491c989268123534c707dc9abdd2aa}{reg\-Send} (\hyperlink{classeventSend__t}{event\-Send\-\_\-t} \&send\-Event)
+\begin{DoxyCompactList}\small\item\em \-Registers send event. \end{DoxyCompactList}\item 
+\hypertarget{classeventSink__t_ab8a23cd49cbd44bef337f53fc85a2c15}{void {\bfseries send\-Progress} (\hyperlink{classeventData__t}{event\-Data\-\_\-t} \&event\-Data)}\label{classeventSink__t_ab8a23cd49cbd44bef337f53fc85a2c15}
+
+\item 
+\hypertarget{classeventSink__t_a6ec6a2f0953773fff74ff1bc3eb90ad7}{void {\bfseries send\-Connection} (\hyperlink{classeventData__t}{event\-Data\-\_\-t} \&event\-Data)}\label{classeventSink__t_a6ec6a2f0953773fff74ff1bc3eb90ad7}
+
+\item 
+\hypertarget{classeventSink__t_af4d67490d4080a6f8d7bd3379be6c27d}{void {\bfseries auto\-Load} (\hyperlink{classjsonObj__t}{json\-Obj\-\_\-t} \&plugins)}\label{classeventSink__t_af4d67490d4080a6f8d7bd3379be6c27d}
+
+\end{DoxyCompactItemize}
+\subsection*{\-Static \-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classeventSink__t_ab4a877e64b745fe13e6a17bcf5343811}{static \hyperlink{classeventSink__t}{event\-Sink\-\_\-t} \& {\bfseries instance} ()}\label{classeventSink__t_ab4a877e64b745fe13e6a17bcf5343811}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Member \-Function \-Documentation}
+\hypertarget{classeventSink__t_a7339c49521260767b8fe4f916b537530}{\index{event\-Sink\-\_\-t@{event\-Sink\-\_\-t}!reg\-Progress@{reg\-Progress}}
+\index{reg\-Progress@{reg\-Progress}!eventSink_t@{event\-Sink\-\_\-t}}
+\subsubsection[{reg\-Progress}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf event\-Sink\-\_\-t\-::reg\-Progress} (
+\begin{DoxyParamCaption}
+\item[{{\bf event\-Progress\-\_\-t} \&}]{progress\-Event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}\label{classeventSink__t_a7339c49521260767b8fe4f916b537530}
+
+
+\-Registers progress event. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em progress\-Event} & \-Event handler for progress event \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classeventRegister__t_a807110b926e683f81a880ddfd897823a}{event\-Register\-\_\-t}.
+
+\hypertarget{classeventSink__t_a23bbd3acc81245047d7e75befdb0b828}{\index{event\-Sink\-\_\-t@{event\-Sink\-\_\-t}!reg\-Receive@{reg\-Receive}}
+\index{reg\-Receive@{reg\-Receive}!eventSink_t@{event\-Sink\-\_\-t}}
+\subsubsection[{reg\-Receive}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf event\-Sink\-\_\-t\-::reg\-Receive} (
+\begin{DoxyParamCaption}
+\item[{{\bf event\-Receive\-\_\-t} \&}]{receive\-Event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}\label{classeventSink__t_a23bbd3acc81245047d7e75befdb0b828}
+
+
+\-Registers receive event. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em receive\-Event} & \-Event handler for receive event \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classeventRegister__t_a1aac317213afabb70d939c91b7ea2848}{event\-Register\-\_\-t}.
+
+\hypertarget{classeventSink__t_aba491c989268123534c707dc9abdd2aa}{\index{event\-Sink\-\_\-t@{event\-Sink\-\_\-t}!reg\-Send@{reg\-Send}}
+\index{reg\-Send@{reg\-Send}!eventSink_t@{event\-Sink\-\_\-t}}
+\subsubsection[{reg\-Send}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf event\-Sink\-\_\-t\-::reg\-Send} (
+\begin{DoxyParamCaption}
+\item[{{\bf event\-Send\-\_\-t} \&}]{send\-Event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}\label{classeventSink__t_aba491c989268123534c707dc9abdd2aa}
+
+
+\-Registers send event. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em send\-Event} & \-Event handler for send event \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classeventRegister__t_ab918520e178622864c7cff50336ac70e}{event\-Register\-\_\-t}.
+
+
+
+\-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/eventsink.\-h\item 
+src/eventsink.\-cpp\end{DoxyCompactItemize}

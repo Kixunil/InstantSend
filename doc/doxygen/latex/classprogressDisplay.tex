@@ -1,0 +1,122 @@
+\hypertarget{classprogressDisplay}{\section{progress\-Display \-Class \-Reference}
+\label{classprogressDisplay}\index{progress\-Display@{progress\-Display}}
+}
+\-Inheritance diagram for progress\-Display\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classprogressDisplay}
+\end{center}
+\end{figure}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classprogressDisplay_a12b174a4eebbb848b2a6f4bc864fbf8c}{on\-Begin} (\hyperlink{classfileStatus__t}{file\-Status\-\_\-t} \&f\-Status)
+\begin{DoxyCompactList}\small\item\em \-This event is called every time, when transfer started. \end{DoxyCompactList}\item 
+void \hyperlink{classprogressDisplay_a3c0cca295db37eac26e4ba196f0b1880}{on\-Update} (\hyperlink{classfileStatus__t}{file\-Status\-\_\-t} \&f\-Status)
+\begin{DoxyCompactList}\small\item\em \-This event is called periodically, during transfer, if status of file was updated. \end{DoxyCompactList}\item 
+void \hyperlink{classprogressDisplay_a9aa06d39ad18025d7c73ce394ff90e97}{on\-Pause} (\hyperlink{classfileStatus__t}{file\-Status\-\_\-t} \&f\-Status)
+\item 
+void \hyperlink{classprogressDisplay_aaf5bcea9ea647f7a77e03b59ea05d68d}{on\-Resume} (\hyperlink{classfileStatus__t}{file\-Status\-\_\-t} \&f\-Status)
+\item 
+void \hyperlink{classprogressDisplay_a60107225c2493aee1a1948ca10154b47}{on\-End} (\hyperlink{classfileStatus__t}{file\-Status\-\_\-t} \&f\-Status)
+\begin{DoxyCompactList}\small\item\em \-This event is called every time, when transfer ended. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Member \-Function \-Documentation}
+\hypertarget{classprogressDisplay_a12b174a4eebbb848b2a6f4bc864fbf8c}{\index{progress\-Display@{progress\-Display}!on\-Begin@{on\-Begin}}
+\index{on\-Begin@{on\-Begin}!progressDisplay@{progress\-Display}}
+\subsubsection[{on\-Begin}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf progress\-Display\-::on\-Begin} (
+\begin{DoxyParamCaption}
+\item[{{\bf file\-Status\-\_\-t} \&}]{f\-Status}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}\label{classprogressDisplay_a12b174a4eebbb848b2a6f4bc864fbf8c}
+
+
+\-This event is called every time, when transfer started. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em f\-Status} & \-Reference to file controller assigned to file \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classeventProgress__t_ad53c56ef512c3097bb8bb562b3f5f4e7}{event\-Progress\-\_\-t}.
+
+\hypertarget{classprogressDisplay_a60107225c2493aee1a1948ca10154b47}{\index{progress\-Display@{progress\-Display}!on\-End@{on\-End}}
+\index{on\-End@{on\-End}!progressDisplay@{progress\-Display}}
+\subsubsection[{on\-End}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf progress\-Display\-::on\-End} (
+\begin{DoxyParamCaption}
+\item[{{\bf file\-Status\-\_\-t} \&}]{f\-Status}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}\label{classprogressDisplay_a60107225c2493aee1a1948ca10154b47}
+
+
+\-This event is called every time, when transfer ended. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em f\-Status} & \-Reference to file controller assigned to file \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classeventProgress__t_a1d6b642128f364fd964fc16f855187cf}{event\-Progress\-\_\-t}.
+
+\hypertarget{classprogressDisplay_a9aa06d39ad18025d7c73ce394ff90e97}{\index{progress\-Display@{progress\-Display}!on\-Pause@{on\-Pause}}
+\index{on\-Pause@{on\-Pause}!progressDisplay@{progress\-Display}}
+\subsubsection[{on\-Pause}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf progress\-Display\-::on\-Pause} (
+\begin{DoxyParamCaption}
+\item[{{\bf file\-Status\-\_\-t} \&}]{f\-Status}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}\label{classprogressDisplay_a9aa06d39ad18025d7c73ce394ff90e97}
+brief \-This event is called, when transfer was paused 
+\begin{DoxyParams}{\-Parameters}
+{\em f\-Status} & \-Reference to file controller assigned to file \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classeventProgress__t_a5388f17e70d3e850a2eb1a8964f5e6b6}{event\-Progress\-\_\-t}.
+
+\hypertarget{classprogressDisplay_aaf5bcea9ea647f7a77e03b59ea05d68d}{\index{progress\-Display@{progress\-Display}!on\-Resume@{on\-Resume}}
+\index{on\-Resume@{on\-Resume}!progressDisplay@{progress\-Display}}
+\subsubsection[{on\-Resume}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf progress\-Display\-::on\-Resume} (
+\begin{DoxyParamCaption}
+\item[{{\bf file\-Status\-\_\-t} \&}]{f\-Status}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}\label{classprogressDisplay_aaf5bcea9ea647f7a77e03b59ea05d68d}
+brief \-This event is called, when (previously paused) transfer was resumed 
+\begin{DoxyParams}{\-Parameters}
+{\em f\-Status} & \-Reference to file controller assigned to file \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classeventProgress__t_a8c92bb6b39128cc9561b699650fbbcf1}{event\-Progress\-\_\-t}.
+
+\hypertarget{classprogressDisplay_a3c0cca295db37eac26e4ba196f0b1880}{\index{progress\-Display@{progress\-Display}!on\-Update@{on\-Update}}
+\index{on\-Update@{on\-Update}!progressDisplay@{progress\-Display}}
+\subsubsection[{on\-Update}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf progress\-Display\-::on\-Update} (
+\begin{DoxyParamCaption}
+\item[{{\bf file\-Status\-\_\-t} \&}]{f\-Status}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}\label{classprogressDisplay_a3c0cca295db37eac26e4ba196f0b1880}
+
+
+\-This event is called periodically, during transfer, if status of file was updated. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em f\-Status} & \-Reference to file controller assigned to file \\
+\hline
+\end{DoxyParams}
+
+
+\-Implements \hyperlink{classeventProgress__t_a45cd93449caa60707382aadbcb92fb38}{event\-Progress\-\_\-t}.
+
+
+
+\-The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+plugins/zenityprogress.\-cpp\end{DoxyCompactItemize}
