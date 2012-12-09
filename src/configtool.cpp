@@ -15,6 +15,7 @@ void printHelp() {
 			"\t--export-target, -Et\tPrints target configuration\n"
 			"\t--add-targets, -At TARGETS\t\tAdds target(s) argument TARGETS have to be json object\n"
 			"\t--add-ways, -Aw NAME WAYS\t\t Adds WAYS to target NAME. WAYS can be eighter json object (for one way) or json array of objects (for multiple ways)\n"
+			"\t--import-targets, -It FILE\t\tImports target(s) from other configuration file\n"
 			"\t--add-com-plugin, -Acp CONFIG\t\tAdds communication plugin for server. CONFIG have to be json object\n"
 			"\t--init-server, -is\t\tDoesn't load configuration but creates empty instead. Use -S or -c FILE after this argument\n"
 			"\t--init-client, -ic\t\tDoesn't load configuration but creates empty instead. Use -C or -c FILE after this argument\n"
@@ -71,6 +72,15 @@ void addWays(jsonComponent_t &cfg, const char *target, const char *waycfg) {
 		}
 	} else {
 		 ways.addNew(wcfg.release());
+	}
+}
+
+void importTargets(jsonComponent_t *cfg, const char *filename) {
+	auto_ptr<jsonComponent_t> other = cfgReadFile(filename);
+	jsonObj_t &thesetargets = dynamic_cast<jsonObj_t &>(dynamic_cast<jsonObj_t &>(*cfg).gie("targets"));
+	jsonObj_t &othertargets = dynamic_cast<jsonObj_t &>(dynamic_cast<jsonObj_t &>(*other.get()).gie("targets"));
+	for(jsonIterator it = othertargets.begin(); it != othertargets.end(); ++it) {
+		thesetargets.insertNew(it.key(), it.value()->clone());
 	}
 }
 
@@ -181,6 +191,14 @@ int main(int argc, char **argv) {
 			addWays(*cfg.get(), argv[i+1], argv[i+2]);
 			save = 1;
 			i += 2;
+		} else
+		if(string(argv[i]) == "--import-targets" || string(argv[i]) == "-It") {
+			if(i + 1 >= argc) {
+				fprintf(stderr, "Not enough arguments!\n");
+				return 1;
+			}
+			importTargets(cfg.get(), argv[++i]);
+			save = 1;
 		} else
 		if(string(argv[i]) == "--add-com-plugin" || string(argv[i]) == "-Acp") {
 			if(i + 1 >= argc) {
