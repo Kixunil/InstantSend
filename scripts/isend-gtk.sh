@@ -1,10 +1,29 @@
 #!/bin/bash
 
-if TARGET="`instsend-config -C -T | zenity --list --title="Instant Send" --text="Choose target" --column="Targets"`";
+if [ $# -lt 1 ];
+then
+	echo "Usage: $0 [-c CLIENT_CONFIG_FILE] file [file ...]"
+	exit 1
+fi
+
+if [ "$1" = "-c" ];
+then
+	CFGFLAG=-c
+	CFG="$2"
+	ISENDFLAG=-c
+	shift
+	shift
+else
+	CFGFLAG=-C
+	CFG=""
+	ISENDFLAG=""
+fi
+
+if TARGET="`instsend-config $CFGFLAG "$CFG" -T | zenity --list --title="Instant Send" --text="Choose target" --column="Targets"`";
 then
 	while [ $# -gt 0 ];
 	do
-		if isend -p -t "$TARGET" -f "$1";
+		if isend "$ISENDFLAG" "$CFG" -p -t "$TARGET" -f "$1";
 		then
 			notify-send -i ~/.instantsend/icon_32.png "Instant Send" "File $1 sent." 
 		else
