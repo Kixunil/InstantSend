@@ -17,19 +17,19 @@ eventSink_t &eventSink_t::instance() {
 }
 
 void eventSink_t::regProgress(eventProgress_t &progressEvent) {
-	progressEvents.push_back(&progressEvent);
+	progressEvents.insert(&progressEvent);
 }
 
 void eventSink_t::regConnections(eventConnections_t &connectionEvent) {
-	connectionEvents.push_back(&connectionEvent);
+	connectionEvents.insert(&connectionEvent);
 }
 
 void eventSink_t::regReceive(eventReceive_t &receiveEvent) {
-	recvEvents.push_back(&receiveEvent);
+	recvEvents.insert(&receiveEvent);
 }
 
 void eventSink_t::regSend(eventSend_t &sendEvent) {
-	sendEvents.push_back(&sendEvent);
+	sendEvents.insert(&sendEvent);
 }
 
 void eventSink_t::autoLoad(jsonObj_t &plugins) {
@@ -44,9 +44,9 @@ void eventSink_t::autoLoad(jsonObj_t &plugins) {
 	}
 }
 
-void eventSink_t::sendEvent(vector<event_t *> &handlers, eventData_t &eventData) {
-	for(unsigned int i = 0; i < handlers.size(); ++i) {
-		eventData.sendEvent(*handlers[i]);
+void eventSink_t::sendEvent(set<event_t *> &handlers, eventData_t &eventData) {
+	for(set<event_t *>::iterator it = handlers.begin(); it != handlers.end(); ++it) {
+		eventData.sendEvent(**it);
 	}
 }
 

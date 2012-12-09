@@ -1,3 +1,5 @@
+#include <set>
+
 #include "pluginapi.h"
 
 #define BCAST_SIMPLE_EVENT(eventName, eventCall) \
@@ -20,14 +22,14 @@ class eventData_t {
 
 class eventSink_t : public eventRegister_t {
 	private:
-		vector<event_t *> progressEvents;
-		vector<event_t *> connectionEvents;
-		vector<event_t *> recvEvents;
-		vector<event_t *> sendEvents;
+		set<event_t *> progressEvents;
+		set<event_t *> connectionEvents;
+		set<event_t *> recvEvents;
+		set<event_t *> sendEvents;
 
 
 	public:
-		void sendEvent(vector<event_t *> &handlers, eventData_t &eventData);
+		void sendEvent(set<event_t *> &handlers, eventData_t &eventData);
 		static eventSink_t &instance();
 		void regProgress(eventProgress_t &progressEvent);
 		void regConnections(eventConnections_t &connectionEvent);
