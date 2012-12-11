@@ -50,6 +50,9 @@ dbus.so: dbus.cpp
 desktop-notify.so: desktop-notify.cpp
 	$(CXX) -o $@ desktop-notify.cpp `pkg-config --cflags --libs libnotify` $(CFLAGS)
 
+avahi-publish.so: avahi-publish.cpp
+	$(CXX) -o $@ avahi-publish.cpp -lavahi-client -lavahi-common $(CFLAGS)
+
 check:
 
 clean:
