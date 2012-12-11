@@ -21,7 +21,7 @@ ifeq ($(HOST),i686-linux-gnu)
 	CFLAGS+=-march=i686 -m32
 endif
 
-all: ip4tcp.so ip6tcp.so dbus.so desktop-notify.so
+all: ip4tcp.so ip6tcp.so dbus.so desktop-notify.so avahi-publish.so avahi-publish.so
 
 ip4tcp.so: ../include/pluginapi.h ip4tcp.cpp
 	 $(CXX) -o $@ ip4tcp.cpp $(CFLAGS)
