@@ -15,22 +15,34 @@ then
 fi
 
 OUTPUTCONF="$HOME/.instantsend/client.cfg"
-
-if [ "$1" = "-c" ];
-then
-	OUTPUTCONF="$2"
-fi
-
-if [ "`stat -L --printf='%D:%i' "$OUTPUTCONF"`" = "`stat -L --printf='%D:%i' ~/.instantsend/client.cfg`" ];
-then
-	if [ '!' -f "$HOME/.instantsend/client.cfg" ];
+INPUTCONF="$HOME/.instantsend/client.cfg"
+while [ $# -gt 0 ];
+do
+	if [ "$1" = "-o" ];
 	then
-		instsend-config -ic -C
+		OUTPUTCONF="$2"
+		shift
+	fi
+
+	if [ "$1" = "-i" ];
+	then
+		INPUTCONF="$2"
+		shift
+	fi
+
+	shift
+done
+
+if [ "$(stat -L --printf='%D:%i' "$OUTPUTCONF")" = "$(stat -L --printf='%D:%i' "$INPUTCONF")" ];
+then
+	if [ '!' -f "$OUTPUTCONF" ];
+	then
+		instsend-config -ic -c "$OUTPUTCONF"
 	fi
 else
 	if [ -r "$HOME/.instantsend/client.cfg" ];
 	then
-		cp ~/.instantsend/client.cfg "$OUTPUTCONF"
+		cp "$INPUTCONF" "$OUTPUTCONF"
 	else
 		instsend-config -ic -c "$OUTPUTCONF"
 	fi
