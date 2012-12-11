@@ -306,25 +306,64 @@ class eventSend_t : public event_t {
 		~eventSend_t();
 };
 
+class serverController_t {
+	public:
+		virtual const string &getPluginName() = 0;
+		virtual const jsonComponent_t &getPluginConf() = 0;
+
+		virtual void stop() = 0;
+};
+
+class eventServer_t : public event_t {
+	public:
+		virtual void onServerStarted(serverController_t &server) = 0;
+		virtual void onServerStopped(serverController_t &server) = 0;
+};
+
 /*! \brief Interface for registering events
  * \details Plugins can use this interface to register their event handlers
  */
-class eventRegister_t : public event_t {
+class eventRegister_t {
 	public:
 		/*! \brief Registers progress event
 		 * \param progressEvent Event handler for progress event
 		 */
 		virtual void regProgress(eventProgress_t &progressEvent) = 0;
 
+		/*! \brief Unregisters progress event
+		 * \param progressEvent Event handler for progress event
+		 */
+		virtual void unregProgress(eventProgress_t &progressEvent) = 0;
+
 		/*! \brief Registers receive event
 		 * \param receiveEvent Event handler for receive event
 		 */
 		virtual void regReceive(eventReceive_t &receiveEvent) = 0;
 
+		/*! \brief Unregisters receive event
+		 * \param receiveEvent Event handler for receive event
+		 */
+		virtual void unregReceive(eventReceive_t &receiveEvent) = 0;
+
 		/*! \brief Registers send event
 		 * \param sendEvent Event handler for send event
 		 */
 		virtual void regSend(eventSend_t &sendEvent) = 0;
+
+		/*! \brief Unregisters send event
+		 * \param sendEvent Event handler for send event
+		 */
+		virtual void unregSend(eventSend_t &sendEvent) = 0;
+
+		/*! \brief Registers server event
+		 * \param serverEvent Event handler for server event
+		 */
+		virtual void regServer(eventServer_t &serverEvent) = 0;
+
+		/*! \brief Unregisters server event
+		 * \param serverEvent Event handler for server event
+		 */
+		virtual void unregServer(eventServer_t &serverEvent) = 0;
 };
 
 /*! brief Interface for registering events
