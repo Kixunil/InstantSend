@@ -1,29 +1,36 @@
 PREFIX=@prefix@
 
-all: instsend-gtk-wrapper.sh instsend-config-wizard.sh
+all: instsend-gtk-wrapper.sh instsend-config-wizard.sh instsend-scan.sh
 
 instsend-gtk-wrapper.sh: instsend-gtk-wrapper.in
-	sed -e 's/ ###PREFIX###/"'"$(subst /,\\/,$(PREFIX))"'"/g' instsend-gtk-wrapper.in > instsend-gtk-wrapper.sh
-	chmod 755 instsend-gtk-wrapper.sh
+	sed -e 's/ ###PREFIX###/"'"$(subst /,\\/,$(PREFIX))"'"/g' instsend-gtk-wrapper.in > $@
+	chmod 755 $@
 
 instsend-config-wizard.sh: instsend-config-wizard.in
-	sed -e 's/ ###PREFIX###/"'"$(subst /,\\/,$(PREFIX))"'"/g' instsend-config-wizard.in > instsend-config-wizard.sh
-	chmod 755 instsend-config-wizard.sh
+	sed -e 's/ ###PREFIX###/"'"$(subst /,\\/,$(PREFIX))"'"/g' instsend-config-wizard.in > $@
+	chmod 755 $@
 	
+instsend-scan.sh: instsend-scan.in
+	sed -e 's/ ###PREFIX###/"'"$(subst /,\\/,$(PREFIX))"'"/g' instsend-scan.in > $@
+	chmod 755 $@
+
 check:
 
 clean:
-	rm -f instsend-gtk-wrapper.sh instsend-config-wizard.sh
+	rm -f instsend-gtk-wrapper.sh instsend-config-wizard.sh instsend-scan.sh
 
 distclean: clean
 	rm -f Makefile
 
 install:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/instantsend/scanners
 	cp isend-gtk.sh $(DESTDIR)$(PREFIX)/bin/isend-gtk
 	cp instsend-gtk-wrapper.sh $(DESTDIR)$(PREFIX)/bin/instsend-gtk-wrapper
 	cp instsend-config-wizard.sh $(DESTDIR)$(PREFIX)/bin/instsend-config-wizard
 	cp instsendd-wrapper.sh $(DESTDIR)$(PREFIX)/bin/instsendd-wrapper
+	cp instsend-scan.sh $(DESTDIR)$(PREFIX)/bin/instsend-scan
+	cp instsend-avahi.sh $(DESTDIR)$(PREFIX)/lib/instantsend/scanners/avahi
 	chmod 755 $(DESTDIR)$(PREFIX)/bin/isend-gtk $(DESTDIR)$(PREFIX)/bin/instsend-gtk-wrapper $(DESTDIR)$(PREFIX)/bin/instsend-config-wizard $(DESTDIR)$(PREFIX)/bin/instsendd-wrapper
 
 .PHONY: all check clean distclean install
