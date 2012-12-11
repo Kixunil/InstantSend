@@ -156,14 +156,30 @@ class clientThread_t : public thread_t {
 
 };
 
-class serverThread_t : public thread_t {
+class serverThread_t : public thread_t, serverController_t {
 	private:
+		auto_ptr<mutex_t> runningmutex;
+		volatile bool running;
+		string pluginName;
+		auto_ptr<jsonComponent_t> pluginConfig;
 		auto_ptr<serverPlugin_t> server;
 	public:
-		serverThread_t(serverPlugin_t *srv) : server(srv) {
+		serverThread_t(const string &plugin, auto_ptr<jsonComponent_t> config) : runningmutex(mutex_t::getNew()), running(true), pluginName(plugin), pluginConfig(config), server(pluginList_t::instance()[pluginName].newServer(*pluginConfig)) {
+			if(!server.get()) {
+				const char *errmsg = pluginList_t::instance()[pluginName].lastError();
+				if(errmsg)
+					throw runtime_error("Could not load plugin " + pluginName + ": " + errmsg);
+				else
+					throw runtime_error("Could not load plugin " + pluginName);
+			}
+	
 		}
 
-		serverThread_t(auto_ptr<serverPlugin_t> srv) : server(srv) {
+		bool checkRunning() {
+			runningmutex->get();
+			bool tmp = running;
+			runningmutex->release();
+			return tmp;
 		}
 
 		void run() {
@@ -171,19 +187,36 @@ class serverThread_t : public thread_t {
 			puts("Server thread started.");
 			fflush(stdout);
 			try {
-				while((client = server->acceptClient())) {
+				bcastServerStarted(*this);
+				while((client = server->acceptClient()) && checkRunning()) {
 					puts("Client connected.");
 					clientThread_t *ct = new clientThread_t(client);
 					if(!ct) puts("WTF?!"); else puts("Client thread created");
 					fflush(stdout);
 					ct->start();
 				}
-				puts("Server plugin failed.");
+//				puts("Server plugin failed.");
+//
+				bcastServerStopped(*this);
 
 			}
 			catch(exception &e) {
 				fprintf(stderr, "Warning, plugin not loaded: %s\n", e.what());
 			}
+		}
+
+		void stop() {
+			runningmutex->get();
+			running = false;
+			runningmutex->release();
+		}
+
+		const string &getPluginName() {
+			return pluginName;
+		}
+
+		const jsonComponent_t &getPluginConf() {
+			return *pluginConfig;
 		}
 
 		bool autoDelete() {
@@ -248,16 +281,8 @@ int main(int argc, char **argv) {
 				jsonComponent_t &pconf = plugin.gie("config");
 				serverPlugin_t *srv;
 
+				(new serverThread_t(pname.getVal(), auto_ptr<jsonComponent_t>(pconf.clone())))->start();
 				// Load plugin, create server instance and start new thread
-				if((srv = pl[pname.getVal()].newServer(pconf))) {
-					(new serverThread_t(srv))->start();
-				} else {
-					const char *errmsg = pl[pname.getVal()].lastError();
-					if(errmsg)
-						puts(("Could not load plugin " + pname.getVal() + ": " + errmsg).c_str());
-					else
-						puts(("Could not load plugin " + pname.getVal()).c_str());
-				}
 			} catch(exception &e) {
 				fprintf(stderr, "Warning, plugin not loaded: %s\n", e.what());
 			}

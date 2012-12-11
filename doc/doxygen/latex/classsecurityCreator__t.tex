@@ -1,0 +1,131 @@
+\hypertarget{classsecurityCreator__t}{\section{security\-Creator\-\_\-t \-Class \-Reference}
+\label{classsecurityCreator__t}\index{security\-Creator\-\_\-t@{security\-Creator\-\_\-t}}
+}
+
+
+\-Creates encryption instances.  
+
+
+
+
+{\ttfamily \#include $<$pluginapi.\-h$>$}
+
+\-Inheritance diagram for security\-Creator\-\_\-t\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classsecurityCreator__t}
+\end{center}
+\end{figure}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} $\ast$ \hyperlink{classsecurityCreator__t_a9e204dba6dd07275ed250640835c5821}{get\-Supported\-Settings} (\hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} \&config)=0
+\begin{DoxyCompactList}\small\item\em \-Publishes supported encryption settings. \end{DoxyCompactList}\item 
+virtual \hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} $\ast$ \hyperlink{classsecurityCreator__t_abe5307cfc49e85f4efae194aaa32e0a8}{choose\-Settings} (\hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} \&config)=0
+\begin{DoxyCompactList}\small\item\em \-Publishes supported encryption settings. \end{DoxyCompactList}\item 
+virtual \hyperlink{classpeer__t}{peer\-\_\-t} $\ast$ \hyperlink{classsecurityCreator__t_a034aee313d01680b4cd7538a427ffdfe}{seconnect} (\hyperlink{classpeer__t}{peer\-\_\-t} \&peer, \hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} \&config, \hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} \&chosen\-Settings)=0
+\begin{DoxyCompactList}\small\item\em \-Initiates secure connection from client side. \end{DoxyCompactList}\item 
+virtual \hyperlink{classpeer__t}{peer\-\_\-t} $\ast$ \hyperlink{classsecurityCreator__t_a3ae98b0d1f4812023d62abf7f03c569f}{seaccept} (\hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} \&config, \hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} \&requested\-Config)=0
+\begin{DoxyCompactList}\small\item\em \-Waits for client to initiate secure connection. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Creates encryption instances. 
+
+\subsection{\-Member \-Function \-Documentation}
+\hypertarget{classsecurityCreator__t_abe5307cfc49e85f4efae194aaa32e0a8}{\index{security\-Creator\-\_\-t@{security\-Creator\-\_\-t}!choose\-Settings@{choose\-Settings}}
+\index{choose\-Settings@{choose\-Settings}!securityCreator_t@{security\-Creator\-\_\-t}}
+\subsubsection[{choose\-Settings}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf json\-Component\-\_\-t}$\ast$ {\bf security\-Creator\-\_\-t\-::choose\-Settings} (
+\begin{DoxyParamCaption}
+\item[{{\bf json\-Component\-\_\-t} \&}]{config}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}\label{classsecurityCreator__t_abe5307cfc49e85f4efae194aaa32e0a8}
+
+
+\-Publishes supported encryption settings. 
+
+\-Encryption plugins can support multiple settings. \-Return value of \hyperlink{classsecurityCreator__t_a9e204dba6dd07275ed250640835c5821}{get\-Supported\-Settings()} is delivered to client, where this method is called, to choose settings. \-Reply is sent to server. \begin{DoxySeeAlso}{\-See also}
+\hyperlink{classsecurityCreator__t_a9e204dba6dd07275ed250640835c5821}{get\-Supported\-Settings()} 
+\end{DoxySeeAlso}
+
+\begin{DoxyParams}{\-Parameters}
+{\em config} & \-Supported configurations sent by server \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-J\-S\-O\-N component containing choosen configuration 
+\end{DoxyReturn}
+\hypertarget{classsecurityCreator__t_a9e204dba6dd07275ed250640835c5821}{\index{security\-Creator\-\_\-t@{security\-Creator\-\_\-t}!get\-Supported\-Settings@{get\-Supported\-Settings}}
+\index{get\-Supported\-Settings@{get\-Supported\-Settings}!securityCreator_t@{security\-Creator\-\_\-t}}
+\subsubsection[{get\-Supported\-Settings}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf json\-Component\-\_\-t}$\ast$ {\bf security\-Creator\-\_\-t\-::get\-Supported\-Settings} (
+\begin{DoxyParamCaption}
+\item[{{\bf json\-Component\-\_\-t} \&}]{config}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}\label{classsecurityCreator__t_a9e204dba6dd07275ed250640835c5821}
+
+
+\-Publishes supported encryption settings. 
+
+\-Encryption plugins can support multiple settings. \-Return value of this function is delivered to client, during handshake. \-Client can choose settings (method choose\-Settings(() is called) and reply is sent back to server. \begin{DoxySeeAlso}{\-See also}
+\hyperlink{classsecurityCreator__t_abe5307cfc49e85f4efae194aaa32e0a8}{choose\-Settings()} 
+\end{DoxySeeAlso}
+
+\begin{DoxyParams}{\-Parameters}
+{\em config} & \-User defined configuration \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-J\-S\-O\-N component containing informations for client 
+\end{DoxyReturn}
+\hypertarget{classsecurityCreator__t_a3ae98b0d1f4812023d62abf7f03c569f}{\index{security\-Creator\-\_\-t@{security\-Creator\-\_\-t}!seaccept@{seaccept}}
+\index{seaccept@{seaccept}!securityCreator_t@{security\-Creator\-\_\-t}}
+\subsubsection[{seaccept}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf peer\-\_\-t}$\ast$ {\bf security\-Creator\-\_\-t\-::seaccept} (
+\begin{DoxyParamCaption}
+\item[{{\bf json\-Component\-\_\-t} \&}]{config, }
+\item[{{\bf json\-Component\-\_\-t} \&}]{requested\-Config}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}\label{classsecurityCreator__t_a3ae98b0d1f4812023d62abf7f03c569f}
+
+
+\-Waits for client to initiate secure connection. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em config} & \-User defined configuration \\
+\hline
+{\em requested\-Config} & \-Settings requested by client \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+instance of \hyperlink{classpeer__t}{peer\-\_\-t}, which encrypts communication between server and client 
+\end{DoxyReturn}
+\hypertarget{classsecurityCreator__t_a034aee313d01680b4cd7538a427ffdfe}{\index{security\-Creator\-\_\-t@{security\-Creator\-\_\-t}!seconnect@{seconnect}}
+\index{seconnect@{seconnect}!securityCreator_t@{security\-Creator\-\_\-t}}
+\subsubsection[{seconnect}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf peer\-\_\-t}$\ast$ {\bf security\-Creator\-\_\-t\-::seconnect} (
+\begin{DoxyParamCaption}
+\item[{{\bf peer\-\_\-t} \&}]{peer, }
+\item[{{\bf json\-Component\-\_\-t} \&}]{config, }
+\item[{{\bf json\-Component\-\_\-t} \&}]{chosen\-Settings}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}\label{classsecurityCreator__t_a034aee313d01680b4cd7538a427ffdfe}
+
+
+\-Initiates secure connection from client side. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em peer} & \-Instance of \hyperlink{classpeer__t}{peer\-\_\-t} connected to server. \\
+\hline
+{\em config} & \-User defined configuration \\
+\hline
+{\em chosen\-Settings} & \-Settings required by \hyperlink{classsecurityCreator__t_abe5307cfc49e85f4efae194aaa32e0a8}{choose\-Settings()} call \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+instance of \hyperlink{classpeer__t}{peer\-\_\-t}, which encrypts communication between server and client 
+\end{DoxyReturn}
+
+
+\-The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+include/pluginapi.\-h\end{DoxyCompactItemize}

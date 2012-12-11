@@ -1,0 +1,48 @@
+\hypertarget{classeventHandlerCreator__t}{\section{event\-Handler\-Creator\-\_\-t \-Class \-Reference}
+\label{classeventHandlerCreator__t}\index{event\-Handler\-Creator\-\_\-t@{event\-Handler\-Creator\-\_\-t}}
+}
+
+
+{\ttfamily \#include $<$pluginapi.\-h$>$}
+
+\-Inheritance diagram for event\-Handler\-Creator\-\_\-t\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classeventHandlerCreator__t}
+\end{center}
+\end{figure}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classeventHandlerCreator__t_a89472cf383359bbfd86595050a277263}{reg\-Events} (\hyperlink{classeventRegister__t}{event\-Register\-\_\-t} \&reg, \hyperlink{classjsonComponent__t}{json\-Component\-\_\-t} $\ast$config)=0
+\begin{DoxyCompactList}\small\item\em \-Tells plugin to register its' events. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+brief \-Interface for registering events 
+
+\subsection{\-Member \-Function \-Documentation}
+\hypertarget{classeventHandlerCreator__t_a89472cf383359bbfd86595050a277263}{\index{event\-Handler\-Creator\-\_\-t@{event\-Handler\-Creator\-\_\-t}!reg\-Events@{reg\-Events}}
+\index{reg\-Events@{reg\-Events}!eventHandlerCreator_t@{event\-Handler\-Creator\-\_\-t}}
+\subsubsection[{reg\-Events}]{\setlength{\rightskip}{0pt plus 5cm}virtual void {\bf event\-Handler\-Creator\-\_\-t\-::reg\-Events} (
+\begin{DoxyParamCaption}
+\item[{{\bf event\-Register\-\_\-t} \&}]{reg, }
+\item[{{\bf json\-Component\-\_\-t} $\ast$}]{config}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}\label{classeventHandlerCreator__t_a89472cf383359bbfd86595050a277263}
+
+
+\-Tells plugin to register its' events. 
+
+\-This method is called after plugin is loaded, so it can create event handlers and register them. 
+\begin{DoxyParams}{\-Parameters}
+{\em reg} & \-Interface for registering events \\
+\hline
+{\em config} & \-User configuration stored in \-Json \\
+\hline
+\end{DoxyParams}
+
+
+\-The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+include/pluginapi.\-h\end{DoxyCompactItemize}

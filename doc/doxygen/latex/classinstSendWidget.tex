@@ -1,0 +1,93 @@
+\hypertarget{classinstSendWidget}{\section{inst\-Send\-Widget \-Class \-Reference}
+\label{classinstSendWidget}\index{inst\-Send\-Widget@{inst\-Send\-Widget}}
+}
+\-Inheritance diagram for inst\-Send\-Widget\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classinstSendWidget}
+\end{center}
+\end{figure}
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classinstSendWidget_a7be756f8e07f0d9185cd708ada1e5986}{void {\bfseries add\-File} (unsigned int id, const ustring \&file\-Name, const ustring \&machine\-Id, uint64\-\_\-t file\-Size, char direction)}\label{classinstSendWidget_a7be756f8e07f0d9185cd708ada1e5986}
+
+\item 
+\hypertarget{classinstSendWidget_ac02750ff02e273e63863d4e0b2b8ac44}{void {\bfseries update\-Bytes} (unsigned int id, uint64\-\_\-t bytes)}\label{classinstSendWidget_ac02750ff02e273e63863d4e0b2b8ac44}
+
+\item 
+\hypertarget{classinstSendWidget_a33c6d042b9eeb1451e045be080143a63}{virtual void {\bfseries show} ()}\label{classinstSendWidget_a33c6d042b9eeb1451e045be080143a63}
+
+\item 
+\hypertarget{classinstSendWidget_adaf00468c149683c46a37f70397346ef}{virtual void {\bfseries hide} ()}\label{classinstSendWidget_adaf00468c149683c46a37f70397346ef}
+
+\item 
+\hypertarget{classinstSendWidget_abf06ab13d6da76955b8b1cd63f7f2630}{virtual void {\bfseries togle} ()}\label{classinstSendWidget_abf06ab13d6da76955b8b1cd63f7f2630}
+
+\item 
+\hypertarget{classinstSendWidget_ad2efffdb4e6949285b36315d92a57092}{virtual void {\bfseries quit} ()}\label{classinstSendWidget_ad2efffdb4e6949285b36315d92a57092}
+
+\item 
+\hypertarget{classinstSendWidget_a71c6fe0a67b57e65d5a348a3c348100c}{virtual bool {\bfseries is\-Visible} ()}\label{classinstSendWidget_a71c6fe0a67b57e65d5a348a3c348100c}
+
+\item 
+\hypertarget{classinstSendWidget_ab93807e8365c07c466d1e537e2a27460}{virtual unsigned int {\bfseries recv\-In\-Progress} ()}\label{classinstSendWidget_ab93807e8365c07c466d1e537e2a27460}
+
+\item 
+\hypertarget{classinstSendWidget_a5f92aec68e5910b95ec8fa422f856f81}{virtual unsigned int {\bfseries send\-In\-Progress} ()}\label{classinstSendWidget_a5f92aec68e5910b95ec8fa422f856f81}
+
+\item 
+\hypertarget{classinstSendWidget_a33c1ccdd9166434d2b1b7816d86f445c}{virtual unsigned int {\bfseries recv\-Pending} ()}\label{classinstSendWidget_a33c1ccdd9166434d2b1b7816d86f445c}
+
+\item 
+\hypertarget{classinstSendWidget_a5d9c9ed5ed5bad74c7bf2e3cdb9eee18}{virtual unsigned int {\bfseries send\-Pending} ()}\label{classinstSendWidget_a5d9c9ed5ed5bad74c7bf2e3cdb9eee18}
+
+\end{DoxyCompactItemize}
+\subsection*{\-Protected \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classinstSendWidget_ac53faceafc5c474f13f792a8c662acf8}{bool {\bfseries on\-\_\-timeout} ()}\label{classinstSendWidget_ac53faceafc5c474f13f792a8c662acf8}
+
+\item 
+\hypertarget{classinstSendWidget_ad9cfe9674c8ce25e2b6d97909559f747}{bool {\bfseries on\-\_\-icon\-\_\-timeout} ()}\label{classinstSendWidget_ad9cfe9674c8ce25e2b6d97909559f747}
+
+\end{DoxyCompactItemize}
+\subsection*{\-Protected \-Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classinstSendWidget_ac76f8d942fefe4f4b810de2173de9407}{\-Scrolled\-Window {\bfseries scroll\-Window\-All}}\label{classinstSendWidget_ac76f8d942fefe4f4b810de2173de9407}
+
+\item 
+\hypertarget{classinstSendWidget_aabd97dd58c1f3c5560d365226e42a7f7}{\-Scrolled\-Window {\bfseries scroll\-Window\-Recv}}\label{classinstSendWidget_aabd97dd58c1f3c5560d365226e42a7f7}
+
+\item 
+\hypertarget{classinstSendWidget_a66f87351f59d013c874e996e17c08914}{\-Scrolled\-Window {\bfseries scroll\-Window\-Send}}\label{classinstSendWidget_a66f87351f59d013c874e996e17c08914}
+
+\item 
+\hypertarget{classinstSendWidget_a414b94531e16e3ccf14ddf8647de5b8d}{\-V\-Box {\bfseries all\-Box}}\label{classinstSendWidget_a414b94531e16e3ccf14ddf8647de5b8d}
+
+\item 
+\hypertarget{classinstSendWidget_a68f4337f7e51064ca697974c2a2ed136}{std\-::map$<$ unsigned int, \*
+\hyperlink{classFileInfoItem}{\-File\-Info\-Item} $\ast$ $>$ {\bfseries files}}\label{classinstSendWidget_a68f4337f7e51064ca697974c2a2ed136}
+
+\item 
+\hypertarget{classinstSendWidget_a9426f91f1218912fa5b8f3493c8d7fd5}{unsigned int {\bfseries nextid}}\label{classinstSendWidget_a9426f91f1218912fa5b8f3493c8d7fd5}
+
+\item 
+\hypertarget{classinstSendWidget_aa775c313536882fe723432fd67afe025}{\-Notebook {\bfseries notebook}}\label{classinstSendWidget_aa775c313536882fe723432fd67afe025}
+
+\item 
+\hypertarget{classinstSendWidget_a14f02ed5957bfe560a37d0fbc8f0db6c}{\-D\-Bus\-Error {\bfseries dberr}}\label{classinstSendWidget_a14f02ed5957bfe560a37d0fbc8f0db6c}
+
+\item 
+\hypertarget{classinstSendWidget_a756833c5f1f9647f5d643d82cf1db849}{\-D\-Bus\-Connection $\ast$ {\bfseries dbconn}}\label{classinstSendWidget_a756833c5f1f9647f5d643d82cf1db849}
+
+\item 
+\hypertarget{classinstSendWidget_af0421447c6aafe2f5d376f0e70082d36}{\hyperlink{classgtkTrayIcon}{gtk\-Tray\-Icon} {\bfseries tr\-Icon}}\label{classinstSendWidget_af0421447c6aafe2f5d376f0e70082d36}
+
+\end{DoxyCompactItemize}
+
+
+\-The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+src/widget-\/gtk.\-cpp\end{DoxyCompactItemize}

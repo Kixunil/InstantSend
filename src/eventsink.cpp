@@ -4,7 +4,7 @@
 
 #define BCAST_SIMPLE_EVENT_DEF(eventName, eventType, eventCall) \
 void eventName::sendEvent(event_t &event) {\
-	dynamic_cast<eventType &>(event).eventCall(*fstatus);\
+	dynamic_cast<eventType &>(event).eventCall(evdata);\
 }
 
 event_t::~event_t() {}
@@ -17,19 +17,43 @@ eventSink_t &eventSink_t::instance() {
 }
 
 void eventSink_t::regProgress(eventProgress_t &progressEvent) {
-	progressEvents.push_back(&progressEvent);
+	progressEvents.insert(&progressEvent);
 }
 
 void eventSink_t::regConnections(eventConnections_t &connectionEvent) {
-	connectionEvents.push_back(&connectionEvent);
+	connectionEvents.insert(&connectionEvent);
 }
 
 void eventSink_t::regReceive(eventReceive_t &receiveEvent) {
-	recvEvents.push_back(&receiveEvent);
+	recvEvents.insert(&receiveEvent);
 }
 
 void eventSink_t::regSend(eventSend_t &sendEvent) {
-	sendEvents.push_back(&sendEvent);
+	sendEvents.insert(&sendEvent);
+}
+
+void eventSink_t::regServer(eventServer_t &serverEvent) {
+	serverEvents.insert(&serverEvent);
+}
+
+void eventSink_t::unregProgress(eventProgress_t &progressEvent) {
+	progressEvents.erase(&progressEvent);
+}
+
+void eventSink_t::unregConnections(eventConnections_t &connectionEvent) {
+	connectionEvents.erase(&connectionEvent);
+}
+
+void eventSink_t::unregReceive(eventReceive_t &receiveEvent) {
+	recvEvents.erase(&receiveEvent);
+}
+
+void eventSink_t::unregSend(eventSend_t &sendEvent) {
+	sendEvents.erase(&sendEvent);
+}
+
+void eventSink_t::unregServer(eventServer_t &serverEvent) {
+	serverEvents.erase(&serverEvent);
 }
 
 void eventSink_t::autoLoad(jsonObj_t &plugins) {
@@ -44,9 +68,9 @@ void eventSink_t::autoLoad(jsonObj_t &plugins) {
 	}
 }
 
-void eventSink_t::sendEvent(vector<event_t *> &handlers, eventData_t &eventData) {
-	for(unsigned int i = 0; i < handlers.size(); ++i) {
-		eventData.sendEvent(*handlers[i]);
+void eventSink_t::sendEvent(set<event_t *> &handlers, eventData_t &eventData) {
+	for(set<event_t *>::iterator it = handlers.begin(); it != handlers.end(); ++it) {
+		eventData.sendEvent(**it);
 	}
 }
 
@@ -56,3 +80,5 @@ BCAST_SIMPLE_EVENT_DEF(bcastProgressPaused, eventProgress_t, onPause);
 BCAST_SIMPLE_EVENT_DEF(bcastProgressResumed, eventProgress_t, onResume);
 BCAST_SIMPLE_EVENT_DEF(bcastProgressEnded, eventProgress_t, onEnd);
 
+BCAST_SIMPLE_EVENT_DEF(bcastServerStarted, eventServer_t, onServerStarted);
+BCAST_SIMPLE_EVENT_DEF(bcastServerStopped, eventServer_t, onServerStopped);
