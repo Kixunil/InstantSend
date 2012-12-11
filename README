@@ -1,5 +1,5 @@
 Instant Send - simplified
-Version: 0.4
+Version: 0.5
 Author: Martin Habovštiak
 
 Features:
@@ -26,6 +26,7 @@ Plugins:
 	dbus		- uses dbus for notifying connected applications
 	desktop-notify	- uses libnotify for showing desktop notifications
 	zenity		- uses zenity for showing progress of downloading
+	avahi-publish	- uses libavahi for publishing service in local network
 
 Config files:
 	Should be placed in ~/.instantsend/

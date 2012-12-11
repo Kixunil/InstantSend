@@ -1,3 +1,8 @@
+instantsend (0.5-3~###DISTRIBUTION###) unstable; urgency=low
+  * Supports avahi, improved GUI
+
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Tue, 11 Dec 2012 15:24:22 +0100
+
 instantsend (0.5-2~###DISTRIBUTION###) unstable; urgency=low
 
   * Support of libnotify1
