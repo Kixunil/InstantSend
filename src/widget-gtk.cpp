@@ -19,10 +19,12 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <memory>
 
 #include "json.h"
 #include "sysapi.h"
+#include "multithread.h"
 
 using namespace Gtk;
 using namespace std;
@@ -36,9 +38,8 @@ ustring intToStr(int value) {
 	return strOut;
 }
 
-class FileInfoBaseRenderer {
+class observer_t {
 	public:
-		virtual Widget &getWidget() = 0;
 		virtual void updateData() = 0;
 };
 
@@ -49,12 +50,14 @@ class FileInfoItem {
 		char status;
 		char direction;
 		uint64_t fileSize, bytes;
-		FileInfoBaseRenderer *renderer;
+		set <observer_t *> observers;
+
 	public:
+		typedef set<observer_t *>::iterator obsiterator;
+
 		inline FileInfoItem() {
 			direction = 0;
 			bytes = 0;
-			renderer = NULL;
 		}
 		inline FileInfoItem(char dir) {
 			direction = dir;
@@ -86,40 +89,57 @@ class FileInfoItem {
 
 		inline void setFileName(const ustring &fileName) {
 			this->fileName = fileName;
-			if(renderer) renderer->updateData();
+			update();
 		}
 
 
 		inline void setPeerName(const ustring &peerName) {
 			this->peerName = peerName;
-			if(renderer) renderer->updateData();
+			update();
 		}
 
 		inline void setSize(uint64_t size) {
 			fileSize = size;
-			if(renderer) renderer->updateData();
 		}
 
 		inline void setStatus(char status) {
 			this->status = status;
-			if(renderer) renderer->updateData();
+			update();
 		}
 
 		inline void setBytes(uint64_t b) {
 			this->bytes = b;
-			if(renderer) renderer->updateData();
+			update();
 		}
 
-		inline void setRenderer(auto_ptr<FileInfoBaseRenderer> renderer) {
-			this->renderer = renderer.release();
+		inline void addObserver(observer_t &observer) {
+			this->observers.insert(&observer);
+		}
+
+		inline void removeObserver(observer_t &observer) {
+			this->observers.erase(&observer);
+		}
+
+		inline void removeObserver(obsiterator &it) {
+			this->observers.erase(it);
+		}
+
+		inline void clearObservers() {
+			this->observers.clear();
+		}
+
+		inline obsiterator firstObserver() {
+			return obsiterator(observers.begin());
+		}
+
+		inline obsiterator lastObserver() {
+			return obsiterator(observers.end());
 		}
 
 		inline void update() {
-			renderer->updateData();
-		}
-
-		inline void removeRenderer(Container &container) {
-			container.remove(renderer->getWidget());
+			for(set<observer_t *>::iterator it = observers.begin(); it != observers.end(); ++it) {
+				(*it)->updateData();
+			}
 		}
 };
 
@@ -291,7 +311,7 @@ class gtkTrayIcon : public trayIcon {
 
 };
 
-class SimpleFileInfoRenderer : public FileInfoBaseRenderer {
+class SimpleFileInfoRenderer : public observer_t {
 	private:
 		FileInfoItem *finfo;
 
@@ -346,7 +366,6 @@ class SimpleFileInfoRenderer : public FileInfoBaseRenderer {
 					break;
 			}
 			/*mainBox.queue_draw();*/
-			printf("Data updated, progress: %d\n", finfo->getProgress());
 		}
 
 		Widget &getWidget() {
@@ -361,6 +380,7 @@ class instSendWidget : public Window, dialogControl {
 		instSendWidget();
 
 		void addFile(unsigned int id, const ustring &fileName, const ustring &machineId, uint64_t fileSize, char direction) {
+			mutex->get();
 			FileInfoItem &finfo = *new FileInfoItem();
 			auto_ptr<SimpleFileInfoRenderer> finfoRenderer;
 
@@ -370,17 +390,80 @@ class instSendWidget : public Window, dialogControl {
 			finfo.setSize(fileSize);
 			finfo.setStatus(4);
 			files[id] = &finfo;
+
 			finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&finfo));
 			allBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
-			finfo.setRenderer(auto_ptr<FileInfoBaseRenderer>(finfoRenderer.release()));
+			finfo.addObserver(*finfoRenderer.get());
+			finfoRenderer.release();
+			allBox.queue_draw();
 
+			finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&finfo));
+			if(direction) {
+				sendBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
+				finfo.addObserver(*finfoRenderer.get());
+				finfoRenderer.release();
+				++sendFileCount;
+				sendBox.queue_draw();
+			} else {
+				recvBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
+				finfo.addObserver(*finfoRenderer.get());
+				finfoRenderer.release();
+				++recvFileCount;
+				recvBox.queue_draw();
+			}
 			show_all_children();
 			trIcon.statusChanged();
+			mutex->release();
 		}
 
 		inline void updateBytes(unsigned int id, uint64_t bytes) {
-			if(files.count(id))
-			files[id]->setBytes(bytes);
+			mutex->get();
+
+			std::map<unsigned int, FileInfoItem *>::iterator fileit = files.find(id);
+			if(fileit != files.end()) {
+				FileInfoItem *file = fileit->second;
+				file->setBytes(bytes);
+				if(file->getProgress() == 100) {
+					for(FileInfoItem::obsiterator it = file->firstObserver(); it != file->lastObserver(); ++it) {
+						SimpleFileInfoRenderer *fiRenderer = dynamic_cast<SimpleFileInfoRenderer *>(*it);
+						if(!fiRenderer) continue;
+						Widget & itemwidget = fiRenderer->getWidget();
+						allBox.remove(itemwidget);
+						if(file->getDirection()) {
+							sendBox.remove(itemwidget);
+						} else {
+							recvBox.remove(itemwidget);
+						}
+
+						delete fiRenderer;
+					}
+
+					if(file->getDirection()) {
+						--sendFileCount;
+					} else {
+						--recvFileCount;
+					}
+
+					received[id] = file;
+					files.erase(fileit);
+
+					file->clearObservers();
+					auto_ptr<SimpleFileInfoRenderer> finfoRenderer(new SimpleFileInfoRenderer(file));
+					recvedBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
+					finfoRenderer->getWidget().show_now();
+					file->addObserver(*finfoRenderer.get());
+					finfoRenderer->updateData();
+					finfoRenderer.release();
+					recvedBox.queue_draw();
+					scrollWindowRecved.queue_draw();
+					scrollWindowRecved.show_all();
+
+					show_all_children();
+					trIcon.statusChanged();
+				}
+			}
+
+			mutex->release();
 		}
 
 		virtual ~instSendWidget() {}
@@ -406,15 +489,15 @@ class instSendWidget : public Window, dialogControl {
 		}
 
 		virtual unsigned int recvInProgress() {
-			return files.size();
+			return recvFileCount;
 		}
 
 		virtual unsigned int sendInProgress() {
-			return 0;
+			return sendFileCount;
 		}
 
 		virtual unsigned int recvPending() {
-			return 0;
+			return pending.size();
 		}
 
 		virtual unsigned int sendPending() {
@@ -422,18 +505,20 @@ class instSendWidget : public Window, dialogControl {
 		}
 
 	protected:
+		auto_ptr<mutex_t> mutex;
 
-		ScrolledWindow scrollWindowAll, scrollWindowRecv, scrollWindowSend;
-		VBox allBox;
+		ScrolledWindow scrollWindowAll, scrollWindowRecv, scrollWindowSend, scrollWindowPending, scrollWindowRecved;
+		VBox allBox, pendingBox, recvBox, sendBox, recvedBox;
 
-		std::map<unsigned int, FileInfoItem *> files;
-		unsigned int nextid;
+		std::map<unsigned int, FileInfoItem *> files, pending, received;
 
 		Notebook notebook;
 
 		DBusError dberr;
 		DBusConnection *dbconn;
 		gtkTrayIcon trIcon;
+
+		unsigned int sendFileCount, recvFileCount;
 
 
 		bool on_timeout() {
@@ -497,7 +582,7 @@ filter_func (DBusConnection *connection,
 	return (handled ? DBUS_HANDLER_RESULT_HANDLED : DBUS_HANDLER_RESULT_NOT_YET_HANDLED);
 }
 
-instSendWidget::instSendWidget() : trIcon(this) {
+instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendFileCount(0), recvFileCount(0) {
 	try {
 		auto_ptr<jsonComponent_t> cfgptr;
 		try {
@@ -553,58 +638,30 @@ instSendWidget::instSendWidget() : trIcon(this) {
 		return;
 	}
 
+	mutex->get();
 
 	add(notebook);
-	notebook.append_page(scrollWindowAll, "All files");
+	notebook.append_page(scrollWindowPending, "Pending files");
+	notebook.append_page(scrollWindowAll, "Files in progress");
 	notebook.append_page(scrollWindowRecv, "Incoming files");
 	notebook.append_page(scrollWindowSend, "Outgoing files");
+	notebook.append_page(scrollWindowRecved, "Received files");
 
+	scrollWindowPending.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	scrollWindowAll.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	scrollWindowRecv.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	scrollWindowSend.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
+	scrollWindowRecved.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	//scrollWindowRecv.add(recvView);
-	//scrollWindowSend.add(sendView);
-	
-	FileInfoItem &finfo = *new FileInfoItem();
-	auto_ptr<SimpleFileInfoRenderer> finfoRenderer;
-
-/*
-	finfo.setDirection(1);
-	finfo.setFileName("Test file 1");
-	finfo.setPeerName("Machine 1");
-	finfo.setStatus(1);
-	files[1] = &finfo;
-	finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&finfo));
-	allBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
-	finfo.setRenderer(auto_ptr<FileInfoBaseRenderer>(finfoRenderer.release()));
-	finfo.setDirection(1);
-	finfo.setFileName("Test file 2");
-	finfo.setPeerName("Machine 2");
-	finfo.setStatus(2);
-	finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&files[addFile(finfo)]));
-	allBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
-	finfo.setRenderer(auto_ptr<FileInfoBaseRenderer>(finfoRenderer.release()));
-
-	finfo.setDirection(1);
-	finfo.setFileName("Test file 3");
-	finfo.setPeerName("Machine 3");
-	finfo.setStatus(3);
-	finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&files[addFile(finfo)]));
-	allBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
-	finfo.setRenderer(auto_ptr<FileInfoBaseRenderer>(finfoRenderer.release()));
-
-	finfo.setDirection(1);
-	finfo.setFileName("Test file 4");
-	finfo.setPeerName("Machine 4");
-	finfo.setStatus(4);
-	finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&files[addFile(finfo)]));
-	allBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
-	finfo.setRenderer(auto_ptr<FileInfoBaseRenderer>(finfoRenderer.release()));
-*/
 	scrollWindowAll.add(allBox);
+	scrollWindowRecv.add(recvBox);
+	scrollWindowSend.add(sendBox);
+	scrollWindowPending.add(pendingBox);
+	scrollWindowRecved.add(recvedBox);
 
 	show_all_children();
+
+	mutex->release();
 
 	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_timeout), 100);
 	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_icon_timeout), 200);
