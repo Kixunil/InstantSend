@@ -35,8 +35,8 @@ client$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o plugi
 server$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
 	$(CXX) $(CFLAGS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS)
 
-widget-gtk: json.o sysapi.o widget-gtk.cpp
-	if [ "$(NOWIDGET)" -eq 1 ]; then echo No widget support; touch widget-gtk; else $(CXX) $(CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`; fi
+widget-gtk: json.o sysapi.o multithread.o widget-gtk.cpp
+	if [ "$(NOWIDGET)" -eq 1 ]; then echo No widget support; touch widget-gtk; else $(CXX) $(CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o multithread.o `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`; fi
 
 configtool: configtool.cpp json.o sysapi.o
 	$(CXX) $(CFLAGS) -o $@ json.o sysapi.o configtool.cpp
