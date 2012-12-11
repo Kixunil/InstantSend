@@ -1,5 +1,21 @@
 #!/bin/bash
 
+TMPCFG="$(mktemp /tmp/instsend-targets.XXXXXX)"
+
+scantargets() {
+	echo Scanning...
+	if [ $CFGFLAG = "-c" ];
+	then
+		instsend-scan -i "$CFG" -o "$TMPCFG"
+	else
+		instsend-scan -o "$TMPCFG"
+	fi
+	CFG="$TMPCFG"
+	CFGFLAG=-c
+	ISENDFLAG=-c
+	echo 100
+}
+
 if [ $# -lt 1 ];
 then
 	echo "Usage: $0 [-c CLIENT_CONFIG_FILE] file [file ...]"
@@ -19,6 +35,14 @@ else
 	ISENDFLAG=""
 fi
 
+if which instsend-scan &>/dev/null;
+then
+	scantargets | zenity --progress --title="Instant Send" --text="Searching for targets" --pulsate --auto-kill --auto-close
+	CFG="$TMPCFG"
+	CFGFLAG=-c
+	ISENDFLAG=-c
+fi
+
 if TARGET="`instsend-config $CFGFLAG "$CFG" -T | zenity --list --title="Instant Send" --text="Choose target" --column="Targets"`";
 then
 	while [ $# -gt 0 ];
@@ -31,4 +55,9 @@ then
 		fi | zenity --progress --title="Instant Send" --text="Sending file $1" --auto-kill --auto-close
 		shift
 	done
+fi
+
+if [ -f "$TMPCFG" ];
+then
+	rm -f "$TMPCFG"
 fi

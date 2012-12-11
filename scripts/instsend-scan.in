@@ -1,0 +1,54 @@
+#!/bin/bash
+
+PREFIX= ###PREFIX###
+
+if [ "$1" = "--count-scanners" ];
+then
+	ls $PREFIX/lib/instantsend/scanners | wc -l
+	exit 0
+fi
+
+if [ "$1" = "--list-scanners" ];
+then
+	ls $PREFIX/lib/instantsend/scanners
+	exit 0
+fi
+
+OUTPUTCONF="$HOME/.instantsend/client.cfg"
+INPUTCONF="$HOME/.instantsend/client.cfg"
+while [ $# -gt 0 ];
+do
+	if [ "$1" = "-o" ];
+	then
+		OUTPUTCONF="$2"
+		shift
+	fi
+
+	if [ "$1" = "-i" ];
+	then
+		INPUTCONF="$2"
+		shift
+	fi
+
+	shift
+done
+
+if [ "$(stat -L --printf='%D:%i' "$OUTPUTCONF")" = "$(stat -L --printf='%D:%i' "$INPUTCONF")" ];
+then
+	if [ '!' -f "$OUTPUTCONF" ];
+	then
+		instsend-config -ic -c "$OUTPUTCONF"
+	fi
+else
+	if [ -r "$HOME/.instantsend/client.cfg" ];
+	then
+		cp "$INPUTCONF" "$OUTPUTCONF"
+	else
+		instsend-config -ic -c "$OUTPUTCONF"
+	fi
+fi
+
+for SCANNER in $PREFIX/lib/instantsend/scanners/*;
+do
+	$SCANNER -c "$OUTPUTCONF"
+done
