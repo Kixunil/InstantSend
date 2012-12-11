@@ -262,7 +262,7 @@ conf_server() {
 		# This is temporary hack - just testing
 		if [ -r /usr/lib/instantsend/plugins/dbus.so ]; 
 		then
-			echo '{"complugins" : [], "eventhandlers" : {"dbus" : null}}' > ~/.instantsend/server.cfg
+			echo '{"complugins" : [], "eventhandlers" : {"dbus" : null, "avahi-publish" : null}}' > ~/.instantsend/server.cfg
 		else
 			instsend-config --init-server -S
 		fi
