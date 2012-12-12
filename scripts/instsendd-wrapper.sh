@@ -1,15 +1,15 @@
 #!/bin/bash
 
-real_start() {
-	echo $$ > /var/lock/instantsend/pid
-	instsendd
-	rm -rf /var/lock/instantsend
-}
+LOCK_PARENT="$HOME/.instantsend/"
+LOCK_NAME="lock"
+PID_FILE="$HOME/.instantsend/pid"
 
 is_start() {
-	if mkdir /var/lock/instantsend &> /dev/null;
+	mkdir -p "$LOCK_PARENT" # Make sure parent exists
+	if mkdir "$HOME/.instantsend/lock" &> /dev/null; # Obtain lock
 	then
-		real_start &
+		instsendd &> /dev/null & # Run instantsend
+		echo $! > "$PID_FILE" # Store PID
 		return 0
 	else
 		echo "Can't obtain lock - InstantSend is probably already running"
@@ -18,9 +18,9 @@ is_start() {
 }
 
 is_stop() {
-	if ISPID=`cat /var/lock/instantsend/pid 2>/dev/null`;
+	if ISPID=`cat "$PID_FILE" 2>/dev/null`;
 	then
-		killall instsendd && rm -rf  /var/lock/instantsend
+		kill "$ISPID" && rm -rf  "$PID_FILE" "$LOCK_PARENT/$LOCK_NAME"
 	else
 		echo "Can't get PID of InstantSend - probably it's not running"
 	fi
@@ -44,7 +44,7 @@ case $1 in
 		is_start && exit 0 || exit 1
 		;;
 	check)
-		if cat /var/lock/instantsend/pid &>/dev/null;
+		if PID=$(cat "$PID_FILE" &>/dev/null) && ps ax | grep -q '^ '"$PID";
 		then
 			exit 0
 		else
