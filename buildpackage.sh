@@ -41,7 +41,7 @@ if LIBNOTIFY_VERSION=`pkg-config --modversion libnotify`;
 then
 	echo -n
 else
-	echo Command \'pkg-config --modversion libnotify\' failed'!' Check if you have installed pkg-config and libnotify-dev.
+	echo Command \'pkg-config --modversion libnotify\' failed'!' Check whether you have installed pkg-config and libnotify-dev.
 	exit 1
 fi
 
@@ -79,6 +79,11 @@ echo Distribution: $DISTRIBUTION
 cp debian/control.$DISTRIBUTION debian/control
 sed -e 's/###DISTRIBUTION###/'$DISTRIBUTION'/g' debian/changelog.in > debian/changelog
 
+if [ '!' -f "Makefile.in" ];
+then
+	automake || exit 1
+fi
+
 BINARY=-b
 
 for ARG in "$@";
@@ -90,4 +95,4 @@ do
 
 done
 
-dpkg-buildpackage $BINARY "$@"
+dpkg-buildpackage $BINARY "$@" || exit 1
