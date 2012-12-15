@@ -7,11 +7,11 @@ INSTSENDD_QUESTION_NOTRUNNING_BTN_OK="Run server"
 INSTSENDD_QUESTION_NOTRUNNING_BTN_CANCEL="Continue without server"
 INSTSENDD_ERR_CANTRUN="Error, couldn't run InstantSend server. Please report bug at martin.habovstiak@gmail.com"
 
-PREFIX= ###PREFIX###
+DATADIR= ###DATADIR###
 
-if [ -r "$PREFIX/share/instantsend/config-wizard/firstrun_$LANG" ];
+if [ -r "$DATADIR/instantsend/config-wizard/firstrun_$LANG" ];
 then
-	. "$PREFIX/share/instantsend/config-wizard/firstrun_$LANG"
+	. "$DATADIR/instantsend/config-wizard/firstrun_$LANG"
 fi
 
 if [ '!' -d ~/.instantsend ];

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PREFIX= ###PREFIX###
+DATADIR= ###DATADIR###
 
 WIZARD_SERVER_COMPLUGINS_LIST="Chose communication type which you want to use for receiving files. You can setup multiple types and/or same type in multiple ways."
 WIZARD_CLIENT_COMPLUGINS_LIST="Chose communication type which you want to use for sending files. You can setup multiple types and/or same type in multiple ways."
@@ -19,9 +19,9 @@ WIZARD_LIST_FIELDS_ALL="Chose setting or press cancel to continue"
 WIZARD_LIST_FIELD_NAME="Name of setting"
 WIZARD_ENTRY_TARGET="If you want to setup new target, enter its' name an press OK"
 
-if [ -r "$PREFIX/share/instantsend/config-wizard/wizard_$LANG" ];
+if [ -r "$DATADIR/instantsend/config-wizard/wizard_$LANG" ];
 then
-	. "$PREFIX/share/instantsend/config-wizard/wizard_$LANG"
+	. "$DATADIR/share/instantsend/config-wizard/wizard_$LANG"
 fi
 
 get_plugin_name() {
@@ -33,7 +33,7 @@ scan_plugins() {
 	ACTION=$2
 
 	COUNT=0
-	for PLUGIN in "$PREFIX/share/instantsend/plugins/"*;
+	for PLUGIN in "$DATADIR/instantsend/plugins/"*;
 	do
 		if [ -r "$PLUGIN/metadata" ];
 		then

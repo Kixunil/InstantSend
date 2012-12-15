@@ -1,16 +1,16 @@
 #!/bin/bash
 
-PREFIX= ###PREFIX###
+LIBDIR= ###LIBDIR###
 
 if [ "$1" = "--count-scanners" ];
 then
-	ls $PREFIX/lib/instantsend/scanners | wc -l
+	ls $LIBDIR/lib/instantsend/scanners | wc -l
 	exit 0
 fi
 
 if [ "$1" = "--list-scanners" ];
 then
-	ls $PREFIX/lib/instantsend/scanners
+	ls $LIBDIR/instantsend/scanners
 	exit 0
 fi
 
@@ -48,7 +48,7 @@ else
 	fi
 fi
 
-for SCANNER in $PREFIX/lib/instantsend/scanners/*;
+for SCANNER in $LIBDIR/instantsend/scanners/*;
 do
 	$SCANNER -c "$OUTPUTCONF"
 done

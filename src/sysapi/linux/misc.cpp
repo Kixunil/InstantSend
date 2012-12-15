@@ -17,14 +17,14 @@ string getUserDir() {
 }
 
 string getSystemDataDir() {
-	return PREFIX "/share/instantsend/data";
+	return DATADIR "/instantsend/data";
 }
 
 string getSystemPluginDir() {
 #ifdef SYSPLUGINDIR
 	return SYSPLUGINDIR;
 #else
-	return PREFIX "/lib/instantsend/plugins";
+	return LIBDIR "/instantsend/plugins";
 #endif
 }
 
