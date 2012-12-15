@@ -28,7 +28,7 @@ HOST=@host_alias@
 CLIENT_BIN=$(DESTDIR)$(BINDIR)/isend # Short name for better user experience
 SERVER_BIN=$(DESTDIR)$(BINDIR)/instsendd
 CONFIGTOOL_BIN=$(DESTDIR)$(BINDIR)/instsend-config
-WIDGET_GTK_BIN=$(DESTDIR)$(BINDIR)/instsend-widget-gtk
+WIDGET_GTK_BIN=$(DESTDIR)$(BINDIR)/instsend-dialog-gtk
 
 ifndef OS
 	OS=linux
@@ -69,7 +69,7 @@ ifeq ($(HAVE_CONFIGTOOL),yes)
 	INSTALL+=install-configtool
 endif
 
-ifeq ($(HAVE_GTKWIDGET),yes)
+ifeq ($(HAVE_WIDGET_GTK),yes)
 	ALL+=widget-gtk$(EXTENSION)
 	INSTALL+=install-widget-gtk
 endif
