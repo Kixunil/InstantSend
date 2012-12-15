@@ -1,10 +1,12 @@
-CXXFLAGS=@CXXFLAGS@               
+CXXFLAGS=@CXXFLAGS@
 CXXFLAGS+=-I../include -I. -I../
-DEFS=@DEFS@                       
-LDFLAGS=@LDFLAGS@ @LIBS@          
+DEFS=@DEFS@
+LDFLAGS=@LDFLAGS@ @LIBS@
+SERVER_LDFLAGS=-ldl
+CLIENT_CFLAGS=-ldl
 
 prefix=@prefix@
-PREFIX=$(prefix)                   
+PREFIX=$(prefix)
 exec_prefix=@exec_prefix@
 BINDIR=@bindir@
 LIBDIR=@libdir@
@@ -14,7 +16,7 @@ DATADIR=@datadir@
 DEFS+=-DPREFIX=\"$(PREFIX)\" -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DDATADIR=\"$(DATADIR)\"
 
 HAVE_CLIENT=@have_client@
-HAVE_SERVER=@have_server@         
+HAVE_SERVER=@have_server@
 HAVE_CONFIGTOOL=@have_configtool@
 HAVE_WIDGET_GTK=@have_widget_gtk@
 
@@ -75,10 +77,10 @@ endif
 all: $(ALL)
 
 client$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp $(LDFLAGS) $(CLIENT_LDFLAGS)
 
 server$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS) $(SERVER_LDFLAGS)
 
 widget-gtk: json.o sysapi.o multithread.o widget-gtk.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o multithread.o $(WIDGET_GTK_LIBS)

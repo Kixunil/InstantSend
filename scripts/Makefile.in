@@ -1,10 +1,10 @@
-prefix=@prefix@          
-PREFIX=$(prefix)         
+prefix=@prefix@
+PREFIX=$(prefix)
 exec_prefix=@exec_prefix@
-BINDIR=@bindir@          
-LIBDIR=@libdir@          
+BINDIR=@bindir@
+LIBDIR=@libdir@
 datarootdir=@datarootdir@
-DATADIR=@datadir@        
+DATADIR=@datadir@
 
 HAVE_CLIENT=@have_client@
 HAVE_SERVER=@have_server@
