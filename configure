@@ -606,6 +606,27 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+have_scanner_avahi
+have_scan
+have_widget_gtk
+have_configtool
+have_server
+have_client
+have_gtkmm
+have_avahi
+have_dbus
+libnotify_version
+have_notify
+have_ip6tcp
+have_ip4tcp
+WIDGET_GTK_LIBS
+WIDGET_GTK_CFLAGS
+GTKMM_LIBS
+GTKMM_CFLAGS
+AVAHI_LIBS
+AVAHI_CFLAGS
+DBUS_LIBS
+DBUS_CFLAGS
 LIBNOTIFY1_LIBS
 LIBNOTIFY1_CFLAGS
 LIBNOTIFY4_LIBS
@@ -703,6 +724,17 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_automatic
+enable_server
+enable_client
+enable_configtool
+enable_widget_gtk
+enable_plugin_ip4tcp
+enable_plugin_ip6tcp
+enable_plugin_dbus
+enable_scanners
+enable_scanner_avahi
+enable_plugin_notify
 enable_dependency_tracking
 '
       ac_precious_vars='build_alias
@@ -723,7 +755,15 @@ PKG_CONFIG_LIBDIR
 LIBNOTIFY4_CFLAGS
 LIBNOTIFY4_LIBS
 LIBNOTIFY1_CFLAGS
-LIBNOTIFY1_LIBS'
+LIBNOTIFY1_LIBS
+DBUS_CFLAGS
+DBUS_LIBS
+AVAHI_CFLAGS
+AVAHI_LIBS
+GTKMM_CFLAGS
+GTKMM_LIBS
+WIDGET_GTK_CFLAGS
+WIDGET_GTK_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1340,6 +1380,43 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-automatic=[yes|no]
+                          if enabled, all features found in system will be
+                          used; default package will be built if set to no
+                          [default=no],
+				,
+				enable_automatic=no
+
+  --enable-server[=yes|no|auto]
+                          define whether server plugin should be compiled
+                          [default=yes]
+  --enable-client[=yes|no|auto]
+                          define whether client plugin should be compiled
+                          [default=yes]
+  --enable-configtool[=yes|no|auto]
+                          define whether configtool plugin should be compiled
+                          [default=yes]
+  --enable-widget-gtk[=yes|no|auto]
+                          define whether widget-gtk should be compiled
+                          [default=yes]
+  --enable-plugin-ip4tcp[=yes|no|auto]
+                          define whether ip4tcp plugin should be compiled
+                          [default=yes]
+  --enable-plugin-ip6tcp[=yes|no|auto]
+                          define whether ip6tcp plugin should be compiled
+                          [default=yes]
+  --enable-plugin-dbus[=yes|no|auto]
+                          define whether dbus plugin should be compiled
+                          [default=yes]
+  --enable-scanners[=yes|no]
+                          define whether scanners should be installed
+                          [default=yes]
+  --enable-scanner-avahi[=yes|no|auto]
+                          define whether avahi scanner should be installed
+                          [default=scanners]
+  --enable-plugin-notify[=yes|no|auto]
+                          define whether notify plugin should be compiled
+                          [default=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
 
@@ -1367,6 +1444,18 @@ Some influential environment variables:
               C compiler flags for LIBNOTIFY1, overriding pkg-config
   LIBNOTIFY1_LIBS
               linker flags for LIBNOTIFY1, overriding pkg-config
+  DBUS_CFLAGS C compiler flags for DBUS, overriding pkg-config
+  DBUS_LIBS   linker flags for DBUS, overriding pkg-config
+  AVAHI_CFLAGS
+              C compiler flags for AVAHI, overriding pkg-config
+  AVAHI_LIBS  linker flags for AVAHI, overriding pkg-config
+  GTKMM_CFLAGS
+              C compiler flags for GTKMM, overriding pkg-config
+  GTKMM_LIBS  linker flags for GTKMM, overriding pkg-config
+  WIDGET_GTK_CFLAGS
+              C compiler flags for WIDGET_GTK, overriding pkg-config
+  WIDGET_GTK_LIBS
+              linker flags for WIDGET_GTK, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -2881,6 +2970,140 @@ am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
 ac_config_headers="$ac_config_headers config.h"
 
 
+# Options
+
+# Check whether --enable-automatic was given.
+if test "${enable_automatic+set}" = set; then :
+  enableval=$enable_automatic;
+fi
+
+
+# Check whether --enable-server was given.
+if test "${enable_server+set}" = set; then :
+  enableval=$enable_server;
+		if test "x$enable_automatic" = xyes; then :
+  enable_server=auto
+else
+  enable_server=yes
+fi
+
+
+fi
+
+
+# Check whether --enable-client was given.
+if test "${enable_client+set}" = set; then :
+  enableval=$enable_client;
+		if test "x$enable_automatic" = xyes; then :
+  enable_client=auto
+else
+  enable_client=yes
+fi
+
+
+fi
+
+
+# Check whether --enable-configtool was given.
+if test "${enable_configtool+set}" = set; then :
+  enableval=$enable_configtool;
+		if test "x$enable_automatic" = xyes; then :
+  enable_configtool=auto
+else
+  enable_configtool=yes
+fi
+
+
+fi
+
+
+# Check whether --enable-widget-gtk was given.
+if test "${enable_widget_gtk+set}" = set; then :
+  enableval=$enable_widget_gtk;
+else
+
+		 { $as_echo "$as_me:${as_lineno-$LINENO}: Assingning default value to enable_widget_gtk" >&5
+$as_echo "$as_me: Assingning default value to enable_widget_gtk" >&6;}
+		 if test "x$enable_automatic" = xyes; then :
+  enable_widget_gtk=auto
+else
+  enable_widget_gtk=yes
+fi
+
+
+fi
+
+
+# Enable/disable plugins
+# Check whether --enable-plugin-ip4tcp was given.
+if test "${enable_plugin_ip4tcp+set}" = set; then :
+  enableval=$enable_plugin_ip4tcp;
+		if test "x$enable_automatic" = xyes; then :
+  enable_plugin_ip4tcp=auto
+else
+  enable_plugin_ip4tcp=yes
+fi
+
+
+fi
+
+
+# Check whether --enable-plugin-ip6tcp was given.
+if test "${enable_plugin_ip6tcp+set}" = set; then :
+  enableval=$enable_plugin_ip6tcp;
+		if test "x$enable_automatic" = xyes; then :
+  enable_plugin_ip6tcp=auto
+else
+  enable_plugin_ip6tcp=yes
+fi
+
+
+fi
+
+
+# Check whether --enable-plugin-dbus was given.
+if test "${enable_plugin_dbus+set}" = set; then :
+  enableval=$enable_plugin_dbus;
+		if test "x$enable_automatic" = xyes; then :
+  enable_plugin_dbus=auto
+else
+  enable_plugin_dbus=yes
+fi
+
+
+fi
+
+
+# Check whether --enable-scanners was given.
+if test "${enable_scanners+set}" = set; then :
+  enableval=$enable_scanners; have_scan="$enable_scanners"
+else
+  have_scan=yes
+
+fi
+
+
+# Check whether --enable-scanner-avahi was given.
+if test "${enable_scanner_avahi+set}" = set; then :
+  enableval=$enable_scanner_avahi;
+else
+  enable_scanner_avahi=$have_scan
+fi
+
+
+# Check whether --enable-plugin-notify was given.
+if test "${enable_plugin_notify+set}" = set; then :
+  enableval=$enable_plugin_notify;
+		if test "x$enable_automatic" = xyes; then :
+  enable_plugin_notify=auto
+else
+  enable_plugin_notify=yes
+fi
+
+
+fi
+
+
 # Checks for programs.
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -4248,7 +4471,7 @@ else
 fi
 
 
-
+ # Do we need this?
 
 # Checks for libraries.
 
@@ -4666,7 +4889,43 @@ done
 
 
 # Check for modules
-# Test libnotify version
+
+# Pre-define variables
+have_notify=no
+have_dbus=no
+have_avahi=no
+have_gtkmm=no
+have_widget_gtk=no
+# Headers has been checked before
+# TODO: Make it better
+
+if test "x$enable_server" '!=' xno; then :
+  have_server=yes
+else
+  have_server=no
+fi
+if test "x$enable_client" '!=' xno; then :
+  have_client=yes
+else
+  have_client=no
+fi
+if test "x$enable_configtool" '!=' xno; then :
+  have_configtool=yes
+else
+  have_configtool=no
+fi
+
+if test "x$enable_plugin_ip4tcp" '!=' xno; then :
+  have_ip4tcp=yes
+else
+  have_ip4tcp=no
+fi
+if test "x$enable_plugin_ip6tcp" '!=' xno; then :
+  have_ip6tcp=yes
+else
+  have_ip6tcp=no
+fi
+
 
 
 
@@ -4787,6 +5046,9 @@ $as_echo "no" >&6; }
 		PKG_CONFIG=""
 	fi
 fi
+if test "x$enable_plugin_notify" '!=' xno; then :
+
+	# Test libnotify version
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBNOTIFY4" >&5
@@ -4905,31 +5167,17 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$LIBNOTIFY1_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (libnotify >= 0.4.5) were not met:
 
-$LIBNOTIFY1_PKG_ERRORS
+					      have_notify=no
 
-Consider adjusting the PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
 
-Alternatively, you may set the environment variables LIBNOTIFY1_CFLAGS
-and LIBNOTIFY1_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details." "$LINENO" 5
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the PKG_CONFIG environment variable to the full
-path to pkg-config.
 
-Alternatively, you may set the environment variables LIBNOTIFY1_CFLAGS
-and LIBNOTIFY1_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
+					      have_notify=no
 
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.
-See \`config.log' for more details" "$LINENO" 5; }
+
 else
 	LIBNOTIFY1_CFLAGS=$pkg_cv_LIBNOTIFY1_CFLAGS
 	LIBNOTIFY1_LIBS=$pkg_cv_LIBNOTIFY1_LIBS
@@ -4938,6 +5186,8 @@ $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_LIBNOTIFY1 1" >>confdefs.h
 
+						     have_notify=yes
+						     libnotify_version=1
 
 fi
 
@@ -5003,31 +5253,17 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$LIBNOTIFY1_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (libnotify >= 0.4.5) were not met:
 
-$LIBNOTIFY1_PKG_ERRORS
+					      have_notify=no
 
-Consider adjusting the PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
 
-Alternatively, you may set the environment variables LIBNOTIFY1_CFLAGS
-and LIBNOTIFY1_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details." "$LINENO" 5
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the PKG_CONFIG environment variable to the full
-path to pkg-config.
 
-Alternatively, you may set the environment variables LIBNOTIFY1_CFLAGS
-and LIBNOTIFY1_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
+					      have_notify=no
 
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.
-See \`config.log' for more details" "$LINENO" 5; }
+
 else
 	LIBNOTIFY1_CFLAGS=$pkg_cv_LIBNOTIFY1_CFLAGS
 	LIBNOTIFY1_LIBS=$pkg_cv_LIBNOTIFY1_LIBS
@@ -5036,6 +5272,8 @@ $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_LIBNOTIFY1 1" >>confdefs.h
 
+						     have_notify=yes
+						     libnotify_version=1
 
 fi
 
@@ -5046,6 +5284,426 @@ else
 $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_LIBNOTIFY4 1" >>confdefs.h
+
+			  have_notify=yes
+			  libnotify_version=4
+fi
+
+
+fi
+
+if test "x$enable_plugin_dbus" '!=' xno || test "x$enable_widget_gtk" '!=' xno; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for DBUS" >&5
+$as_echo_n "checking for DBUS... " >&6; }
+
+if test -n "$DBUS_CFLAGS"; then
+    pkg_cv_DBUS_CFLAGS="$DBUS_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"dbus-1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "dbus-1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_DBUS_CFLAGS=`$PKG_CONFIG --cflags "dbus-1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$DBUS_LIBS"; then
+    pkg_cv_DBUS_LIBS="$DBUS_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"dbus-1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "dbus-1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_DBUS_LIBS=`$PKG_CONFIG --libs "dbus-1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        DBUS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "dbus-1" 2>&1`
+        else
+	        DBUS_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "dbus-1" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$DBUS_PKG_ERRORS" >&5
+
+	have_dbus=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	have_dbus=no
+else
+	DBUS_CFLAGS=$pkg_cv_DBUS_CFLAGS
+	DBUS_LIBS=$pkg_cv_DBUS_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_DBUS 1" >>confdefs.h
+
+			  have_dbus=yes
+fi
+
+fi
+
+if test "x$enable_plugin_avahi" '!=' xno; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for AVAHI" >&5
+$as_echo_n "checking for AVAHI... " >&6; }
+
+if test -n "$AVAHI_CFLAGS"; then
+    pkg_cv_AVAHI_CFLAGS="$AVAHI_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"avahi-client\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "avahi-client") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_AVAHI_CFLAGS=`$PKG_CONFIG --cflags "avahi-client" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$AVAHI_LIBS"; then
+    pkg_cv_AVAHI_LIBS="$AVAHI_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"avahi-client\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "avahi-client") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_AVAHI_LIBS=`$PKG_CONFIG --libs "avahi-client" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        AVAHI_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "avahi-client" 2>&1`
+        else
+	        AVAHI_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "avahi-client" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$AVAHI_PKG_ERRORS" >&5
+
+	have_avahi=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	have_avahi=no
+else
+	AVAHI_CFLAGS=$pkg_cv_AVAHI_CFLAGS
+	AVAHI_LIBS=$pkg_cv_AVAHI_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_AVAHI 1" >>confdefs.h
+
+			  have_avahi=yes
+fi
+
+fi
+
+if test "x$enable_widget_gtk" '!=' xno; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GTKMM" >&5
+$as_echo_n "checking for GTKMM... " >&6; }
+
+if test -n "$GTKMM_CFLAGS"; then
+    pkg_cv_GTKMM_CFLAGS="$GTKMM_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtkmm-2.4\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gtkmm-2.4") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GTKMM_CFLAGS=`$PKG_CONFIG --cflags "gtkmm-2.4" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$GTKMM_LIBS"; then
+    pkg_cv_GTKMM_LIBS="$GTKMM_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtkmm-2.4\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gtkmm-2.4") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GTKMM_LIBS=`$PKG_CONFIG --libs "gtkmm-2.4" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        GTKMM_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gtkmm-2.4" 2>&1`
+        else
+	        GTKMM_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gtkmm-2.4" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$GTKMM_PKG_ERRORS" >&5
+
+	have_gtkmm=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	have_gtkmm=no
+else
+	GTKMM_CFLAGS=$pkg_cv_GTKMM_CFLAGS
+	GTKMM_LIBS=$pkg_cv_GTKMM_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_GTKMM 1" >>confdefs.h
+
+			  have_gtkmm=yes
+fi
+
+	# Setup libraries correctly
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for WIDGET_GTK" >&5
+$as_echo_n "checking for WIDGET_GTK... " >&6; }
+
+if test -n "$WIDGET_GTK_CFLAGS"; then
+    pkg_cv_WIDGET_GTK_CFLAGS="$WIDGET_GTK_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtkmm-2.4 dbus-1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gtkmm-2.4 dbus-1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_WIDGET_GTK_CFLAGS=`$PKG_CONFIG --cflags "gtkmm-2.4 dbus-1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$WIDGET_GTK_LIBS"; then
+    pkg_cv_WIDGET_GTK_LIBS="$WIDGET_GTK_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtkmm-2.4 dbus-1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gtkmm-2.4 dbus-1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_WIDGET_GTK_LIBS=`$PKG_CONFIG --libs "gtkmm-2.4 dbus-1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        WIDGET_GTK_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gtkmm-2.4 dbus-1" 2>&1`
+        else
+	        WIDGET_GTK_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gtkmm-2.4 dbus-1" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$WIDGET_GTK_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (gtkmm-2.4 dbus-1) were not met:
+
+$WIDGET_GTK_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables WIDGET_GTK_CFLAGS
+and WIDGET_GTK_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables WIDGET_GTK_CFLAGS
+and WIDGET_GTK_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	WIDGET_GTK_CFLAGS=$pkg_cv_WIDGET_GTK_CFLAGS
+	WIDGET_GTK_LIBS=$pkg_cv_WIDGET_GTK_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+fi
+
+if test "x$enable_scanner_avahi" '!=' xno; then :
+
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for avahi-browse" >&5
+$as_echo_n "checking for avahi-browse... " >&6; }
+       if which avahi-browse > /dev/null; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	      have_scanner_avahi=yes
+else
+
+	      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	      if test "x$enable_scanner_avahi" = xyes; then :
+  have_scanner_avahi=yes
+		 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: avahi-browse not found. This will cause run-time problem if not solved. Suggestion: install it or disable avahi scanner" >&5
+$as_echo "$as_me: WARNING: avahi-browse not found. This will cause run-time problem if not solved. Suggestion: install it or disable avahi scanner" >&2;}
+
+elif have_scanner_avahi=no; then :
+
+fi
+
+fi
+
+else
+  have_scanner_avahi=no
+fi
+
+if test "x$enable_plugin_dbus" = xyes; then :
+
+	 if test "x$have_dbus" '!=' xyes; then :
+  as_fn_error $? "You have missing module dbus! Install it or disable." "$LINENO" 5
+
+fi
+
+
+fi
+
+if test "x$enable_plugin_avahi" = xyes; then :
+
+	 if test "x$have_avahi" '!=' xyes; then :
+  as_fn_error $? "You have missing module avahi-client! Install it or disable." "$LINENO" 5
+
+fi
+
+
+fi
+
+if test "x$enable_plugin_notify" = xyes; then :
+
+	 if test "x$have_notify" '!=' xyes; then :
+  as_fn_error $? "You have missing modules libnotify1 and libnotify4! Install one of them or disable." "$LINENO" 5
+
+fi
+
+
+fi
+
+if test "x$enable_widget_gtk" = xyes; then :
+
+	 if test "x$have_gtkmm" '!=' xyes; then :
+  as_fn_error $? "You have missing gtkmm! Install it or disable widget-gtk." "$LINENO" 5
+
+fi
+
+
+	if test "x$have_dbus" '!=' xyes; then :
+  as_fn_error $? "You have missing dbus! Install it or disable widget-gtk." "$LINENO" 5
+
+fi
+
+	have_widget_gtk=yes
+
+fi
+
+if test "x$enable_widget_gtk" = xauto; then :
+
+      if test "x$have_gtkmm" = xyes && test "x$have_dbus" != xyes; then :
+  have_widget_gtk=yes
+else
+  have_widget_gtk=no
+
+fi
 
 fi
 
@@ -5498,7 +6156,22 @@ fi
 done
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ac_config_files="$ac_config_files Makefile src/Makefile scripts/Makefile data/Makefile plugins/Makefile"
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6968,3 +7641,34 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+
+info_msg="successful
+
+------------------------------------Programs------------------------------------
+Server:                                                                      $have_server
+Client:                                                                      $have_client
+Configtool:                                                                  $have_configtool
+Widget-gtk:                                                                  $have_widget_gtk
+
+------------------------------------Plugins-------------------------------------
+(Communication)
+ip4tcp:                                                                      $have_ip4tcp
+ip6tcp:                                                                      $have_ip6tcp
+(Event handlers)
+dbus:                                                                        $have_dbus
+notify:                                                                      $have_notify
+"
+if test "x$have_notify" = xyes; then :
+
+       info_msg="$info_msg - libnotify version: $libnotify_version
+"
+
+fi
+info_msg="${info_msg}avahi:                                                                       $have_avahi
+
+------------------------------------Scanners------------------------------------
+Scanners enabled:                                                            $have_scan
+avahi:                                                                       $have_scanner_avahi"
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: $info_msg" >&5
+$as_echo "$as_me: $info_msg" >&6;}
