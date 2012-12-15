@@ -79,4 +79,15 @@ echo Distribution: $DISTRIBUTION
 cp debian/control.$DISTRIBUTION debian/control
 sed -e 's/###DISTRIBUTION###/'$DISTRIBUTION'/g' debian/changelog.in > debian/changelog
 
-dpkg-buildpackage -b "$@"
+BINARY=-b
+
+for ARG in "$@";
+do
+	if [ "$ARG" = "-B" -o "$ARG" = "-b" -o "$ARG" = "-A" ];
+	then
+		BINARY=""
+	fi
+
+done
+
+dpkg-buildpackage $BINARY "$@"
