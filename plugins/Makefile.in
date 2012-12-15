@@ -12,6 +12,7 @@ LIBDIR=@libdir@
 HAVE_IP4TCP=@have_ip4tcp@
 HAVE_IP6TCP=@have_ip6tcp@
 HAVE_NOTIFY=@have_notify@
+LIBNOTIFY_VERSION=@libnotify_version@
 HAVE_AVAHI=@have_avahi@
 HAVE_DBUS=@have_dbus@
 
@@ -21,12 +22,13 @@ DBUS_LIBS=@DBUS_LIBS@
 AVAHI_CFLAGS=@AVAHI_CFLAGS@
 AVAHI_LIBS=@AVAHI_LIBS@
 
+
 ifeq ($(LIBNOTIFY_VERSION),4)
 	NOTIFY_CFLAGS=@LIBNOTIFY4_CFLAGS@
 	NOTIFY_LIBS=@LIBNOTIFY4_LIBS@
 endif
 
-ifeq ($(LIBNOTIFY_VERSION),4)
+ifeq ($(LIBNOTIFY_VERSION),1)
 	NOTIFY_CFLAGS=@LIBNOTIFY1_CFLAGS@
 	NOTIFY_LIBS=@LIBNOTIFY1_LIBS@
 endif
@@ -57,6 +59,7 @@ OS ?= linux
 
 ifeq ($(OS),linux)
 	LDFLAGS+=-ldl -pthread -rdynamic
+	EXTENSION=.so
 endif
 
 ifeq ($(OS),windows)
@@ -94,13 +97,13 @@ zenityprogress.so: zenityprogress.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ zenityprogress.cpp $(LDFLAGS)
 
 dbus.so: dbus.cpp
-	$(CXX) $(DBUS_CFLAGS) $(CXXFLAGS) $(DEFS) -o $@ dbus.cpp $(LDFLAGS) $(DBUS_LIBS)
+	$(CXX) $(CXXFLAGS) $(DBUS_CFLAGS) $(DEFS) -o $@ dbus.cpp $(LDFLAGS) $(DBUS_LIBS)
 
 desktop-notify.so: desktop-notify.cpp
-	$(CXX) $(NOTIFY_CFLAGS) $(CXXFLAGS) $(DEFS) -o $@ desktop-notify.cpp $(LDFLAGS) $(NOTIFY_LIBS)
+	$(CXX) $(CXXFLAGS) $(NOTIFY_CFLAGS) $(DEFS) -o $@ desktop-notify.cpp $(LDFLAGS) $(NOTIFY_LIBS)
 
 avahi-publish.so: avahi-publish.cpp
-	$(CXX) $(AVAHI_CFLAGS) $(CXXFLAGS) $(DEFS) -o $@ avahi-publish.cpp $(LDFLAGS) $(AVAHI_LIBS)
+	$(CXX) $(CXXFLAGS) $(AVAHI_CFLAGS) $(DEFS) -o $@ avahi-publish.cpp $(LDFLAGS) $(AVAHI_LIBS)
 
 check:
 

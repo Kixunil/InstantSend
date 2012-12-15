@@ -59,7 +59,7 @@ distclean: clean
 	rm -f Makefile
 
 install-server:
-	install -D instsendd-wrapper.sh $(DESTDIR)$(BINIDIR)/instsendd-wrapper
+	install -D instsendd-wrapper.sh $(DESTDIR)$(BINDIR)/instsendd-wrapper
 
 
 install-widget-gtk:
