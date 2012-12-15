@@ -1,17 +1,53 @@
-PREFIX=@prefix@
+prefix=@prefix@          
+PREFIX=$(prefix)         
+exec_prefix=@exec_prefix@
+BINDIR=@bindir@          
+LIBDIR=@libdir@          
+datarootdir=@datarootdir@
+DATADIR=@datadir@        
 
-all: instsend-gtk-wrapper.sh instsend-config-wizard.sh instsend-scan.sh
+HAVE_CLIENT=@have_client@
+HAVE_SERVER=@have_server@
+HAVE_WIDGET_GTK=@have_widget_gtk@
+HAVE_SCAN=@have_scan@
+HAVE_SCANNER_AVAHI=@have_scanner_avahi@
+
+ALL=
+INSTALL=
+
+ifeq ($(HAVE_SERVER),yes)
+	INSTALL+=install-server
+endif
+
+ifeq ($(HAVE_WIDGET_GTK),yes)
+	ALL+=instsend-gtk-wrapper.sh instsend-config-wizard.sh
+	INSTALL+=install-widget-gtk
+	ifeq ($(HAVE_CLIENT),yes)
+		INSTALL+=install-isend-gtk
+	endif
+endif
+
+ifeq ($(HAVE_SCAN),yes)
+	ALL+=instsend-scan.sh
+	INSTALL+=install-scan
+endif
+
+ifeq ($(HAVE_SCANNER_AVAHI),yes)
+	INSTALL+=install-scanner-avahi
+endif
+
+all: $(ALL)
 
 instsend-gtk-wrapper.sh: instsend-gtk-wrapper.in
-	sed -e 's/ ###PREFIX###/"'"$(subst /,\\/,$(PREFIX))"'"/g' instsend-gtk-wrapper.in > $@
+	sed -e 's/ ###DATADIR###/"'"$(subst /,\\/,$(DATADIR))"'"/g' instsend-gtk-wrapper.in > $@
 	chmod 755 $@
 
 instsend-config-wizard.sh: instsend-config-wizard.in
-	sed -e 's/ ###PREFIX###/"'"$(subst /,\\/,$(PREFIX))"'"/g' instsend-config-wizard.in > $@
+	sed -e 's/ ###DATADIR###/"'"$(subst /,\\/,$(DATADIR))"'"/g' instsend-config-wizard.in > $@
 	chmod 755 $@
 	
 instsend-scan.sh: instsend-scan.in
-	sed -e 's/ ###PREFIX###/"'"$(subst /,\\/,$(PREFIX))"'"/g' instsend-scan.in > $@
+	sed -e 's/ ###LIBDIR###/"'"$(subst /,\\/,$(LIBDIR))"'"/g' instsend-scan.in > $@
 	chmod 755 $@
 
 check:
@@ -22,15 +58,23 @@ clean:
 distclean: clean
 	rm -f Makefile
 
-install:
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	mkdir -p $(DESTDIR)$(PREFIX)/lib/instantsend/scanners
-	cp isend-gtk.sh $(DESTDIR)$(PREFIX)/bin/isend-gtk
-	cp instsend-gtk-wrapper.sh $(DESTDIR)$(PREFIX)/bin/instsend-gtk-wrapper
-	cp instsend-config-wizard.sh $(DESTDIR)$(PREFIX)/bin/instsend-config-wizard
-	cp instsendd-wrapper.sh $(DESTDIR)$(PREFIX)/bin/instsendd-wrapper
-	cp instsend-scan.sh $(DESTDIR)$(PREFIX)/bin/instsend-scan
-	cp instsend-avahi.sh $(DESTDIR)$(PREFIX)/lib/instantsend/scanners/avahi
-	chmod 755 $(DESTDIR)$(PREFIX)/bin/isend-gtk $(DESTDIR)$(PREFIX)/bin/instsend-gtk-wrapper $(DESTDIR)$(PREFIX)/bin/instsend-config-wizard $(DESTDIR)$(PREFIX)/bin/instsendd-wrapper
+install-server:
+	install -D instsendd-wrapper.sh $(DESTDIR)$(BINIDIR)/instsendd-wrapper
 
-.PHONY: all check clean distclean install
+
+install-widget-gtk:
+	install -D instsend-gtk-wrapper.sh $(DESTDIR)$(BINDIR)/instsend-gtk-wrapper
+	install -D instsend-config-wizard.sh $(DESTDIR)$(BINDIR)/instsend-config-wizard
+
+install-isend-gtk:
+	install -D isend-gtk.sh $(DESTDIR)$(BINDIR)/isend-gtk
+
+install-scan:
+	install -D instsend-scan.sh $(DESTDIR)$(BINDIR)/instsend-scan
+
+install-scanner-avahi:
+	install -D instsend-avahi.sh $(DESTDIR)$(LIBDIR)/instantsend/scanners/avahi
+
+install: $(INSTALL)
+
+.PHONY: all check clean distclean install install-isend-gtk install-scan install-scanner-avahi install-server

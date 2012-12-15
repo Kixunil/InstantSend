@@ -1,4 +1,23 @@
-PREFIX=@prefix@
+prefix=@prefix@
+PREFIX=$(prefix)
+exec_prefix=@exec_prefix@
+BINDIR=@bindir@
+LIBDIR=@libdir@
+datarootdir=@datarootdir@
+DATADIR=@datadir@
+
+HAVE_WIDGET_GTK=@have_widget_gtk@
+HAVE_IP4TCP=@have_ip4tcp@
+
+INSTALL=
+
+ifeq ($(HAVE_WIDGET_GTK),yes)
+	INSTALL+=install-widget-gtk
+endif
+
+ifeq ($(HAVE_IP4TCP),yes)
+	INSTALL+=install-plugin-ip4tcp
+endif
 
 all:
 
@@ -9,13 +28,17 @@ clean:
 distclean: clean
 	rm -f Makefile
 
-install:
-	mkdir -p $(DESTDIR)$(PREFIX)/share/instantsend/data
-	mkdir -p $(DESTDIR)$(PREFIX)/share/applications
-	cp icon_*.png $(DESTDIR)$(PREFIX)/share/instantsend/data/
-	cp dialog-gtk.desktop $(DESTDIR)$(PREFIX)/share/applications/instsend-dialog-gtk.desktop
-	cp -r plugins $(DESTDIR)$(PREFIX)/share/instantsend/
-	cp -r config-wizard $(DESTDIR)$(PREFIX)/share/instantsend/
-	chmod 644 $(DESTDIR)$(PREFIX)/share/instantsend/data/icon_*.png $(DESTDIR)$(PREFIX)/share/applications/instsend-dialog-gtk.desktop
+install-widget-gtk:
+	mkdir -p $(DESTDIR)$(DATADIR)/instantsend/data
+	cp icon_*.png $(DESTDIR)$(DATADIR)/instantsend/data/
+	install -D -m 644 dialog-gtk.desktop $(DESTDIR)$(DATADIR)/applications/instsend-dialog-gtk.desktop
+	cp -r config-wizard $(DESTDIR)$(DATADIR)/instantsend
+	chmod 644 $(DESTDIR)$(DATADIR)/instantsend/data/icon_*.png
 
-.PHONY: all check clean distclean install
+install-plugin-ip4tcp:
+	mkdir -p $(DESTDIR)$(DATADIR)/instantsend/plugins
+	cp -r plugins/ip4tcp $(DESTDIR)$(DATADIR)/instantsend/plugins
+
+install: $(INSTALL)
+
+.PHONY: all check clean distclean install install-plugin-ip4tcp install-widget-gtk

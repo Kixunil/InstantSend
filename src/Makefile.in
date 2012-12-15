@@ -1,17 +1,42 @@
-CFLAGS+=-W -Wall -g -I../include -I. -I../ -DPREFIX=\"$(PREFIX)\"
+CXXFLAGS=@CXXFLAGS@               
+CXXFLAGS+=-I../include -I. -I../
+DEFS=@DEFS@                       
+LDFLAGS=@LDFLAGS@ @LIBS@          
 
-PREFIX=@prefix@
+prefix=@prefix@
+PREFIX=$(prefix)                   
+exec_prefix=@exec_prefix@
+BINDIR=@bindir@
+LIBDIR=@libdir@
+datarootdir=@datarootdir@
+DATADIR=@datadir@
+
+DEFS+=-DPREFIX=\"$(PREFIX)\" -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DDATADIR=\"$(DATADIR)\"
+
+HAVE_CLIENT=@have_client@
+HAVE_SERVER=@have_server@         
+HAVE_CONFIGTOOL=@have_configtool@
+HAVE_WIDGET_GTK=@have_widget_gtk@
+
+WIDGET_GTK_CFLAGS=@WIDGET_GTK_CFLAGS@
+WIDGET_GTK_LIBS=@WIDGET_GTK_LIBS@
+
 HOST=@host_alias@
+
+CLIENT_BIN=$(DESTDIR)$(BINDIR)/isend # Short name for better user experience
+SERVER_BIN=$(DESTDIR)$(BINDIR)/instsendd
+CONFIGTOOL_BIN=$(DESTDIR)$(BINDIR)/instsend-config
+WIDGET_GTK_BIN=$(DESTDIR)$(BINDIR)/instsend-widget-gtk
 
 ifndef OS
 	OS=linux
-	LDFLAGS+=-ldl -pthread -rdynamic
+	CLIENT_LDFLAGS+=-ldl -pthread -rdynamic
+	SERVER_LDFLAGS+=-ldl -pthread -rdynamic
 endif
 
 ifeq ($(OS),windows)
 	CXX=$(ARCH)-w64-mingw32-g++
-	CFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS
-	NOWIDGET=1
+	CXXFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS
 	EXTENSION=.exe
 endif
 
@@ -27,55 +52,75 @@ ifeq ($(HOST),arm-linux-gnueabi)
 	CXX=arm-linux-gnueabi-g++
 endif
 
-all: client server configtool widget-gtk
+ifeq ($(HAVE_CLIENT),yes)
+	ALL+=client$(EXTENSION)
+	INSTALL+=install-client
+endif
+
+ifeq ($(HAVE_SERVER),yes)
+	ALL+=server$(EXTENSION)
+	INSTALL+=install-server
+endif
+
+ifeq ($(HAVE_CONFIGTOOL),yes)
+	ALL+=configtool$(EXTENSION)
+	INSTALL+=install-configtool
+endif
+
+ifeq ($(HAVE_GTKWIDGET),yes)
+	ALL+=widget-gtk$(EXTENSION)
+	INSTALL+=install-widget-gtk
+endif
+
+all: $(ALL)
 
 client$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp
-	$(CXX) $(CFLAGS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp $(LDFLAGS)
 
 server$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
-	$(CXX) $(CFLAGS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS)
 
 widget-gtk: json.o sysapi.o multithread.o widget-gtk.cpp
-	if [ "$(NOWIDGET)" -eq 1 ]; then echo No widget support; touch widget-gtk; else $(CXX) $(CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o multithread.o `pkg-config --cflags --libs gtkmm-2.4` `pkg-config --cflags --libs dbus-1`; fi
+	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o multithread.o $(WIDGET_GTK_LIBS)
 
 configtool: configtool.cpp json.o sysapi.o
-	$(CXX) $(CFLAGS) -o $@ json.o sysapi.o configtool.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o sysapi.o configtool.cpp
 
 libinstantsend.o: libinstantsend.cpp
-	$(CXX) $(CFLAGS) -c -o $@ libinstantsend.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ libinstantsend.cpp
 
 json.o: json.cpp
-	$(CXX) $(CFLAGS) -c -o $@ json.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ json.cpp
 
 pluginlist.o: pluginlist.cpp
-	$(CXX) $(CFLAGS) -c -o $@ pluginlist.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ pluginlist.cpp
 
 plugin.o: plugin.cpp
-	$(CXX) $(CFLAGS) -c -o $@ plugin.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ plugin.cpp
 
 environment.o: sysapi/$(OS)/environment.cpp
-	$(CXX) $(CFLAGS) -c -o $@ sysapi/$(OS)/environment.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/environment.cpp
 
 pluginloader.o: pluginloader.cpp
-	$(CXX) $(CFLAGS) -c -o $@ pluginloader.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ pluginloader.cpp
 
 pluginloader-platformdependent.o: sysapi/$(OS)/pluginloader-$(OS).cpp
-	$(CXX) $(CFLAGS) -c -o $@ sysapi/$(OS)/pluginloader-$(OS).cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/pluginloader-$(OS).cpp
 
 sysapi.o: sysapi/$(OS)/misc.cpp
-	$(CXX) $(CFLAGS) -c -o $@ sysapi/$(OS)/misc.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/misc.cpp
 
 multithread.o: sysapi/$(OS)/multithread.cpp
-	$(CXX) $(CFLAGS) $(LDFLAGS) -c -o $@ sysapi/$(OS)/multithread.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) $(LDFLAGS) -c -o $@ sysapi/$(OS)/multithread.cpp
 
 filewriter.o: filewriter.cpp
-	$(CXX) $(CFLAGS) -c -o $@ filewriter.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ filewriter.cpp
 
 filelist.o: filelist.cpp
-	$(CXX) $(CFLAGS) -c -o $@ filelist.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ filelist.cpp
 
 eventsink.o: eventsink.cpp
-	$(CXX) $(CFLAGS) -c -o $@ eventsink.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ eventsink.cpp
 
 check:
 
@@ -85,12 +130,18 @@ clean:
 distclean: clean
 	rm -f Makefile
 
-install:
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp server $(DESTDIR)$(PREFIX)/bin/instsendd
-	cp client $(DESTDIR)$(PREFIX)/bin/isend # Short name for better user experience
-	cp widget-gtk $(DESTDIR)$(PREFIX)/bin/instsend-dialog-gtk
-	cp configtool $(DESTDIR)$(PREFIX)/bin/instsend-config
-	chmod 755 $(DESTDIR)$(PREFIX)/bin/instsendd $(DESTDIR)$(PREFIX)/bin/isend $(DESTDIR)$(PREFIX)/bin/instsend-config $(DESTDIR)$(PREFIX)/bin/instsend-dialog-gtk
+install-client: client
+	install -D client $(CLIENT_BIN)
 
-.PHONY: all check clean distclean install
+install-server: server
+	install -D server $(SERVER_BIN)
+
+install-configtool: configtool
+	install -D configtool $(CONFIGTOOL_BIN)
+
+install-widget-gtk: widget-gtk
+	install -D widget-gtk $(WIDGET_GTK_BIN)
+
+install: $(INSTALL)
+
+.PHONY: all check clean distclean install install-client install-server install-configtool install-widget-gtk

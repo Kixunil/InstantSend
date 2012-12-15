@@ -1,57 +1,106 @@
-CFLAGS+=-W -Wall -g -O2 -shared -fPIC -I../include -I../
-PREFIX=@prefix@
+CXXFLAGS=@CXXFLAGS@
+CXXFLAGS+=-fPIC -I../include -I../
+DEFS=@DEFS@
+LDFLAGS=@LDFLAGS@ @LIBS@
+LDFLAGS+=-shared
 
-ifndef OS
-	OS=linux                        
+PREFIX=@prefix@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+LIBDIR=@libdir@
+
+HAVE_IP4TCP=@have_ip4tcp@
+HAVE_IP6TCP=@have_ip6tcp@
+HAVE_NOTIFY=@have_notify@
+HAVE_AVAHI=@have_avahi@
+HAVE_DBUS=@have_dbus@
+
+DBUS_CFLAGS=@DBUS_CFLAGS@
+DBUS_LIBS=@DBUS_LIBS@
+
+AVAHI_CFLAGS=@AVAHI_CFLAGS@
+AVAHI_LIBS=@AVAHI_LIBS@
+
+ifeq ($(LIBNOTIFY_VERSION),4)
+	NOTIFY_CFLAGS=@LIBNOTIFY4_CFLAGS@
+	NOTIFY_LIBS=@LIBNOTIFY4_LIBS@
+endif
+
+ifeq ($(LIBNOTIFY_VERSION),4)
+	NOTIFY_CFLAGS=@LIBNOTIFY1_CFLAGS@
+	NOTIFY_LIBS=@LIBNOTIFY1_LIBS@
+endif
+
+ALL=
+
+ifeq ($(HAVE_IP4TCP),yes)
+	ALL+=ip4tcp$(EXTENSION)
+endif
+
+ifeq ($(HAVE_IP6TCP),yes)
+	ALL+=ip6tcp$(EXTENSION)
+endif
+
+ifeq ($(HAVE_NOTIFY),yes)
+	ALL+=desktop-notify$(EXTENSION)
+endif
+
+ifeq ($(HAVE_DBUS),yes)
+	ALL+=dbus$(EXTENSION)
+endif
+
+ifeq ($(HAVE_AVAHI),yes)
+	ALL+=avahi-publish$(EXTENSION)
+endif
+
+OS ?= linux
+
+ifeq ($(OS),linux)
 	LDFLAGS+=-ldl -pthread -rdynamic
 endif
 
 ifeq ($(OS),windows)
 	CXX=$(ARCH)-w64-mingw32-g++
-	CFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS
+	CXXFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS -mdll
 	EXTENSION=.dll
 	DLLTOOL=$(ARCH)-w64-mingw32-dlltool
 endif
 
 ifeq ($(HOST),i686-linux-gnu)
-	CFLAGS+=-march=i686 -m32
+	CXXFLAGS+=-march=i686 -m32
 endif
 
-ifeq ($(HOST),i686-linux-gnu)
-	CFLAGS+=-march=i686 -m32
-endif
-
-all: ip4tcp.so ip6tcp.so dbus.so desktop-notify.so avahi-publish.so avahi-publish.so
+all: $(ALL)
 
 ip4tcp.so: ../include/pluginapi.h ip4tcp.cpp
-	 $(CXX) -o $@ ip4tcp.cpp $(CFLAGS)
+	 $(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcp.cpp $(LDFLAGS)
 
 ip4tcp-windows.o: ../include/pluginapi.h ip4tcp-windows.cpp
-	$(CXX) -c -o $@ ip4tcp-windows.cpp $(CFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ ip4tcp-windows.cpp $(LDFLAGS)
 
 ip4tcp-exports.o: ip4tcp-windows.o
 	$(DLLTOOL) --export-all-symbols -e ip4tcp-exports.o -l ip4tcp-windows.lib ip4tcp-windows.o
 
 ip4tcp.dll: ip4tcp-windows.o ip4tcp-exports.o
-	$(CXX) -o $@ ip4tcp-windows.o ip4tcp-exports.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcp-windows.o ip4tcp-exports.o
 
 ip6tcp.so: ../include/pluginapi.h ip6tcp.cpp
-	$(CXX) -o $@ ip6tcp.cpp $(CFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp.cpp $(LDFLAGS) 
 
 ip6tcp.dll: ../include/pluginapi.h ip6tcp-windows.cpp
-	$(CXX) -o $@ ip6tcp-windows.cpp $(CFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp-windows.cpp $(LDFLAGS) 
 
 zenityprogress.so: zenityprogress.cpp
-	$(CXX) -o $@ zenityprogress.cpp $(CFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ zenityprogress.cpp $(LDFLAGS) 
 
 dbus.so: dbus.cpp
-	$(CXX) -o $@ dbus.cpp $(CFLAGS) `pkg-config --cflags --libs dbus-1`
+	$(CXX) $(DBUS_CFLAGS) $(CXXFLAGS) $(DEFS) -o $@ dbus.cpp $(LDFLAGS) $(DBUS_LIBS)
 
 desktop-notify.so: desktop-notify.cpp
-	$(CXX) -o $@ desktop-notify.cpp `pkg-config --cflags --libs libnotify` $(CFLAGS)
+	$(CXX) $(NOTIFY_CFLAGS) $(CXXFLAGS) $(DEFS) -o $@ desktop-notify.cpp $(LDFLAGS) $(NOTIFY_LIBS)
 
 avahi-publish.so: avahi-publish.cpp
-	$(CXX) -o $@ avahi-publish.cpp -lavahi-client -lavahi-common $(CFLAGS)
+	$(CXX) $(AVAHI_CFLAGS) $(CXXFLAGS) $(DEFS) -o $@ avahi-publish.cpp $(LDFLAGS) $(AVAHI_LIBS)
 
 check:
 
@@ -62,7 +111,7 @@ distclean: clean
 	rm -f Makefile
 
 install:
-	mkdir -p $(DESTDIR)$(PREFIX)/lib/instantsend/plugins
-	cp *.so $(DESTDIR)$(PREFIX)/lib/instantsend/plugins
+	mkdir -p $(DESTDIR)$(LIBDIR)/instantsend/plugins
+	cp *.so $(DESTDIR)$(LIBDIR)/instantsend/plugins
 
-.PHONY: all check clean distclean
+.PHONY: all check clean distclean install
