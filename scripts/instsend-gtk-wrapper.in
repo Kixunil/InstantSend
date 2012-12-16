@@ -16,13 +16,15 @@ fi
 
 if [ '!' -d ~/.instantsend ];
 then
-	if zenity --question --title="InstantSend" --text="$FIRSTRUN_QUESTION";
-	then
-		instsend-config-wizard
-	else
-		mkdir ~/.instantsend
-		zenity --info --title="InstantSend" --text="$FIRSTRUN_INFO"
-	fi
+	#if zenity --question --title="InstantSend" --text="$FIRSTRUN_QUESTION";
+	#then
+	#	instsend-config-wizard
+	#else
+	#	mkdir ~/.instantsend
+	#	zenity --info --title="InstantSend" --text="$FIRSTRUN_INFO"
+	#fi
+	mkdir -p ~/.instantsend/files
+	instsend-config-defaults
 fi
 
 if [ -r ~/.instantsend/server.cfg ];
@@ -31,16 +33,24 @@ then
 	then
 		echo -n
 	else
-		if zenity --question --title="InstantSend" --text="$INSTSENDD_QUESTION_NOTRUNNING" --ok-label="$INSTSENDD_QUESTION_NOTRUNNING_BTN_OK" --cancel-label="$INSTSENDD_QUESTION_NOTRUNNING_BTN_CANCEL";
-		then
-			if instsendd-wrapper start;
-			then
-				echo -n
-			else
-				zenity --error --title="InstantSend" --text="$INSTSENDD_ERR_CANTRUN"
-			fi
-		fi
+		#if zenity --question --title="InstantSend" --text="$INSTSENDD_QUESTION_NOTRUNNING" --ok-label="$INSTSENDD_QUESTION_NOTRUNNING_BTN_OK" --cancel-label="$INSTSENDD_QUESTION_NOTRUNNING_BTN_CANCEL";
+		#then
+		#	if instsendd-wrapper start;
+		#	then
+		#		echo -n
+		#	else
+		#		zenity --error --title="InstantSend" --text="$INSTSENDD_ERR_CANTRUN"
+		#	fi
+		#fi
+
+		STOPSERVER=yes
+		instsendd-wrapper start
 	fi
 fi
 
 instsend-dialog-gtk
+
+if [ "$STOPSERVER" = yes ];
+then
+	instsendd-wrapper stop
+fi
