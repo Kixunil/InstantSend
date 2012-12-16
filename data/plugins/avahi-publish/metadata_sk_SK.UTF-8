@@ -1,0 +1,2 @@
+PLUGIN_FULLNAME="Avahi publish"
+PLUGIN_DESCRIPTION="Zverejní službu na lokálnej sieti prostredníctvom Avahi (ZeroConf)"

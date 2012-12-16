@@ -1,0 +1,2 @@
+PLUGIN_FULLNAME="DBus"
+PLUGIN_DESCRIPTION="Umožňuje komunikovať s inými aplikáciami prostredníctvom DBus"

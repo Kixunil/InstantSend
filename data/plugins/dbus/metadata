@@ -1,0 +1,7 @@
+PLUGIN_FULLNAME="DBus"
+PLUGIN_DESCRIPTION="Allows communication with other applications using dbus"
+PLUGIN_VERSION="0.5"
+PLUGIN_AUTHOR="Martin Habovštiak"
+PLUGIN_CONTACT="martin.habovstiak@gmail.com"
+PLUGIN_TYPE="EVENTHANDLER"
+PLUGIN_IMPORTANCE="USERCOMFORT"

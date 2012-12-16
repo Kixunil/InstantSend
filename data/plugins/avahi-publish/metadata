@@ -1,0 +1,7 @@
+PLUGIN_FULLNAME="Avahi publish"
+PLUGIN_DESCRIPTION="Publishes service on local network using Avahi (ZeroConf)"
+PLUGIN_VERSION="0.1"
+PLUGIN_AUTHOR="Martin Habovštiak"
+PLUGIN_CONTACT="martin.habovstiak@gmail.com"
+PLUGIN_TYPE="EVENTHANDLER"
+PLUGIN_IMPORTANCE="USERCOMFORT"
