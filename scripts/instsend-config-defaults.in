@@ -1,0 +1,69 @@
+#!/bin/bash
+
+DATADIR= ###DATADIR###
+CFGDIR= ###CONFIGDIR###
+
+add_plugin() {
+	case "$1" in
+		COMMUNICATION)
+			instsend-config -S -Acp '{ "name" : "'"$3"'", "config" : '"$2"'}'
+			;;
+		EVENTHANDLER)
+			instsend-config -S -Aep '{'" \"${3}\" : $2 "'}'
+			;;
+	esac
+}
+
+add_defaults() {
+	PTYPE=$1
+	AUTOPLUGINS=$2
+
+	cd "$DATADIR/instantsend/plugins/"
+
+	for PLUGIN in *;
+	do
+		if [ -r "$PLUGIN/metadata" ];
+		then
+			. "$PLUGIN/metadata"
+			if [ "$PTYPE" = "$PLUGIN_TYPE" -o "$PTYPE" = "ALL" ];
+			then
+				if [ -r "$PLUGIN/defaultcfg_server" ] && grep -q "$PLUGIN_IMPORTANCE" "$AUTOPLUGINS";
+				then
+					add_plugin "$PLUGIN_TYPE" "$(cat "$PLUGIN/defaultcfg_server")" "$PLUGIN"
+				fi
+			fi
+		fi
+	done
+}
+
+if [ -r "$HOME/.instantsend/autoplugins.cfg" ];
+then
+	AUTOPLUGINSCFG="$HOME/.instantsend/autoplugins.cfg"
+else
+	if [ -r "$CFGDIR/instantsend/autoplugins" ];
+	then
+		AUTOPLUGINSCFG="$CFGDIR/instantsend/autoplugins"
+	else
+		AUTOPLUGINSCFG="$CFGDIR/instantsend/autoplugins.defaults"
+	fi
+fi
+
+TYPE=ALL
+
+while [ $# -gt 0 ];
+do
+	if [ "$1" = "-t" ];
+	then
+		TYPE="$2"
+	fi
+
+	shift
+done
+
+if [ '!' -f "$HOME/.instantsend/server.cfg" ];
+then
+	instsend-config -is -S
+fi
+
+add_defaults "$TYPE" "$AUTOPLUGINSCFG"
+
