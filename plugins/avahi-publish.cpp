@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdexcept>
+#include <unistd.h>
 
 #include <avahi-client/client.h>
 #include <avahi-client/publish.h>
@@ -42,7 +43,12 @@ class serverHandler : public eventServer_t {
 		AvahiEntryGroup *group;
 		char *name;
 	public:
-		serverHandler() : pollObj(avahi_threaded_poll_new()), name(avahi_strdup("instantsend")) {
+		serverHandler() : pollObj(avahi_threaded_poll_new()) {
+			char buf[HOST_NAME_MAX + 1];
+			gethostname(buf, HOST_NAME_MAX);
+			buf[HOST_NAME_MAX] = 0;
+			name = avahi_strdup(buf);
+			
 			if(!pollObj) throw runtime_error("Failed to create threaded poll object.");
 
 			int error;
@@ -102,6 +108,7 @@ class serverHandler : public eventServer_t {
 					fprintf(stderr, "Service name collision, renaming service to '%s'\n", newname);
 					avahi_free(name);
 					name = newname;
+					createServices();
 				}
 				break;
 
