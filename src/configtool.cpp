@@ -109,19 +109,17 @@ void saveCfg(jsonComponent_t &cfg, string file) {
 		return;
 	}
 
-	rename(string(file + "_tmp").c_str(), file.c_str());
+	rename((file + "_tmp").c_str(), file.c_str());
 }
 
 void initClientCfg(auto_ptr<jsonComponent_t> &cfg) {
-	jsonObj_t *rootObj = new jsonObj_t();
+	auto_ptr<jsonObj_t> rootObj(new jsonObj_t());
 	rootObj->insertNew("targets", new jsonObj_t());
-	cfg = auto_ptr<jsonComponent_t>(rootObj);
+	cfg = auto_ptr<jsonComponent_t>(rootObj.release());
 }
 
 void initServerCfg(auto_ptr<jsonComponent_t> &cfg) {
-	jsonObj_t *rootObj = new jsonObj_t();
-	rootObj->insertNew("complugins", new jsonArr_t());
-	cfg = auto_ptr<jsonComponent_t>(rootObj);
+	cfg = auto_ptr<jsonComponent_t>(new jsonObj_t());
 }
 
 void changeCfg(auto_ptr<jsonComponent_t> &cfg, const string &newpath, string &oldpath, int &save, int &load) {
@@ -155,13 +153,13 @@ int main(int argc, char **argv) {
 	for(int i = 1; i < argc; ++i) {
 		if(string(argv[i]) == "--help" || string(argv[i]) == "-h") printHelp(); else
 		if(string(argv[i]) == "--init-client" || string(argv[i]) == "-ic") {
-			if(save) saveCfg(*cfg.get(), cfgpath);
+			if(save) saveCfg(*cfg, cfgpath);
 			initClientCfg(cfg);
 			save = 1;
 			load = 0;
 		} else
 		if(string(argv[i]) == "--init-server" || string(argv[i]) == "-is") {
-			if(save) saveCfg(*cfg.get(), cfgpath);
+			if(save) saveCfg(*cfg, cfgpath);
 			initServerCfg(cfg);
 			save = 1;
 			load = 0;
@@ -234,6 +232,6 @@ int main(int argc, char **argv) {
 		}
 		
 	}
-	if(save) saveCfg(*cfg.get(), cfgpath);
+	if(save) saveCfg(*cfg, cfgpath);
 	return 0;
 }
