@@ -86,8 +86,36 @@ void importTargets(jsonComponent_t *cfg, const char *filename) {
 
 void addComPlugin(jsonComponent_t &cfg, const char *plugconf) {
 	string pcfgstr(plugconf);
-	jsonArr_t &cplugins = dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(cfg).gie("complugins"));
-	cplugins.addNew(new jsonObj_t(&pcfgstr));
+	jsonArr_t *cplugins;
+	try {
+		cplugins = &dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(cfg).gie("complugins"));
+	}
+	catch(jsonNotExist) {
+		cplugins = new jsonArr_t();
+		dynamic_cast<jsonObj_t &>(cfg).insertNew("complugins", cplugins);
+	}
+
+	cplugins->addNew(new jsonObj_t(&pcfgstr));
+}
+
+void addEventPlugin(jsonComponent_t &cfg, const char *plugconf) {
+	string pcfgstr(plugconf);
+	jsonObj_t *evhandlers;
+	try {
+		evhandlers = &dynamic_cast<jsonObj_t &>(dynamic_cast<jsonObj_t &>(cfg).gie("eventhandlers"));
+	}
+	catch(jsonNotExist) {
+		evhandlers = new jsonObj_t();
+		dynamic_cast<jsonObj_t &>(cfg).insertNew("eventhandlers", evhandlers);
+	}
+
+	jsonObj_t newHandlers(&pcfgstr);
+
+	for(jsonIterator it = newHandlers.begin(); it != newHandlers.end(); ++it) {
+		auto_ptr<jsonComponent_t> tmp(it.value()->clone());
+		evhandlers->insertNew(it.key(), tmp.get());
+		tmp.release();
+	}
 }
 
 void saveCfg(jsonComponent_t &cfg, string file) {
@@ -204,6 +232,14 @@ int main(int argc, char **argv) {
 				return 1;
 			}
 			addComPlugin(*cfg.get(), argv[++i]);
+			save = 1;
+		} else
+		if(string(argv[i]) == "--add-event-plugin" || string(argv[i]) == "-Aep") {
+			if(i + 1 >= argc) {
+				fprintf(stderr, "Not enough arguments!\n");
+				return 1;
+			}
+			addEventPlugin(*cfg.get(), argv[++i]);
 			save = 1;
 		} else
 		if(string(argv[i]) == "--client" || string(argv[i]) == "-C") { 

@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <stdlib.h>
+#include <unistd.h>
 #include <gtkmm/action.h>
 #include <gtkmm/actiongroup.h>
 #include <gtkmm/window.h>
@@ -149,7 +151,12 @@ class dialogControl {
 		virtual void hide() = 0;
 		virtual void togle() = 0;
 		virtual void quit() = 0;
+		virtual void sendFiles() = 0;
+		virtual void preferences() = 0;
+		virtual void startServer() = 0;
+		virtual void stopServer() = 0;
 		virtual bool isVisible() = 0;
+		virtual bool serverRunning() = 0;
 		virtual unsigned int recvInProgress() = 0;
 		virtual unsigned int sendInProgress() = 0;
 		virtual unsigned int recvPending() = 0;
@@ -163,6 +170,11 @@ class trayIcon {
 	public:
 		inline trayIcon(dialogControl *dialog) : dlg(dialog), actions(Gtk::ActionGroup::create()) {
 			actions->add( Gtk::Action::create("Quit", Gtk::Stock::QUIT), sigc::mem_fun(*dlg, &dialogControl::quit));
+			actions->add( Gtk::Action::create("SendFiles", "Send files"), sigc::mem_fun(*dlg, &dialogControl::sendFiles));
+			actions->add( Gtk::Action::create("Preferences", Gtk::Stock::PREFERENCES), sigc::mem_fun(*dlg, &dialogControl::preferences));
+			actions->add( Gtk::Action::create("StartServer", "Start server"), sigc::mem_fun(*dlg, &dialogControl::startServer));
+			actions->add( Gtk::Action::create("StopServer", "Stop server"), sigc::mem_fun(*dlg, &dialogControl::stopServer));
+
 		}
 
 		virtual void show() = 0;
@@ -181,7 +193,6 @@ class gtkTrayIcon : public trayIcon {
 		vector<Glib::RefPtr<Gdk::Pixbuf> > dlAnim, ulAnim;
 		Glib::RefPtr<Gtk::StatusIcon> statusIcon;
 		Glib::RefPtr<Gtk::UIManager> uimanager;
-		Gtk::Menu* popupmenu;
 	protected:
 		void on_icon_activate() {
 			dlg->togle();
@@ -189,7 +200,8 @@ class gtkTrayIcon : public trayIcon {
 		}
 
 		void on_popup_menu(guint button, guint32 activate_time) {
-			statusIcon->popup_menu_at_position(*popupmenu, button, activate_time);
+			Gtk::Menu& popupmenu = dynamic_cast<Gtk::Menu&>(*uimanager->get_widget((dlg->serverRunning())?"/TrayIconPopup_serverRunning":"/TrayIconPopup_serverStopped")); 
+			statusIcon->popup_menu_at_position(popupmenu, button, activate_time);
 		}
 	public:
 		gtkTrayIcon(dialogControl *dlg) : trayIcon(dlg), uimanager(Gtk::UIManager::create()), animPtr(0) {
@@ -214,14 +226,23 @@ class gtkTrayIcon : public trayIcon {
 
 				Glib::ustring ui_info =
 					"<ui>"
-					"  <popup name='TrayIconPopup'>"
+					"  <popup name='TrayIconPopup_serverStopped'>"
+					"    <menuitem action='SendFiles'/>"
+					"    <menuitem action='StartServer'/>"
+					"    <menuitem action='Preferences'/>"
 					"    <menuitem action='Quit'/>"
 					"  </popup>"
+					"  <popup name='TrayIconPopup_serverRunning'>"
+					"    <menuitem action='SendFiles'/>"
+					"    <menuitem action='StopServer'/>"
+					"    <menuitem action='Preferences'/>"
+					"    <menuitem action='Quit'/>"
+					"  </popup>"
+
 					"</ui>";
 				uimanager->add_ui_from_string(ui_info);
 
 				uimanager->insert_action_group(actions);
-				popupmenu = dynamic_cast<Gtk::Menu*>(uimanager->get_widget("/TrayIconPopup"));
 				statusIcon->signal_popup_menu().connect(sigc::mem_fun(*this, &gtkTrayIcon::on_popup_menu));
 
 			} catch(Glib::FileError &e) {
@@ -482,6 +503,32 @@ class instSendWidget : public Window, dialogControl {
 
 		virtual void quit() {
 			appPtr->quit();
+		}
+
+		virtual void sendFiles() {
+			pid_t pid = fork();
+			if(!pid) {
+				exit(system("zenity --file-selection --multiple --title=InstantSend --separator='\n' | xargs -d '\\n' isend-gtk"));
+			}
+		}
+
+		virtual void preferences() {
+			pid_t pid = fork();
+			if(!pid) {
+				exit(system("instsend-config-wizard --conf-server"));
+			}
+		}
+
+		virtual void startServer() {
+			system("instsendd-wrapper start");
+		}
+
+		virtual void stopServer() {
+			system("instsendd-wrapper stop");
+		}
+
+		virtual bool serverRunning() {
+			return !system("instsendd-wrapper check"); // Kind of stupid; TODO: improve
 		}
 
 		virtual bool isVisible() {
