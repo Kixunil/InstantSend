@@ -5,9 +5,11 @@ BINDIR=@bindir@
 LIBDIR=@libdir@
 datarootdir=@datarootdir@
 DATADIR=@datadir@
+SYSCONFDIR=@sysconfdir@
 
 HAVE_CLIENT=@have_client@
 HAVE_SERVER=@have_server@
+HAVE_CONFIGTOOL=@have_configtool@
 HAVE_WIDGET_GTK=@have_widget_gtk@
 HAVE_SCAN=@have_scan@
 HAVE_SCANNER_AVAHI=@have_scanner_avahi@
@@ -17,13 +19,21 @@ INSTALL=
 
 ifeq ($(HAVE_SERVER),yes)
 	INSTALL+=install-server
+	ifeq ($(HAVE_CONFIGTOOL),yes)
+		ALL+=instsend-config-defaults.sh
+		INSTALL+=install-config-defaults
+	endif
 endif
 
 ifeq ($(HAVE_WIDGET_GTK),yes)
-	ALL+=instsend-gtk-wrapper.sh instsend-config-wizard.sh
+	ALL+=instsend-gtk-wrapper.sh
 	INSTALL+=install-widget-gtk
-	ifeq ($(HAVE_CLIENT),yes)
-		INSTALL+=install-isend-gtk
+	ifeq ($(HAVE_CONFIGTOOL),yes)
+		ALL+=instsend-config-wizard.sh
+		INSTALL+=install-config-wizard
+		ifeq ($(HAVE_CLIENT),yes)
+			INSTALL+=install-isend-gtk
+		endif
 	endif
 endif
 
@@ -50,10 +60,14 @@ instsend-scan.sh: instsend-scan.in
 	sed -e 's/ ###LIBDIR###/"'"$(subst /,\\/,$(LIBDIR))"'"/g' instsend-scan.in > $@
 	chmod 755 $@
 
+instsend-config-defaults.sh: instsend-config-defaults.in
+	sed -e 's/ ###DATADIR###/"'"$(subst /,\\/,$(DATADIR))"'"/g' instsend-config-defaults.in | sed -e 's/ ###CONFIGDIR###/"'"$(subst /,\\/,$(SYSCONFDIR))"'"/g' > $@
+	chmod 755 $@
+
 check:
 
 clean:
-	rm -f instsend-gtk-wrapper.sh instsend-config-wizard.sh instsend-scan.sh
+	rm -f instsend-gtk-wrapper.sh instsend-config-wizard.sh instsend-scan.sh instsend-config-defaults.sh
 
 distclean: clean
 	rm -f Makefile
@@ -64,6 +78,8 @@ install-server:
 
 install-widget-gtk:
 	install -D instsend-gtk-wrapper.sh $(DESTDIR)$(BINDIR)/instsend-gtk-wrapper
+
+install-config-wizard:
 	install -D instsend-config-wizard.sh $(DESTDIR)$(BINDIR)/instsend-config-wizard
 
 install-isend-gtk:
@@ -75,6 +91,9 @@ install-scan:
 install-scanner-avahi:
 	install -D instsend-avahi.sh $(DESTDIR)$(LIBDIR)/instantsend/scanners/avahi
 
+install-config-defaults:
+	install -D instsend-config-defaults.sh $(DESTDIR)$(BINDIR)/instsend-config-defaults
+
 install: $(INSTALL)
 
-.PHONY: all check clean distclean install install-isend-gtk install-scan install-scanner-avahi install-server
+.PHONY: all check clean distclean install install-config-defaults install-config-wizard install-isend-gtk install-scan install-scanner-avahi install-server

@@ -5,9 +5,14 @@ BINDIR=@bindir@
 LIBDIR=@libdir@
 datarootdir=@datarootdir@
 DATADIR=@datadir@
+SYSCONFDIR=@sysconfdir@
 
+HAVE_SERVER=@have_server@
+HAVE_CONFIGTOOL=@have_configtool@
 HAVE_WIDGET_GTK=@have_widget_gtk@
 HAVE_IP4TCP=@have_ip4tcp@
+HAVE_AVAHI=@have_avahi@
+HAVE_DBUS=@have_dbus@
 
 INSTALL=
 
@@ -17,6 +22,20 @@ endif
 
 ifeq ($(HAVE_IP4TCP),yes)
 	INSTALL+=install-plugin-ip4tcp
+endif
+
+ifeq ($(HAVE_DBUS),yes)
+	INSTALL+=install-plugin-dbus
+endif
+
+ifeq ($(HAVE_AVAHI),yes)
+	INSTALL+=install-plugin-avahi-publish
+endif
+
+ifeq ($(HAVE_CONFIGTOOL),yes)
+	ifeq ($(HAVE_SERVER),yes)
+		INSTALL+=install-default-cfg
+	endif
 endif
 
 all:
@@ -39,6 +58,19 @@ install-plugin-ip4tcp:
 	mkdir -p $(DESTDIR)$(DATADIR)/instantsend/plugins
 	cp -r plugins/ip4tcp $(DESTDIR)$(DATADIR)/instantsend/plugins
 
+install-plugin-avahi-publish:
+	mkdir -p $(DESTDIR)$(DATADIR)/instantsend/plugins
+	cp -r plugins/avahi-publish $(DESTDIR)$(DATADIR)/instantsend/plugins
+
+install-plugin-dbus:
+	mkdir -p $(DESTDIR)$(DATADIR)/instantsend/plugins
+	cp -r plugins/dbus $(DESTDIR)$(DATADIR)/instantsend/plugins
+
+
+install-default-cfg:
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/instantsend/
+	cp autoplugins.defaults $(DESTDIR)$(SYSCONFDIR)/instantsend/autoplugins.defaults
+
 install: $(INSTALL)
 
-.PHONY: all check clean distclean install install-plugin-ip4tcp install-widget-gtk
+.PHONY: all check clean distclean install install-default-cfg install-plugin-avahi-publish install-plugin-dbus install-plugin-ip4tcp install-widget-gtk
