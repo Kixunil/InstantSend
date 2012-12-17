@@ -7,4 +7,5 @@ usr/bin/instsend-gtk-wrapper
 usr/share/instantsend/data/icon_*.png
 usr/share/instantsend/config-wizard
 usr/share/applications/instsend-dialog-gtk.desktop
+usr/share/locale/*/LC_MESSAGES/instantsend-dialog-gtk.mo
 etc/instantsend/autoplugins.defaults
