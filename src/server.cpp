@@ -69,7 +69,7 @@ class clientThread_t : public thread_t {
 					printf("Receiving file %s (%d bytes)\n", fname.c_str(), fsize);
 					fflush(stdout);
 
-					writer = dynamic_cast<fileWriter_t *>(&flist.getController(0, combinePath(savedir, fname), (size_t)fsize, /*client.getMachineIdentifier()*/ "UNKNOWN"));
+					writer = dynamic_cast<fileWriter_t *>(&flist.getController(0, combinePath(savedir, fname), (size_t)fsize, client.getMachineIdentifier()));
 					writer->incRC();
 					D("Writer created")
 
