@@ -8,6 +8,8 @@ Build-Depends: autoconf, automake, libdbus-1-dev, libnotify-dev, libgtkmm-2.4-de
 Package: instantsend-server
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: instantsend-client, instantsend-gtk, instantsend-plugins-standard
+Description: Server from instantsend toolkit                               
 Description: Server from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -17,6 +19,8 @@ Description: Server from instantsend toolkit
 Package: instantsend-client
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: instantsend-plugins-communication
+Suggests: instantsend-server, instantsend-gtk
 Description: Client from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -26,6 +30,7 @@ Description: Client from instantsend toolkit
 Package: instantsend-plugin-ip4tcp
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Enhances: instantsend-client, instantsend-server
 Description: TCP/IPv4 plugin from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -34,6 +39,7 @@ Description: TCP/IPv4 plugin from instantsend toolkit
 Package: instantsend-plugin-ip6tcp
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Enhances: instantsend-client, instantsend-server
 Description: TCP/IPv6 plugin from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -52,6 +58,8 @@ Description: Communication plugins from instantsend toolkit
 Package: instantsend-plugin-dbus
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libdbus-1-3
+Enhances: instantsend-server
+Suggests: instantsend-gtk   
 Description: DBus plugin from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -60,6 +68,7 @@ Description: DBus plugin from instantsend toolkit
 Package: instantsend-plugin-notify
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libnotify1
+Enhances: instantsend-server
 Description: Desktop notify plugin from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -68,6 +77,8 @@ Description: Desktop notify plugin from instantsend toolkit
 Package: instantsend-plugin-avahi
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libavahi-common3, libavahi-client3
+Enhances: instantsend-server
+Suggests: instantsend-gtk   
 Description: Avahi publish plugin from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -77,6 +88,8 @@ Description: Avahi publish plugin from instantsend toolkit
 Package: instantsend-scan
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Enhances: instantsend-client, instantsend-gtk
+Suggests: instantsend-scanners-standard
 Description: Scaning tool from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -85,6 +98,7 @@ Description: Scaning tool from instantsend toolkit
 Package: instantsend-scanner-avahi
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, instantsend-scan, avahi-utils
+Enhances: instantsend-scan
 Description: Avahi scanner from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
@@ -94,6 +108,8 @@ Description: Avahi scanner from instantsend toolkit
 Package: instantsend-gtk
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libgtkmm-2.4-1c2a, instantsend-plugin-dbus, libdbus-1-3, zenity
+Enhances: instantsend-server, instantsend-client
+Suggests: instantsend-filemanagers              
 Description: GTK based GUI from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
