@@ -173,11 +173,11 @@ class trayIcon {
 		Glib::RefPtr<ActionGroup> actions;
 	public:
 		inline trayIcon(dialogControl *dialog) : dlg(dialog), actions(Gtk::ActionGroup::create()) {
-			actions->add( Gtk::Action::create("Quit", Gtk::Stock::QUIT), sigc::mem_fun(*dlg, &dialogControl::quit));
-			actions->add( Gtk::Action::create("SendFiles", _("Send files")), sigc::mem_fun(*dlg, &dialogControl::sendFiles));
-			actions->add( Gtk::Action::create("Preferences", Gtk::Stock::PREFERENCES), sigc::mem_fun(*dlg, &dialogControl::preferences));
-			actions->add( Gtk::Action::create("StartServer", _("Start server")), sigc::mem_fun(*dlg, &dialogControl::startServer));
-			actions->add( Gtk::Action::create("StopServer", _("Stop server")), sigc::mem_fun(*dlg, &dialogControl::stopServer));
+			actions->add( Gtk::Action::create("Quit", Gtk::Stock::QUIT, _("Quit")), sigc::mem_fun(*dlg, &dialogControl::quit));
+			actions->add( Gtk::Action::create_with_icon_name("SendFiles", ustring("document-send"), ustring(_("Send files")), ustring()), sigc::mem_fun(*dlg, &dialogControl::sendFiles));
+			actions->add( Gtk::Action::create("Preferences", Gtk::Stock::PREFERENCES, _("Preferences")), sigc::mem_fun(*dlg, &dialogControl::preferences));
+			actions->add( Gtk::Action::create_with_icon_name("StartServer", ustring("system-run"), ustring(_("Start server")), ustring()), sigc::mem_fun(*dlg, &dialogControl::startServer));
+			actions->add( Gtk::Action::create_with_icon_name("StopServer", ustring("stop"), ustring(_("Stop server")), ustring()), sigc::mem_fun(*dlg, &dialogControl::stopServer));
 
 		}
 
@@ -364,7 +364,7 @@ class SimpleFileInfoRenderer : public observer_t {
 		}
 
 		void updateData() {
-			fileName.set_markup("<b>" + Markup::escape_text(finfo->getFileName()) + "</b>");
+			fileName.set_markup("<b>" + Markup::escape_text(getFileName(finfo->getFileName().c_str())) + "</b>");
 			fileName.set_justify(JUSTIFY_LEFT);
 			peerName.set_markup("<small>" + Markup::escape_text(finfo->getPeerName()) + "</small>");
 			peerName.set_justify(JUSTIFY_LEFT);
