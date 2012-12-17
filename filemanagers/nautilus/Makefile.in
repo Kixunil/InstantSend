@@ -1,0 +1,69 @@
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+datarootdir=@datarootdir@
+PREFIX=$(prefix)
+LIBDIR=@libdir@
+LOCALEDIR=@localedir@
+
+GETTEXT_DOMAINNAME=instantsend-filemanager-nautilus
+
+DEFS+=-DGETTEXT_PACKAGE=\"$(GETTEXT_DOMAINNAME)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+
+CFLAGS+=-fPIC
+
+HAVE_NAUTILUS_EXTENSION=@have_nautilus_extension@
+EXTENSION_VERSION=@nautilus_extension_version@
+ifeq ($(EXTENSION_VERSION),3.0)
+	NAUTILUS_EXTENSION_CFLAGS=@NAUTILUS_EXTENSION3_CFLAGS@
+	NAUTILUS_EXTENSION_LIBS=@NAUTILUS_EXTENSION3_LIBS@
+endif
+
+ifeq ($(EXTENSION_VERSION),2.0)
+	NAUTILUS_EXTENSION_CFLAGS=@NAUTILUS_EXTENSION2_CFLAGS@
+	NAUTILUS_EXTENSION_LIBS=@NAUTILUS_EXTENSION2_LIBS@
+endif
+
+ALL=
+INSTALL=
+
+ifeq ($(HAVE_NAUTILUS_EXTENSION),yes)
+	ALL+=filemanager-nautilus.so locales
+	INSTALL+=install-filemanager-nautilus install-locales
+endif
+
+POFILES=$(wildcard po/*.po)
+MOFILES=$(POFILES:.po=.mo)
+LANGS=$(subst po/,,$(subst .po,,$(POFILES)))
+
+all: $(ALL)
+
+check:
+
+clean:
+	rm -f filemanager-nautilus.so po/*.mo
+
+distclean: clean
+	rm -f Makefile
+
+install: $(INSTALL)
+
+locales: $(MOFILES)
+
+po/%.mo: po/%.po
+	msgfmt -o $@ $<
+
+install-mo-%: po/%.mo
+	install -D -m 644 $< $(DESTDIR)$(LOCALEDIR)/$(subst po/,,$(subst .mo,,$<))/LC_MESSAGES/$(GETTEXT_DOMAINNAME).mo
+
+install-locales: $(patsubst %,install-mo-%,$(LANGS))
+
+filemanager-nautilus.so: nautilus.c nautilus-nste.c
+	gcc $(CFLAGS) $(NAUTILUS_EXTENSION_CFLAGS) $(DEFS) -o $@ nautilus.c nautilus-nste.c $(NAUTILUS_EXTENSION_LIBS) -shared
+
+install-filemanager-nautilus: filemanager-nautilus.so
+	install -D -m 644 filemanager-nautilus.so $(DESTDIR)$(LIBDIR)/nautilus/extensions-$(EXTENSION_VERSION)/libnautilus-instantsend.so
+
+.PHONY: all check clean distclean install install-locales install-mo-% loacles
