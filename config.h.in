@@ -6,6 +6,9 @@
 /* Use avahi */
 #undef HAVE_AVAHI
 
+/* Use caja */
+#undef HAVE_CAJA
+
 /* Use dbus */
 #undef HAVE_DBUS
 
@@ -41,6 +44,9 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Use nautilus */
+#undef HAVE_NAUTILUS
 
 /* Define to 1 if you have the <netdb.h> header file. */
 #undef HAVE_NETDB_H

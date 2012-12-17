@@ -1,2 +1,2 @@
-SUBDIRS = src plugins scripts data
-AM_CFLAGS = -Wall -DPREFIX=\"$(prefix)\"
+SUBDIRS = src plugins scripts data filemanagers
+AM_CFLAGS =-W -Wall -DPREFIX=\"$(prefix)\"

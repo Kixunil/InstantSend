@@ -141,6 +141,9 @@ have_dbus=no
 have_avahi=no
 have_gtkmm=no
 have_widget_gtk=no
+have_caja_extension=no
+have_nautilus_extension=no
+
 # Headers has been checked before
 # TODO: Make it better
 
@@ -194,6 +197,29 @@ AS_IF([test "x$enable_widget_gtk" '!=' xno], [
 	PKG_CHECK_MODULES([WIDGET_GTK], [gtkmm-2.4 dbus-1],
 			  [],
 			  [])
+])
+
+
+# Caja and Nautilus are always automatic
+AS_IF([test "x$enable_filemanager_caja" '!=' xno], [
+	PKG_CHECK_MODULES([CAJA_EXTENSION], [libcaja-extension],
+			  [AC_DEFINE([HAVE_CAJA], [1], [Use caja])
+			  have_caja_extension=yes],
+			  [have_caja_extension=no])
+])
+
+AS_IF([test "x$enable_filemanager_nautilus" '!=' xno], [
+	PKG_CHECK_MODULES([NAUTILUS_EXTENSION3], [libnautilus-extension >= 3.0],
+			  [AC_DEFINE([HAVE_NAUTILUS], [1], [Use nautilus])
+			  have_nautilus_extension=yes
+			  nautilus_extension_version=3.0],
+			  [
+			  	PKG_CHECK_MODULES([NAUTILUS_EXTENSION2], [libnautilus-extension >= 2.0],
+						  [AC_DEFINE([HAVE_NAUTILUS], [1], [Use nautilus])
+						  have_nautilus_extension=yes
+						  nautilus_extension_version=2.0],
+			  			  [have_nautilus_extension=no])
+			])
 ])
 
 AS_IF([test "x$enable_scanner_avahi" '!=' xno], [
@@ -287,12 +313,17 @@ AC_SUBST([have_configtool])
 AC_SUBST([have_widget_gtk])
 AC_SUBST([have_scan])
 AC_SUBST([have_scanner_avahi])
+AC_SUBST([have_caja_extension])
+AC_SUBST([have_nautilus_extension])
+AC_SUBST([nautilus_extension_version])
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
 		 scripts/Makefile
 		 data/Makefile
-                 plugins/Makefile])
+                 plugins/Makefile
+		 filemanagers/caja/Makefile
+		 filemanagers/nautilus/Makefile])
 
 AC_OUTPUT
 
@@ -320,6 +351,14 @@ info_msg="${info_msg}avahi:                                                     
 
 ------------------------------------Scanners------------------------------------
 Scanners enabled:                                                            $have_scan
-avahi:                                                                       $have_scanner_avahi"
+avahi:                                                                       $have_scanner_avahi
+----------------------------------File managers---------------------------------
+Caja:                                                                        $have_caja_extension
+Nautilus:                                                                    $have_nautilus_extension"
+
+AS_IF([test "x$have_nautilus_extension" = xyes], [
+       info_msg="$info_msg
+ - libnautilus-extension version: $nautilus_extension_version"
+])
 
 AC_MSG_NOTICE([$info_msg])
