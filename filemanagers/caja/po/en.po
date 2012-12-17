@@ -1,0 +1,30 @@
+# InstantSend Caja plugin
+# Copyright (C) 2012
+# This file is distributed under the same license as the instantsend package.
+# Martin Habovštiak <martin.habovstiak@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-12-17 01:21+0100\n"
+"PO-Revision-Date: 2012-12-17 01:25+0100\n"
+"Last-Translator: Martin <martin.habovstiak@gmail.com>\n"
+"Language-Team: Slovak\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: caja-nste.c:83
+msgid "Send using InstantSend"
+msgstr "Send using InstantSend"
+
+#: caja-nste.c:84
+msgid "Send file over any protocol provided by InstantSend toolkit"
+msgstr "Send file over any protocol provided by InstantSend toolkit"
+
+#: caja-nste.c:89
+msgid "Send files over any protocol provided by InstantSend toolkit"
+msgstr "Send files over any protocol provided by InstantSend toolkit"
