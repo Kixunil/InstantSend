@@ -1,0 +1,5 @@
+# This file lists importance levels of plugins, which will cause automatic adding of plugin(s)
+# Do not edit this but make copy named "autoplugins" instead!
+POPULAR
+USERCOMFORT
+SECURITY
