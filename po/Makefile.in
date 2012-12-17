@@ -1,0 +1,29 @@
+HAVE_WIDGET_GTK=@have_widget_gtk@
+
+ALL=
+INSTALL=
+
+ifeq ($(HAVE_WIDGET_GTK),yes)
+	ALL+=widget-gtk
+	INSTALL+=install-widget-gtk
+endif
+
+all: $(ALL)
+
+check:
+
+clean:
+	$(MAKE) -C widget-gtk clean
+
+distclean:
+	$(MAKE) -C widget-gtk distclean
+
+install: $(INSTALL)
+
+widget-gtk:
+	$(MAKE) -C widget-gtk
+
+install-widget-gtk:
+	$(MAKE) -C widget-gtk install
+
+.PHONY: all check clean distclean install widget-gtk install-widget-gtk

@@ -1,0 +1,112 @@
+# InstantSend (gtk dialog)
+# Copyright (C) 2012
+# This file is distributed under the same license as the InstantSend package.
+# Martin Habovštiak <martin.habovstiak@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.6\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-12-17 12:32+0100\n"
+"PO-Revision-Date: 2012-12-17 12:37+0100\n"
+"Last-Translator: Martin <martin.habovstiak@gmail.com>\n"
+"Language-Team: Slovak\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: src/widget-gtk.cpp:172
+msgid "Quit"
+msgstr "Quit"
+
+#: src/widget-gtk.cpp:173
+msgid "Send files"
+msgstr "Send files"
+
+#: src/widget-gtk.cpp:174
+msgid "Preferences"
+msgstr "Preferences"
+
+#: src/widget-gtk.cpp:175
+msgid "Start server"
+msgstr "Start server"
+
+#: src/widget-gtk.cpp:176
+msgid "Stop server"
+msgstr "Stop server"
+
+#: src/widget-gtk.cpp:249
+#, c-format
+msgid "Error: %s\n"
+msgstr "Error: %s\n"
+
+#: src/widget-gtk.cpp:369
+msgid "Connecting"
+msgstr "Connecting"
+
+#: src/widget-gtk.cpp:373
+msgid "Waiting for accept"
+msgstr "Waiting for accept"
+
+#: src/widget-gtk.cpp:377
+msgid "Sending ("
+msgstr "Sending ("
+
+#: src/widget-gtk.cpp:381
+msgid "Receiving ("
+msgstr "Receiving ("
+
+#: src/widget-gtk.cpp:385
+msgid "Paused ("
+msgstr "Paused ("
+
+#: src/widget-gtk.cpp:606 src/widget-gtk.cpp:619
+#, c-format
+msgid "Error getting message args: %s"
+msgstr "Error getting message args: %s"
+
+#: src/widget-gtk.cpp:650
+#, c-format
+msgid "Excepion occured during loading of icon: %s\n"
+msgstr "Excepion occured during loading of icon: %s\n"
+
+#: src/widget-gtk.cpp:660
+msgid "InstantSend - Files"
+msgstr "InstantSend - Files"
+
+#: src/widget-gtk.cpp:662
+#, c-format
+msgid "getting session bus failed: %s\n"
+msgstr "getting session bus failed: %s\n"
+
+#: src/widget-gtk.cpp:670
+#, c-format
+msgid "requesting name failed: %s\n"
+msgstr "requesting name failed: %s\n"
+
+#: src/widget-gtk.cpp:683
+#, c-format
+msgid "Could not match: %s"
+msgstr "Could not match: %s"
+
+#: src/widget-gtk.cpp:691
+msgid "Pending files"
+msgstr "Pending files"
+
+#: src/widget-gtk.cpp:692
+msgid "Files in progress"
+msgstr "Files in progress"
+
+#: src/widget-gtk.cpp:693
+msgid "Incoming files"
+msgstr "Incoming files"
+
+#: src/widget-gtk.cpp:694
+msgid "Outgoing files"
+msgstr "Outgoing files"
+
+#: src/widget-gtk.cpp:695
+msgid "Received files"
+msgstr "Received files"
