@@ -18,6 +18,8 @@
 #include <gtkmm/uimanager.h>
 #include <stdint.h>
 #include <dbus/dbus.h>
+#include <locale.h>
+#include <libintl.h>
 
 #include <vector>
 #include <map>
@@ -27,6 +29,8 @@
 #include "json.h"
 #include "sysapi.h"
 #include "multithread.h"
+
+#define _(str) gettext(str)
 
 using namespace Gtk;
 using namespace std;
@@ -170,10 +174,10 @@ class trayIcon {
 	public:
 		inline trayIcon(dialogControl *dialog) : dlg(dialog), actions(Gtk::ActionGroup::create()) {
 			actions->add( Gtk::Action::create("Quit", Gtk::Stock::QUIT), sigc::mem_fun(*dlg, &dialogControl::quit));
-			actions->add( Gtk::Action::create("SendFiles", "Send files"), sigc::mem_fun(*dlg, &dialogControl::sendFiles));
+			actions->add( Gtk::Action::create("SendFiles", _("Send files")), sigc::mem_fun(*dlg, &dialogControl::sendFiles));
 			actions->add( Gtk::Action::create("Preferences", Gtk::Stock::PREFERENCES), sigc::mem_fun(*dlg, &dialogControl::preferences));
-			actions->add( Gtk::Action::create("StartServer", "Start server"), sigc::mem_fun(*dlg, &dialogControl::startServer));
-			actions->add( Gtk::Action::create("StopServer", "Stop server"), sigc::mem_fun(*dlg, &dialogControl::stopServer));
+			actions->add( Gtk::Action::create("StartServer", _("Start server")), sigc::mem_fun(*dlg, &dialogControl::startServer));
+			actions->add( Gtk::Action::create("StopServer", _("Stop server")), sigc::mem_fun(*dlg, &dialogControl::stopServer));
 
 		}
 
@@ -366,23 +370,23 @@ class SimpleFileInfoRenderer : public observer_t {
 			peerName.set_justify(JUSTIFY_LEFT);
 			switch(finfo->getStatus()) {
 				case 1:
-					progress.set_text("Connecting");
+					progress.set_text(_("Connecting"));
 					progress.pulse();
 					break;
 				case 2:
-					progress.set_text("Waiting for accept");
+					progress.set_text(_("Waiting for accept"));
 					progress.pulse();
 					break;
 				case 3:
-					progress.set_text(ustring("Sending (") + intToStr(finfo->getProgress()) + "%)");
+					progress.set_text(ustring(_("Sending")) + " (" + intToStr(finfo->getProgress()) + "%)");
 					progress.set_fraction((float)finfo->getProgress() / 100);
 					break;
 				case 4:
-					progress.set_text(ustring("Receiving (") + intToStr(finfo->getProgress()) + "%)");
+					progress.set_text(ustring(_("Receiving")) + " (" + intToStr(finfo->getProgress()) + "%)");
 					progress.set_fraction((float)finfo->getProgress() / 100);
 					break;
 				case 5:
-					progress.set_text(ustring("Paused (") + intToStr(finfo->getProgress()) + "%)");
+					progress.set_text(ustring(_("Paused")) + " (" + intToStr(finfo->getProgress()) + "%)");
 					progress.set_fraction((float)finfo->getProgress() / 100);
 					break;
 			}
@@ -603,7 +607,7 @@ filter_func (DBusConnection *connection,
 		dbus_error_init (&dberr);
 		dbus_message_get_args (message, &dberr, DBUS_TYPE_UINT32, &fileId, DBUS_TYPE_STRING, &fileName, DBUS_TYPE_STRING, &machineId, DBUS_TYPE_UINT64, &fileSize, DBUS_TYPE_BYTE, &direction, DBUS_TYPE_INVALID);
 		if (dbus_error_is_set (&dberr)) {
-			fprintf (stderr, "Error getting message args: %s", dberr.message);
+			fprintf (stderr, _("Error getting message args: %s"), dberr.message);
 			dbus_error_free (&dberr);
 		} else {
 			isWidget.addFile(fileId, ustring(fileName), ustring(machineId), fileSize, direction);
@@ -616,7 +620,7 @@ filter_func (DBusConnection *connection,
 		dbus_error_init (&dberr);
 		dbus_message_get_args (message, &dberr, DBUS_TYPE_UINT32, &fileId, DBUS_TYPE_UINT64, &transferredBytes, DBUS_TYPE_INVALID);
 		if (dbus_error_is_set (&dberr)) {
-			fprintf (stderr, "Error getting message args: %s", dberr.message);
+			fprintf (stderr, _("Error getting message args: %s"), dberr.message);
 			dbus_error_free (&dberr);
 		} else {
 			isWidget.updateBytes(fileId, transferredBytes);
@@ -647,19 +651,19 @@ instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendF
 			set_icon_from_file(combinePath(getSystemDataDir(), "icon_32.png"));
 		}
 		catch(exception &e) {
-			printf("Excepion occured during loading of icon: %s\n", e.what());
+			printf(_("Excepion occured during loading of icon: %s\n"), e.what());
 		}
 		catch(...) {
 		}
 	}
 
-	set_title("Files");
+	set_title(_("InstantSend - Files"));
 	set_default_size(400, 200);
 
 	dbus_error_init (&dberr);
 	dbconn = dbus_bus_get (DBUS_BUS_SESSION, &dberr);
 	if (dbus_error_is_set (&dberr)) {
-		fprintf (stderr, "getting session bus failed: %s\n", dberr.message);
+		fprintf (stderr, _("getting session bus failed: %s\n"), dberr.message);
 		dbus_error_free (&dberr);
 		return;
 	}
@@ -667,7 +671,7 @@ instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendF
 	dbus_bus_request_name (dbconn, "sk.pixelcomp.instantsend",
 	                       DBUS_NAME_FLAG_REPLACE_EXISTING, &dberr);
 	if (dbus_error_is_set (&dberr)) {
-		fprintf (stderr, "requesting name failed: %s\n", dberr.message);
+		fprintf (stderr, _("requesting name failed: %s\n"), dberr.message);
 		dbus_error_free (&dberr);
 		return;
 	}
@@ -680,7 +684,7 @@ instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendF
 	                    &dberr);
 
 	if (dbus_error_is_set (&dberr)) {
-		fprintf (stderr, "Could not match: %s", dberr.message);
+		fprintf (stderr, _("Could not match: %s"), dberr.message);
 		dbus_error_free (&dberr);
 		return;
 	}
@@ -688,11 +692,11 @@ instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendF
 	mutex->get();
 
 	add(notebook);
-	notebook.append_page(scrollWindowPending, "Pending files");
-	notebook.append_page(scrollWindowAll, "Files in progress");
-	notebook.append_page(scrollWindowRecv, "Incoming files");
-	notebook.append_page(scrollWindowSend, "Outgoing files");
-	notebook.append_page(scrollWindowRecved, "Received files");
+	notebook.append_page(scrollWindowPending, _("Pending files"));
+	notebook.append_page(scrollWindowAll, _("Files in progress"));
+	notebook.append_page(scrollWindowRecv, _("Incoming files"));
+	notebook.append_page(scrollWindowSend, _("Outgoing files"));
+	notebook.append_page(scrollWindowRecved, _("Received files"));
 
 	scrollWindowPending.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	scrollWindowAll.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -715,6 +719,11 @@ instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendF
 }
 
 int main(int argc, char *argv[]) {
+	setlocale(LC_ALL, "");
+	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+	textdomain(GETTEXT_PACKAGE);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
 	Main app(argc, argv, "sk.pixelcomp.instantsend.widget");
 	appPtr = &app;
 	instSendWidget window;
