@@ -16,7 +16,8 @@ clean:
 	$(MAKE) -C widget-gtk clean
 
 distclean:
-	$(MAKE) -C widget-gtk distclean
+	-$(MAKE) -C widget-gtk distclean
+	rm -f Makefile
 
 install: $(INSTALL)
 
