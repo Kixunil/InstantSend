@@ -77,6 +77,7 @@ echo Revision: $REVISION
 echo Distribution: $DISTRIBUTION
 
 cp debian/control.$DISTRIBUTION debian/control
+cp debian/instantsend-filemanager-nautilus.install.$DISTRIBUTION cp debian/instantsend-filemanager-nautilus.install
 sed -e 's/###DISTRIBUTION###/'$DISTRIBUTION'/g' debian/changelog.in > debian/changelog
 
 if [ '!' -f "Makefile.in" ];
