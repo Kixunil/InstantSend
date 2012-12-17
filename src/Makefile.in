@@ -12,8 +12,11 @@ BINDIR=@bindir@
 LIBDIR=@libdir@
 datarootdir=@datarootdir@
 DATADIR=@datadir@
+LOCALEDIR=@localedir@
 
-DEFS+=-DPREFIX=\"$(PREFIX)\" -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DDATADIR=\"$(DATADIR)\"
+GETTEXT_DOMAINNAME=instantsend-dialog-gtk
+
+DEFS+=-DPREFIX=\"$(PREFIX)\" -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DGETTEXT_PACKAGE=\"$(GETTEXT_DOMAINNAME)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 HAVE_CLIENT=@have_client@
 HAVE_SERVER=@have_server@

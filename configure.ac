@@ -323,7 +323,9 @@ AC_CONFIG_FILES([Makefile
 		 data/Makefile
                  plugins/Makefile
 		 filemanagers/caja/Makefile
-		 filemanagers/nautilus/Makefile])
+		 filemanagers/nautilus/Makefile
+		 po/Makefile
+		 po/widget-gtk/Makefile])
 
 AC_OUTPUT
 
