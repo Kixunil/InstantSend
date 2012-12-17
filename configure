@@ -606,6 +606,9 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+nautilus_extension_version
+have_nautilus_extension
+have_caja_extension
 have_scanner_avahi
 have_scan
 have_widget_gtk
@@ -619,6 +622,12 @@ libnotify_version
 have_notify
 have_ip6tcp
 have_ip4tcp
+NAUTILUS_EXTENSION2_LIBS
+NAUTILUS_EXTENSION2_CFLAGS
+NAUTILUS_EXTENSION3_LIBS
+NAUTILUS_EXTENSION3_CFLAGS
+CAJA_EXTENSION_LIBS
+CAJA_EXTENSION_CFLAGS
 WIDGET_GTK_LIBS
 WIDGET_GTK_CFLAGS
 GTKMM_LIBS
@@ -763,7 +772,13 @@ AVAHI_LIBS
 GTKMM_CFLAGS
 GTKMM_LIBS
 WIDGET_GTK_CFLAGS
-WIDGET_GTK_LIBS'
+WIDGET_GTK_LIBS
+CAJA_EXTENSION_CFLAGS
+CAJA_EXTENSION_LIBS
+NAUTILUS_EXTENSION3_CFLAGS
+NAUTILUS_EXTENSION3_LIBS
+NAUTILUS_EXTENSION2_CFLAGS
+NAUTILUS_EXTENSION2_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1456,6 +1471,18 @@ Some influential environment variables:
               C compiler flags for WIDGET_GTK, overriding pkg-config
   WIDGET_GTK_LIBS
               linker flags for WIDGET_GTK, overriding pkg-config
+  CAJA_EXTENSION_CFLAGS
+              C compiler flags for CAJA_EXTENSION, overriding pkg-config
+  CAJA_EXTENSION_LIBS
+              linker flags for CAJA_EXTENSION, overriding pkg-config
+  NAUTILUS_EXTENSION3_CFLAGS
+              C compiler flags for NAUTILUS_EXTENSION3, overriding pkg-config
+  NAUTILUS_EXTENSION3_LIBS
+              linker flags for NAUTILUS_EXTENSION3, overriding pkg-config
+  NAUTILUS_EXTENSION2_CFLAGS
+              C compiler flags for NAUTILUS_EXTENSION2, overriding pkg-config
+  NAUTILUS_EXTENSION2_LIBS
+              linker flags for NAUTILUS_EXTENSION2, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -4896,6 +4923,9 @@ have_dbus=no
 have_avahi=no
 have_gtkmm=no
 have_widget_gtk=no
+have_caja_extension=no
+have_nautilus_extension=no
+
 # Headers has been checked before
 # TODO: Make it better
 
@@ -5622,6 +5652,319 @@ fi
 
 fi
 
+
+# Caja and Nautilus are always automatic
+if test "x$enable_filemanager_caja" '!=' xno; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for CAJA_EXTENSION" >&5
+$as_echo_n "checking for CAJA_EXTENSION... " >&6; }
+
+if test -n "$CAJA_EXTENSION_CFLAGS"; then
+    pkg_cv_CAJA_EXTENSION_CFLAGS="$CAJA_EXTENSION_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcaja-extension\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcaja-extension") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_CAJA_EXTENSION_CFLAGS=`$PKG_CONFIG --cflags "libcaja-extension" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$CAJA_EXTENSION_LIBS"; then
+    pkg_cv_CAJA_EXTENSION_LIBS="$CAJA_EXTENSION_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcaja-extension\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcaja-extension") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_CAJA_EXTENSION_LIBS=`$PKG_CONFIG --libs "libcaja-extension" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        CAJA_EXTENSION_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libcaja-extension" 2>&1`
+        else
+	        CAJA_EXTENSION_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libcaja-extension" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$CAJA_EXTENSION_PKG_ERRORS" >&5
+
+	have_caja_extension=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	have_caja_extension=no
+else
+	CAJA_EXTENSION_CFLAGS=$pkg_cv_CAJA_EXTENSION_CFLAGS
+	CAJA_EXTENSION_LIBS=$pkg_cv_CAJA_EXTENSION_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_CAJA 1" >>confdefs.h
+
+			  have_caja_extension=yes
+fi
+
+fi
+
+if test "x$enable_filemanager_nautilus" '!=' xno; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for NAUTILUS_EXTENSION3" >&5
+$as_echo_n "checking for NAUTILUS_EXTENSION3... " >&6; }
+
+if test -n "$NAUTILUS_EXTENSION3_CFLAGS"; then
+    pkg_cv_NAUTILUS_EXTENSION3_CFLAGS="$NAUTILUS_EXTENSION3_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnautilus-extension >= 3.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnautilus-extension >= 3.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_NAUTILUS_EXTENSION3_CFLAGS=`$PKG_CONFIG --cflags "libnautilus-extension >= 3.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$NAUTILUS_EXTENSION3_LIBS"; then
+    pkg_cv_NAUTILUS_EXTENSION3_LIBS="$NAUTILUS_EXTENSION3_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnautilus-extension >= 3.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnautilus-extension >= 3.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_NAUTILUS_EXTENSION3_LIBS=`$PKG_CONFIG --libs "libnautilus-extension >= 3.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        NAUTILUS_EXTENSION3_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libnautilus-extension >= 3.0" 2>&1`
+        else
+	        NAUTILUS_EXTENSION3_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libnautilus-extension >= 3.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$NAUTILUS_EXTENSION3_PKG_ERRORS" >&5
+
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for NAUTILUS_EXTENSION2" >&5
+$as_echo_n "checking for NAUTILUS_EXTENSION2... " >&6; }
+
+if test -n "$NAUTILUS_EXTENSION2_CFLAGS"; then
+    pkg_cv_NAUTILUS_EXTENSION2_CFLAGS="$NAUTILUS_EXTENSION2_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnautilus-extension >= 2.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnautilus-extension >= 2.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_NAUTILUS_EXTENSION2_CFLAGS=`$PKG_CONFIG --cflags "libnautilus-extension >= 2.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$NAUTILUS_EXTENSION2_LIBS"; then
+    pkg_cv_NAUTILUS_EXTENSION2_LIBS="$NAUTILUS_EXTENSION2_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnautilus-extension >= 2.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnautilus-extension >= 2.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_NAUTILUS_EXTENSION2_LIBS=`$PKG_CONFIG --libs "libnautilus-extension >= 2.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        NAUTILUS_EXTENSION2_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libnautilus-extension >= 2.0" 2>&1`
+        else
+	        NAUTILUS_EXTENSION2_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libnautilus-extension >= 2.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$NAUTILUS_EXTENSION2_PKG_ERRORS" >&5
+
+	have_nautilus_extension=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	have_nautilus_extension=no
+else
+	NAUTILUS_EXTENSION2_CFLAGS=$pkg_cv_NAUTILUS_EXTENSION2_CFLAGS
+	NAUTILUS_EXTENSION2_LIBS=$pkg_cv_NAUTILUS_EXTENSION2_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_NAUTILUS 1" >>confdefs.h
+
+						  have_nautilus_extension=yes
+						  nautilus_extension_version=2.0
+fi
+
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for NAUTILUS_EXTENSION2" >&5
+$as_echo_n "checking for NAUTILUS_EXTENSION2... " >&6; }
+
+if test -n "$NAUTILUS_EXTENSION2_CFLAGS"; then
+    pkg_cv_NAUTILUS_EXTENSION2_CFLAGS="$NAUTILUS_EXTENSION2_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnautilus-extension >= 2.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnautilus-extension >= 2.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_NAUTILUS_EXTENSION2_CFLAGS=`$PKG_CONFIG --cflags "libnautilus-extension >= 2.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$NAUTILUS_EXTENSION2_LIBS"; then
+    pkg_cv_NAUTILUS_EXTENSION2_LIBS="$NAUTILUS_EXTENSION2_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnautilus-extension >= 2.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnautilus-extension >= 2.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_NAUTILUS_EXTENSION2_LIBS=`$PKG_CONFIG --libs "libnautilus-extension >= 2.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        NAUTILUS_EXTENSION2_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libnautilus-extension >= 2.0" 2>&1`
+        else
+	        NAUTILUS_EXTENSION2_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libnautilus-extension >= 2.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$NAUTILUS_EXTENSION2_PKG_ERRORS" >&5
+
+	have_nautilus_extension=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	have_nautilus_extension=no
+else
+	NAUTILUS_EXTENSION2_CFLAGS=$pkg_cv_NAUTILUS_EXTENSION2_CFLAGS
+	NAUTILUS_EXTENSION2_LIBS=$pkg_cv_NAUTILUS_EXTENSION2_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_NAUTILUS 1" >>confdefs.h
+
+						  have_nautilus_extension=yes
+						  nautilus_extension_version=2.0
+fi
+
+else
+	NAUTILUS_EXTENSION3_CFLAGS=$pkg_cv_NAUTILUS_EXTENSION3_CFLAGS
+	NAUTILUS_EXTENSION3_LIBS=$pkg_cv_NAUTILUS_EXTENSION3_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_NAUTILUS 1" >>confdefs.h
+
+			  have_nautilus_extension=yes
+			  nautilus_extension_version=3.0
+fi
+
+fi
+
 if test "x$enable_scanner_avahi" '!=' xno; then :
 
        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for avahi-browse" >&5
@@ -6170,7 +6513,10 @@ done
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile scripts/Makefile data/Makefile plugins/Makefile"
+
+
+
+ac_config_files="$ac_config_files Makefile src/Makefile scripts/Makefile data/Makefile plugins/Makefile filemanagers/caja/Makefile filemanagers/nautilus/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -6913,6 +7259,8 @@ do
     "scripts/Makefile") CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
     "data/Makefile") CONFIG_FILES="$CONFIG_FILES data/Makefile" ;;
     "plugins/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/Makefile" ;;
+    "filemanagers/caja/Makefile") CONFIG_FILES="$CONFIG_FILES filemanagers/caja/Makefile" ;;
+    "filemanagers/nautilus/Makefile") CONFIG_FILES="$CONFIG_FILES filemanagers/nautilus/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -7668,7 +8016,17 @@ info_msg="${info_msg}avahi:                                                     
 
 ------------------------------------Scanners------------------------------------
 Scanners enabled:                                                            $have_scan
-avahi:                                                                       $have_scanner_avahi"
+avahi:                                                                       $have_scanner_avahi
+----------------------------------File managers---------------------------------
+Caja:                                                                        $have_caja_extension
+Nautilus:                                                                    $have_nautilus_extension"
+
+if test "x$have_nautilus_extension" = xyes; then :
+
+       info_msg="$info_msg
+ - libnautilus-extension version: $nautilus_extension_version"
+
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: $info_msg" >&5
 $as_echo "$as_me: $info_msg" >&6;}
