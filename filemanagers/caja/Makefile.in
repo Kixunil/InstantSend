@@ -1,0 +1,62 @@
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+datarootdir=@datarootdir@
+PREFIX=$(prefix)
+LIBDIR=@libdir@
+LOCALEDIR=@localedir@
+
+GETTEXT_DOMAINNAME=instantsend-filemanager-caja
+
+DEFS+=-DGETTEXT_PACKAGE=\"$(GETTEXT_DOMAINNAME)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+
+CFLAGS+=-fPIC
+
+HAVE_CAJA_EXTENSION=@have_caja_extension@
+CAJA_EXTENSION_CFLAGS=@CAJA_EXTENSION_CFLAGS@
+CAJA_EXTENSION_LIBS=@CAJA_EXTENSION_LIBS@
+
+ALL=
+INSTALL=
+
+ifeq ($(HAVE_CAJA_EXTENSION),yes)
+	ALL+=filemanager-caja.so locales
+	INSTALL+=install-filemanager-caja install-locales
+endif
+
+POFILES=$(wildcard po/*.po)
+MOFILES=$(POFILES:.po=.mo)
+LANGS=$(subst po/,,$(subst .po,,$(POFILES)))
+
+all: $(ALL)
+
+check:
+
+clean:
+	rm -f filemanager-caja.so po/*.mo
+
+distclean: clean
+	rm -f Makefile
+
+install: $(INSTALL)
+
+locales: $(MOFILES)
+
+po/%.mo: po/%.po
+	msgfmt -o $@ $<
+
+install-mo-%: po/%.mo
+	mkdir -p $(DESTDIR)$(LOCALEDIR)/$(subst po/,,$(subst .mo,,$<))/LC_MESSAGES
+	cp $< $(DESTDIR)$(LOCALEDIR)/$(subst po/,,$(subst .mo,,$<))/LC_MESSAGES/$(GETTEXT_DOMAINNAME).mo
+
+install-locales: $(patsubst %,install-mo-%,$(LANGS))
+
+filemanager-caja.so: caja.c caja-nste.c
+	gcc $(CFLAGS) $(CAJA_EXTENSION_CFLAGS) $(DEFS) -o $@ caja.c caja-nste.c $(CAJA_EXTENSION_LIBS) -shared
+
+install-filemanager-caja: filemanager-caja.so
+	install -D -m 644 filemanager-caja.so $(DESTDIR)$(LIBDIR)/caja/extensions-2.0/libcaja-instantsend.so
+
+.PHONY: all check clean distclean install install-locales install-mo-% loacles 
