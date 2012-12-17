@@ -10,7 +10,6 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: instantsend-client, instantsend-gtk, instantsend-plugins-standard
 Description: Server from instantsend toolkit                               
-Description: Server from instantsend toolkit
  Instantsend is toolkit for sending files over multiple protocols.
  .
  This program handles receiving files.
