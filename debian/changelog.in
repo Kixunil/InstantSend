@@ -1,3 +1,8 @@
+instantsend (0.6~###DISTRIBUTION###) unstable; urgency=low
+  * Added few items to tray icon menu (gtk), caja and nautilus support
+
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Tue, 17 Dec 2012 12:15:56 +0100
+
 instantsend (0.5-3~###DISTRIBUTION###) unstable; urgency=low
   * Supports avahi, improved GUI
 
