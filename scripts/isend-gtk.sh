@@ -47,6 +47,10 @@ if TARGET="`instsend-config $CFGFLAG "$CFG" -T | zenity --list --title="Instant 
 then
 	while [ $# -gt 0 ];
 	do
+		if [ -d "$1" ];
+		then
+			continue # Skip directories
+		fi
 		if isend "$ISENDFLAG" "$CFG" -p -t "$TARGET" -f "$1";
 		then
 			notify-send -i ~/.instantsend/icon_32.png "Instant Send" "File $1 sent." 
