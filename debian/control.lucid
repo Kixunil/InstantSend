@@ -99,6 +99,17 @@ Description: GTK based GUI from instantsend toolkit
  .
  Simple GUI shows files in progress and allows users control them.
 
+# File managers
+Package: instantsend-filemanager-nautilus
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, instantsend-gtk, instantsend-client, nautilus, libnautilus-extension1
+Enhances: instantsend-gtk, nautilus, instantsend-client
+Provides: instantsend-filemanagers
+Description: Nautilus plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin makes instantsend work with nautilus file manager.
+
 # Virtual package - depends on all plugins made by Martin Habovštiak
 Package: instantsend-plugins-standard
 Architecture: all

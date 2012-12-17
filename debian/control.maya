@@ -2,7 +2,7 @@ Source: instantsend
 Maintainer: Martin Habovštiak <martin.habovstiak@gmail.com>
 Section: misc
 Priority: optional
-Build-Depends: autoconf, automake, libdbus-1-dev, libnotify-dev, libgtkmm-2.4-dev, libavahi-common-dev, libavahi-client-dev
+Build-Depends: autoconf, automake, libdbus-1-dev, libnotify-dev, libgtkmm-2.4-dev, libavahi-common-dev, libavahi-client-dev, libcaja-extension-dev, libnautilus-extension-dev
 
 # Server
 Package: instantsend-server
@@ -99,6 +99,27 @@ Description: GTK based GUI from instantsend toolkit
  .
  Simple GUI shows files in progress and allows users control them.
 
+# File managers
+Package: instantsend-filemanager-caja
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, instantsend-gtk, instantsend-client, caja, libcaja-extension
+Enhances: instantsend-gtk, caja, instantsend-client
+Provides: instantsend-filemanagers
+Description: Caja plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin makes instantsend work with caja file manager.
+
+Package: instantsend-filemanager-nautilus
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, instantsend-gtk, instantsend-client, nautilus, libnautilus-extension1a
+Enhances: instantsend-gtk, nautilus, instantsend-client
+Provides: instantsend-filemanagers
+Description: Nautilus plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin makes instantsend work with nautilus file manager.
+
 # Virtual package - depends on all plugins made by Martin Habovštiak
 Package: instantsend-plugins-standard
 Architecture: all
@@ -120,5 +141,6 @@ Description: Scanners from instantsend toolkit
 Package: instantsend
 Architecture: all
 Depends: instantsend-server, instantsend-client, instantsend-gtk, instantsend-plugins-standard, instantsend-scanners-standard
+Recommends: instantsend-filemanagers
 Description: Toolkit for sending files over multiple protocols.
 
