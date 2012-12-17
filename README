@@ -1,5 +1,5 @@
 Instant Send - simplified
-Version: 0.5
+Version: 0.6
 Author: Martin Habovštiak
 
 Features:
@@ -10,7 +10,8 @@ Features:
 	You can create any imaginable plugin for communication
 	Plugins can use another plugins. This means you can chain them or add features without changing original plugin.
 	Server implements some events and uses event plugins
-	Experimental version of gtk-widget can show receiving files
+	Experimental version of gtk-widget can show receiving files, start/stop server, invoke send command; localized
+	Caja and Nautilus modules provides comfortable sending from file manager
 
 Issues:
 	Several things are hard coded
