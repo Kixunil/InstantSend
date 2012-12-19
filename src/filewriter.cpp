@@ -23,7 +23,7 @@ bool dataFragment_t::writeData(FILE *file) const {
 	fseek(file, pos, SEEK_SET);
 	bool success = fwrite(dat->data, dat->size, 1, file);
 	if(!success) {
-		printf("Error occured: %s\n", strerror(ferror(file)));
+		printf("Error occured: %s\n(tried to write %lu Bytes of data)\n", strerror(ferror(file)), (long)dat->size);
 		fflush(stdout);
 	}
 	//funlockfile(file);
@@ -156,6 +156,12 @@ void fileWriter_t::run() {
 
 bool fileWriter_t::writeData(long position, auto_ptr<anyData> &data, thread_t &caller) {
 	DMG;
+	// Just in case, so we don't insert empty data
+	if(!data->size) {
+		data.reset();
+		return true;
+	}
+
 	mutex->get();
 	if(hardPause || data->size + bufsiz > MAXBUFSIZE) {
 		caller.pause();
