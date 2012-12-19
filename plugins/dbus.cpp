@@ -42,6 +42,8 @@ class progressHandler : public eventProgress_t {
 			uint8_t direction = fStatus.getDirection();
 
 			dbus_message_append_args(dbmsg, DBUS_TYPE_UINT32, &fileId, DBUS_TYPE_STRING, &fname_c, DBUS_TYPE_STRING, &mname_c, DBUS_TYPE_UINT64, &fsize, DBUS_TYPE_BYTE, &direction, DBUS_TYPE_INVALID);
+			delete[](fname_c);
+			delete[](mname_c);
 			dbconnhandle.sendMsg(dbmsg);
 			dbus_message_unref(dbmsg);
 			gettimeofday(&lastUpdate, NULL);
