@@ -42,6 +42,25 @@ msgstr "Zastaviť server"
 msgid "Error: %s\n"
 msgstr "Chyba: %s\n"
 
+#: src/widget-gtk.cpp:357
+msgid "Pause"
+msgstr "Pozastaviť"
+
+msgid "Cancel"
+msgstr "Zrušiť"
+
+msgid "Open file"
+msgstr "Otvoriť súbor"
+
+msgid "Open directory"
+msgstr "Otvoriť adresár"
+
+msgid "Remove from list"
+msgstr "Odstrániť zo zoznamu"
+
+msgid "Delete file"
+msgstr "Vymazať súbor"
+
 #: src/widget-gtk.cpp:369
 msgid "Connecting"
 msgstr "Pripájanie"

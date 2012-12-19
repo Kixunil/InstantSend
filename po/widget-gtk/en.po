@@ -42,6 +42,25 @@ msgstr "Stop server"
 msgid "Error: %s\n"
 msgstr "Error: %s\n"
 
+#: src/widget-gtk.cpp:357
+msgid "Pause"
+msgstr "Pause"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Open file"
+msgstr "Open file"
+
+msgid "Open directory"
+msgstr "Open directory"
+
+msgid "Remove from list"
+msgstr "Remove from list"
+
+msgid "Delete file"
+msgstr "Delete file"
+
 #: src/widget-gtk.cpp:369
 msgid "Connecting"
 msgstr "Connecting"
