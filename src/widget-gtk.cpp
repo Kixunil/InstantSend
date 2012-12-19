@@ -108,6 +108,10 @@ class FileInfoItem {
 			fileSize = size;
 		}
 
+		inline uint64_t getSize() {
+			return fileSize;
+		}
+
 		inline void setStatus(char status) {
 			this->status = status;
 			update();
@@ -173,11 +177,11 @@ class trayIcon {
 		Glib::RefPtr<ActionGroup> actions;
 	public:
 		inline trayIcon(dialogControl *dialog) : dlg(dialog), actions(Gtk::ActionGroup::create()) {
-			actions->add( Gtk::Action::create("Quit", Gtk::Stock::QUIT), sigc::mem_fun(*dlg, &dialogControl::quit));
-			actions->add( Gtk::Action::create("SendFiles", _("Send files")), sigc::mem_fun(*dlg, &dialogControl::sendFiles));
-			actions->add( Gtk::Action::create("Preferences", Gtk::Stock::PREFERENCES), sigc::mem_fun(*dlg, &dialogControl::preferences));
-			actions->add( Gtk::Action::create("StartServer", _("Start server")), sigc::mem_fun(*dlg, &dialogControl::startServer));
-			actions->add( Gtk::Action::create("StopServer", _("Stop server")), sigc::mem_fun(*dlg, &dialogControl::stopServer));
+			actions->add( Gtk::Action::create("Quit", Gtk::Stock::QUIT, _("Quit")), sigc::mem_fun(*dlg, &dialogControl::quit));
+			actions->add( Gtk::Action::create_with_icon_name("SendFiles", ustring("document-send"), ustring(_("Send files")), ustring()), sigc::mem_fun(*dlg, &dialogControl::sendFiles));
+			actions->add( Gtk::Action::create("Preferences", Gtk::Stock::PREFERENCES, _("Preferences")), sigc::mem_fun(*dlg, &dialogControl::preferences));
+			actions->add( Gtk::Action::create_with_icon_name("StartServer", ustring("system-run"), ustring(_("Start server")), ustring()), sigc::mem_fun(*dlg, &dialogControl::startServer));
+			actions->add( Gtk::Action::create_with_icon_name("StopServer", ustring("stop"), ustring(_("Stop server")), ustring()), sigc::mem_fun(*dlg, &dialogControl::stopServer));
 
 		}
 
@@ -339,6 +343,7 @@ class gtkTrayIcon : public trayIcon {
 class SimpleFileInfoRenderer : public observer_t {
 	private:
 		FileInfoItem *finfo;
+		int lastStatus;
 
 	public:
 		Label fileName, peerName;
@@ -346,11 +351,10 @@ class SimpleFileInfoRenderer : public observer_t {
 		VBox mainBox;
 		VBox textInfo;
 		HBox info;
-		HBox progressContainer;
-		Button pause, cancel;
-		Image icon;
-		SimpleFileInfoRenderer(FileInfoItem *fileInfo) : pause(Stock::MEDIA_PAUSE), cancel(Stock::CANCEL), icon(fileInfo->getDirection()?Stock::GOTO_TOP:Stock::GOTO_BOTTOM, IconSize(ICON_SIZE_DND)) {
-			finfo = fileInfo;
+		HBox progressContainer, buttonContainer;
+		Button pause, cancel, open, opendir, remove, deletedata;
+		Image icon, iconpause, iconcancel, iconopen, icondir, icondelete, iconremove;
+		SimpleFileInfoRenderer(FileInfoItem *fileInfo) : finfo(fileInfo), lastStatus(0), pause(_("Pause")), cancel(_("Cancel")), open(_("Open file")), opendir(_("Open directory")), remove(_("Remove from list")), deletedata(_("Delete file")), icon(fileInfo->getDirection()?Stock::GOTO_TOP:Stock::GOTO_BOTTOM, IconSize(ICON_SIZE_DND)), iconpause(Stock::MEDIA_PAUSE, IconSize(ICON_SIZE_BUTTON)), iconcancel(Stock::CANCEL, IconSize(ICON_SIZE_BUTTON)), iconopen(Stock::OPEN, IconSize(ICON_SIZE_BUTTON)), icondir(Stock::DIRECTORY, IconSize(ICON_SIZE_BUTTON)), icondelete(Stock::DELETE, IconSize(ICON_SIZE_BUTTON)), iconremove(Stock::REMOVE, IconSize(ICON_SIZE_BUTTON)) {
 			textInfo.pack_start(fileName, PACK_EXPAND_WIDGET);
 			textInfo.pack_start(peerName, PACK_EXPAND_WIDGET);
 			progressContainer.pack_start(progress, PACK_EXPAND_WIDGET);
@@ -359,22 +363,38 @@ class SimpleFileInfoRenderer : public observer_t {
 			info.pack_start(textInfo, PACK_EXPAND_WIDGET);
 			info.pack_start(icon, PACK_SHRINK);
 			mainBox.pack_start(info, PACK_SHRINK);
-			mainBox.pack_start(progressContainer, PACK_SHRINK);
+			pause.set_image(iconpause);
+			cancel.set_image(iconcancel);
+			open.set_image(iconopen);
+			opendir.set_image(icondir);
+			remove.set_image(iconremove);
+			deletedata.set_image(icondelete);
+			buttonContainer.pack_start(open, PACK_SHRINK);
+			buttonContainer.pack_start(opendir, PACK_SHRINK);
+			buttonContainer.pack_start(remove, PACK_SHRINK);
+			buttonContainer.pack_start(deletedata, PACK_SHRINK);
+		mainBox.pack_start(progressContainer, PACK_SHRINK);
 			updateData();
 		}
 
 		void updateData() {
-			fileName.set_markup("<b>" + Markup::escape_text(finfo->getFileName()) + "</b>");
+			fileName.set_markup("<b>" + Markup::escape_text(getFileName(finfo->getFileName().c_str())) + "</b>");
 			fileName.set_justify(JUSTIFY_LEFT);
 			peerName.set_markup("<small>" + Markup::escape_text(finfo->getPeerName()) + "</small>");
 			peerName.set_justify(JUSTIFY_LEFT);
 			switch(finfo->getStatus()) {
 				case 1:
-					progress.set_text(_("Connecting"));
+					if(lastStatus != 1) {
+						progress.set_text(_("Connecting"));
+						lastStatus = 1;
+					}
 					progress.pulse();
 					break;
 				case 2:
-					progress.set_text(_("Waiting for accept"));
+					if(lastStatus != 2) {
+						progress.set_text(_("Waiting for acceptance"));
+						lastStatus = 2;
+					}
 					progress.pulse();
 					break;
 				case 3:
@@ -386,9 +406,22 @@ class SimpleFileInfoRenderer : public observer_t {
 					progress.set_fraction((float)finfo->getProgress() / 100);
 					break;
 				case 5:
-					progress.set_text(ustring(_("Paused")) + " (" + intToStr(finfo->getProgress()) + "%)");
+					if(lastStatus != 5) {
+						progress.set_text(ustring(_("Paused")) + " (" + intToStr(finfo->getProgress()) + "%)");
+						lastStatus = 5;
+					}
 					progress.set_fraction((float)finfo->getProgress() / 100);
 					break;
+				case 6:
+					if(lastStatus != 6) {
+						progressContainer.remove(progress);
+						progressContainer.remove(pause);
+						progressContainer.remove(cancel);
+						progressContainer.pack_start(buttonContainer, PACK_EXPAND_PADDING);
+						lastStatus = 6;
+					}
+					break;
+				
 			}
 			/*mainBox.queue_draw();*/
 		}
@@ -448,45 +481,70 @@ class instSendWidget : public Window, dialogControl {
 			if(fileit != files.end()) {
 				FileInfoItem *file = fileit->second;
 				file->setBytes(bytes);
-				if(file->getProgress() == 100) {
-					for(FileInfoItem::obsiterator it = file->firstObserver(); it != file->lastObserver(); ++it) {
-						SimpleFileInfoRenderer *fiRenderer = dynamic_cast<SimpleFileInfoRenderer *>(*it);
-						if(!fiRenderer) continue;
-						Widget & itemwidget = fiRenderer->getWidget();
-						allBox.remove(itemwidget);
-						if(file->getDirection()) {
-							sendBox.remove(itemwidget);
-						} else {
-							recvBox.remove(itemwidget);
-						}
-
-						delete fiRenderer;
-					}
-
-					if(file->getDirection()) {
-						--sendFileCount;
-					} else {
-						--recvFileCount;
-					}
-
-					received[id] = file;
-					files.erase(fileit);
-
-					file->clearObservers();
-					auto_ptr<SimpleFileInfoRenderer> finfoRenderer(new SimpleFileInfoRenderer(file));
-					recvedBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
-					finfoRenderer->getWidget().show_now();
-					file->addObserver(*finfoRenderer.get());
-					finfoRenderer->updateData();
-					finfoRenderer.release();
-					recvedBox.queue_draw();
-					scrollWindowRecved.queue_draw();
-					scrollWindowRecved.show_all();
-
-					show_all_children();
-					trIcon.statusChanged();
-				}
 			}
+
+			mutex->release();
+		}
+
+		void fileEnded(uint32_t id, uint32_t status) {
+			mutex->get();
+			std::map<unsigned int, FileInfoItem *>::iterator fileit = files.find(id);
+			// Ignore unknown files
+			if(fileit == files.end()) {
+				mutex->release();
+				return;
+			}
+
+			FileInfoItem &file = *fileit->second;
+
+			if(status != 1) { // File finished TODO dont't ignore errors/cancel
+				mutex->release();
+				return;
+			}
+			file.setStatus(6);
+
+			// In case we didn't receive update bytes
+			file.setBytes(file.getSize());
+
+			for(FileInfoItem::obsiterator it = file.firstObserver(); it != file.lastObserver(); ++it) {
+				SimpleFileInfoRenderer *fiRenderer = dynamic_cast<SimpleFileInfoRenderer *>(*it);
+				if(!fiRenderer) continue;
+
+				Widget & itemwidget = fiRenderer->getWidget();
+				allBox.remove(itemwidget);
+				if(file.getDirection()) {
+					sendBox.remove(itemwidget);
+				} else {
+					recvBox.remove(itemwidget);
+				}
+
+				delete fiRenderer;
+			}
+
+			if(file.getDirection()) {
+				--sendFileCount;
+			} else {
+				--recvFileCount;
+			}
+
+			received[id] = &file;
+			files.erase(fileit);
+
+			file.clearObservers();
+			auto_ptr<SimpleFileInfoRenderer> finfoRenderer(new SimpleFileInfoRenderer(&file));
+			recvedBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
+			finfoRenderer->getWidget().show_now();
+
+			file.addObserver(*finfoRenderer);
+			finfoRenderer->updateData();
+			finfoRenderer.release();
+
+			recvedBox.queue_draw();
+			scrollWindowRecved.queue_draw();
+			scrollWindowRecved.show_all();
+
+			show_all_children();
+			trIcon.statusChanged();
 
 			mutex->release();
 		}
@@ -626,6 +684,19 @@ filter_func (DBusConnection *connection,
 			isWidget.updateBytes(fileId, transferredBytes);
 //			printf("Received onUpdate signal, file: %u, bytes: %lu", fileId, transferredBytes);
 
+			handled = TRUE;
+		}
+	} else if(dbus_message_is_signal (message, "sk.pixelcomp.instantsend", "onEnd")) {
+		DBusError dberr;
+		uint32_t status;
+		dbus_error_init (&dberr);
+		dbus_message_get_args (message, &dberr, DBUS_TYPE_UINT32, &fileId, DBUS_TYPE_UINT32, &status, DBUS_TYPE_INVALID);
+
+		if (dbus_error_is_set (&dberr)) {
+			fprintf (stderr, _("Error getting message args: %s"), dberr.message);
+			dbus_error_free (&dberr);
+		} else {
+			isWidget.fileEnded(fileId, status);
 			handled = TRUE;
 		}
 	}
