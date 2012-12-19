@@ -8,14 +8,15 @@
 #include "pluginlist.h"
 #include "sysapi.h"
 #include "eventsink.h"
+#include <stdexcept>
 
 int outputpercentage = 0;
 
 int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 	try {
 		long fs, sb;
-		if(fseek(file, 0, SEEK_END) < 0) throw "Can't seek";
-		if((fs = ftell(file)) < 0) throw "Unknown size";
+		if(fseek(file, 0, SEEK_END) < 0) throw runtime_error("Can't seek");
+		if((fs = ftell(file)) < 0) throw runtime_error("Unknown size");
 		rewind(file);
 
 		auto_ptr<anyData> data(allocData(DMAXSIZE+1));
@@ -29,14 +30,14 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 		data->size = msg.size() + 1;
 		msgobj.deleteContent();
 
-		if(!client->sendData(data.get())) throw "Can't send!";
+		if(!client->sendData(data.get())) throw runtime_error("Can't send!");
 		data->size = DMAXSIZE;
-		if(!client->recvData(data.get())) throw "No response";
+		if(!client->recvData(data.get())) throw runtime_error("No response");
 		data->data[data->size] = 0;
 
 		msg = string(data->data);
 		msgobj = jsonObj_t(&msg);
-		if(dynamic_cast<jsonStr_t &>(msgobj.gie("service")) != "filetransfer") throw "Unknown protocol";
+		if(dynamic_cast<jsonStr_t &>(msgobj.gie("service")) != "filetransfer") throw runtime_error("Unknown protocol");
 		jsonStr_t &action = dynamic_cast<jsonStr_t &>(msgobj.gie("action"));
 		if(action.getVal() != string("accept")) {
 			try {
@@ -53,16 +54,16 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 
 		do {
 			long fpos = ftell(file);
-			if(fpos < 0) throw "Unknown position";
+			if(fpos < 0) throw runtime_error("Unknown position");
 			fp->setVal(fpos);
 			string msg = msgobj.toString();
 			strcpy(data->data, msg.c_str());
 			data->size = fread(data->data + msg.size() + 1, 1, 1022 - msg.size(), file);
-			if(ferror(file)) throw "Can't read";
+			if(ferror(file)) throw runtime_error("Can't read");
 			sb += data->size;
 			data->size += msg.size() + 1;
 
-			if(!client->sendData(data.get())) throw "Can't send!";
+			if(!client->sendData(data.get())) throw runtime_error("Can't send!");
 			if(outputpercentage) {
 				printf("%ld\n", 100*sb / fs);
 				fflush(stdout);
