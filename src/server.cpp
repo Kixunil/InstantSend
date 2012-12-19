@@ -44,8 +44,7 @@ class clientThread_t : public thread_t {
 		}
 
 		void run() {	// This is called as new thread
-			puts("Client thread started");
-			fflush(stdout);
+			D("Client thread started");
 			peer_t &client = *cptr.get();
 			auto_ptr<anyData> data = allocData(DMAXSIZE + 1);
 			int received, hlen;
