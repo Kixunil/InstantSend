@@ -1,3 +1,8 @@
+instantsend (0.6-1~###DISTRIBUTION###) unstable; urgency=low
+  * Christmas update - fixed stuff!
+
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Tue, 24 Dec 2012 16:39:44 +0100
+
 instantsend (0.6~###DISTRIBUTION###) unstable; urgency=low
   * Added few items to tray icon menu (gtk), caja and nautilus support
 
