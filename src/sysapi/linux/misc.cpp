@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <string>
 #include <stdlib.h>
+#include <stdexcept>
 
 #include "config.h"
 
@@ -12,7 +13,7 @@ string combinePath(string dir, string file) {
 
 string getUserDir() {
 	char *s = getenv("HOME");
-	if(!s) throw "HOME variable undefined";
+	if(!s) throw runtime_error("HOME variable undefined");
 	return string(s) + "/.instantsend";
 }
 
