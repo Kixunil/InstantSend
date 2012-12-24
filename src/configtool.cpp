@@ -168,12 +168,13 @@ void changeCfg(auto_ptr<jsonComponent_t> &cfg, const string &newpath, string &ol
 int main(int argc, char **argv) {
 	if(argc < 2) printHelp();
 	auto_ptr<jsonComponent_t> cfg;
-	const char *homedir;
+	string homedir;
+	bool haveHomeDir = false;
 	try {
-		homedir = getUserDir().c_str();
+		homedir = getUserDir();
+		haveHomeDir = true;
 	} catch(exception &e) {
 		fprintf(stderr, "Warning: Home directory (%s) not found!\n", e.what());
-		homedir = NULL;
 	}
 	string cfgpath;
 	int save = 0;
@@ -243,20 +244,20 @@ int main(int argc, char **argv) {
 			save = 1;
 		} else
 		if(string(argv[i]) == "--client" || string(argv[i]) == "-C") { 
-			if(!homedir) {
+			if(!haveHomeDir) {
 				fprintf(stderr, "Config not found!\n");
 				return 1;
 			}
 
-			changeCfg(cfg, combinePath(string(homedir), "client.cfg"), cfgpath, save, load);
+			changeCfg(cfg, combinePath(homedir, "client.cfg"), cfgpath, save, load);
 		} else
 		if(string(argv[i]) == "--server" || string(argv[i]) == "-S") {
-			if(!homedir) {
+			if(!haveHomeDir) {
 				fprintf(stderr, "Config not found!\n");
 				return 1;
 			}
 
-			changeCfg(cfg, combinePath(string(homedir), "server.cfg"), cfgpath, save, load);
+			changeCfg(cfg, combinePath(homedir, "server.cfg"), cfgpath, save, load);
 		} else
 		if(string(argv[i]) == "--config" || string(argv[i]) == "-c") {
 			if(i + 1 >= argc) {
