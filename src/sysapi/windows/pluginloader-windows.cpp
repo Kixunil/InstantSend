@@ -29,7 +29,7 @@ pluginInstanceCreator_t *pluginLoader_t::getCreator(void *handle) {
 
 void closePlugin(void *handle) {
 	FreeLibrary(*(HMODULE *)handle);
-	delete handle;
+	delete (HMODULE *)handle;
 }
 
 void (*pluginLoader_t::getPluginDestructor())(void *) {
