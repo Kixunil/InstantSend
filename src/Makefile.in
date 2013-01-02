@@ -1,9 +1,8 @@
+CXX=@CXX@
 CXXFLAGS=@CXXFLAGS@
 CXXFLAGS+=-I../include -I. -I../
 DEFS=@DEFS@
 LDFLAGS=@LDFLAGS@ @LIBS@
-SERVER_LDFLAGS=-ldl
-CLIENT_CFLAGS=-ldl
 
 prefix=@prefix@
 PREFIX=$(prefix)
@@ -15,8 +14,6 @@ DATADIR=@datadir@
 LOCALEDIR=@localedir@
 
 GETTEXT_DOMAINNAME=instantsend-dialog-gtk
-
-DEFS+=-DPREFIX=\"$(PREFIX)\" -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DGETTEXT_PACKAGE=\"$(GETTEXT_DOMAINNAME)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 HAVE_CLIENT=@have_client@
 HAVE_SERVER=@have_server@
@@ -33,28 +30,45 @@ SERVER_BIN=$(DESTDIR)$(BINDIR)/instsendd
 CONFIGTOOL_BIN=$(DESTDIR)$(BINDIR)/instsend-config
 WIDGET_GTK_BIN=$(DESTDIR)$(BINDIR)/instsend-dialog-gtk
 
-ifndef OS
-	OS=linux
-	CLIENT_LDFLAGS+=-ldl -pthread -rdynamic
-	SERVER_LDFLAGS+=-ldl -pthread -rdynamic
-endif
-
-ifeq ($(OS),windows)
-	CXX=$(ARCH)-w64-mingw32-g++
-	CXXFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS
-	EXTENSION=.exe
-endif
-
 ifeq ($(HOST),i686-linux-gnu)
 	CFLAGS+=-march=i686 -m32
+	OS=linux
 endif
 
 ifeq ($(HOST),arm-linux-gnueabihf)
 	CXX=arm-linux-gnueabihf-g++
+	OS=linux
 endif
 
 ifeq ($(HOST),arm-linux-gnueabi)
 	CXX=arm-linux-gnueabi-g++
+	OS=linux
+endif
+
+ifeq ($(HOST),i686-w64-mingw32)
+	OS=windows
+	ARCH=i686
+endif
+
+ifeq ($(HOST),x86_64-w64-mingw32)
+	OS=windows
+	ARCH=x86_64
+endif
+
+ifndef OS
+	OS=linux
+endif
+
+ifeq ($(OS),linux)
+	CLIENT_LDFLAGS+=-ldl -pthread -rdynamic
+	SERVER_LDFLAGS+=-ldl -pthread -rdynamic
+	DEFS+=-DPREFIX=\"$(PREFIX)\" -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DGETTEXT_PACKAGE=\"$(GETTEXT_DOMAINNAME)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+endif
+
+ifeq ($(OS),windows)
+	DEFS+=-DWINDOWS
+	EXTENSION=.exe
+	DLLTOOL=$(HOST)-dlltool
 endif
 
 ifeq ($(HAVE_CLIENT),yes)
@@ -79,17 +93,26 @@ endif
 
 all: $(ALL)
 
-client$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp
+client: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp $(LDFLAGS) $(CLIENT_LDFLAGS)
 
-server$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
+client.exe: pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp libinstantsend-plugin.dll libinstantsend-json.dll
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp -L. -linstantsend-plugin -linstantsend-json $(LDFLAGS) $(CLIENT_LDFLAGS)
+
+server: json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp $(LDFLAGS) $(SERVER_LDFLAGS)
+
+server.exe: pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp libinstantsend-plugin.dll libinstantsend-json.dll
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o server.cpp -L. -linstantsend-plugin -linstantsend-json $(LDFLAGS) $(SERVER_LDFLAGS)
 
 widget-gtk: json.o sysapi.o multithread.o widget-gtk.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o multithread.o $(WIDGET_GTK_LIBS)
 
 configtool: configtool.cpp json.o sysapi.o
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o sysapi.o configtool.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o sysapi.o configtool.cpp $(LDFLAGS)
+
+configtool.exe: configtool.cpp sysapi.o libinstantsend-json.dll
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ sysapi.o configtool.cpp -L. -linstantsend-json $(LDFLAGS)
 
 libinstantsend.o: libinstantsend.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ libinstantsend.cpp
@@ -102,6 +125,9 @@ pluginlist.o: pluginlist.cpp
 
 plugin.o: plugin.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ plugin.cpp
+
+plugin-common.o: plugin-common.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ plugin-common.cpp
 
 environment.o: sysapi/$(OS)/environment.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/environment.cpp
@@ -126,6 +152,12 @@ filelist.o: filelist.cpp
 
 eventsink.o: eventsink.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ eventsink.cpp
+
+libinstantsend-plugin.dll: plugin-common.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ plugin-common.o -shared $(LDFLAGS)
+
+libinstantsend-json.dll: json.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o -shared $(LDFLAGS)
 
 check:
 

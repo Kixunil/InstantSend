@@ -1,8 +1,8 @@
+CXX=@CXX@
 CXXFLAGS=@CXXFLAGS@
 CXXFLAGS+=-fPIC -I../include -I../
 DEFS=@DEFS@
 LDFLAGS=@LDFLAGS@ @LIBS@
-LDFLAGS+=-shared
 
 PREFIX=@prefix@
 prefix=@prefix@
@@ -22,6 +22,7 @@ DBUS_LIBS=@DBUS_LIBS@
 AVAHI_CFLAGS=@AVAHI_CFLAGS@
 AVAHI_LIBS=@AVAHI_LIBS@
 
+HOST=@host_alias@
 
 ifeq ($(LIBNOTIFY_VERSION),4)
 	NOTIFY_CFLAGS=@LIBNOTIFY4_CFLAGS@
@@ -55,43 +56,62 @@ ifeq ($(HAVE_AVAHI),yes)
 	ALL+=avahi-publish$(EXTENSION)
 endif
 
+ifeq ($(HOST),i686-linux-gnu)
+	CXXFLAGS+=-march=i686 -m32
+	OS=linux
+	ARCH=i686
+endif
+
+ifeq ($(HOST),i686-w64-mingw32)
+	OS=windows
+	ARCH=i686
+endif
+
+ifeq ($(HOST),x86_64-w64-mingw32)
+	OS=windows
+	ARCH=x86_64
+endif
+
 OS ?= linux
 
 ifeq ($(OS),linux)
-	LDFLAGS+=-ldl -pthread -rdynamic
+	LDFLAGS+=-ldl -pthread -rdynamic -shared
 	EXTENSION=.so
 endif
 
 ifeq ($(OS),windows)
-	CXX=$(ARCH)-w64-mingw32-g++
-	CXXFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS -mdll
+#	CXXFLAGS+=-mdll
+	LDFLAGS+=-shared
+	DEFS+=-DWINDOWS
 	EXTENSION=.dll
-	DLLTOOL=$(ARCH)-w64-mingw32-dlltool
-endif
-
-ifeq ($(HOST),i686-linux-gnu)
-	CXXFLAGS+=-march=i686 -m32
+	DLLTOOL=$(HOST)-dlltool
 endif
 
 all: $(ALL)
+
+../src/libinstantsend-plugin.dll:
+	$(MAKE) -C ../src libinstantsend-plugin.dll
+
+../src/libinstantsend-json.dll:
+	$(MAKE) -C ../src libinstantsend-json.dll
 
 ip4tcp.so: ../include/pluginapi.h ip4tcp.cpp
 	 $(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcp.cpp $(LDFLAGS)
 
 ip4tcp-windows.o: ../include/pluginapi.h ip4tcp-windows.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ ip4tcp-windows.cpp $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ ip4tcp-windows.cpp
 
-ip4tcp-exports.o: ip4tcp-windows.o
-	$(DLLTOOL) --export-all-symbols -e ip4tcp-exports.o -l ip4tcp-windows.lib ip4tcp-windows.o
+ip4tcp.dll: ip4tcp-windows.o ../src/libinstantsend-plugin.dll ../src/libinstantsend-json.dll
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcp-windows.o -L../src/ -linstantsend-json -linstantsend-plugin -lwsock32 $(LDFLAGS)
 
-ip4tcp.dll: ip4tcp-windows.o ip4tcp-exports.o
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcp-windows.o ip4tcp-exports.o
+ip6tcp-windows.o: ../include/pluginapi.h ip6tcp-windows.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ ip6tcp-windows.cpp
 
-ip6tcp.so: ../include/pluginapi.h ip6tcp.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp.cpp $(LDFLAGS)
+ip6tcp.so: ip6tcp-windows.o ../src/libinstantsend-plugin.dll ../src/libinstantsend-json.dll
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp-windows.o -L../src/ -linstantsend-json -linstantsend-plugin -lwsock32 $(LDFLAGS)
 
 ip6tcp.dll: ../include/pluginapi.h ip6tcp-windows.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp-windows.cpp $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp-windows.cpp $(LDFLAGS) -lwsock32
 
 zenityprogress.so: zenityprogress.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ zenityprogress.cpp $(LDFLAGS)
