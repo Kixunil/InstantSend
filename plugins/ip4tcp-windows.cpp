@@ -9,6 +9,9 @@
 
 #define min(a, b) ((a < b)?a:b)
 
+asm (".section .drectve");
+asm (".ascii \"-export:getCreator\"");
+
 class i4tPeer : public peer_t {
 	private:
 		SOCKET fd;
@@ -82,21 +85,21 @@ class i4tserver : public serverPlugin_t {
 	private:
 		int fd;
 	public:
-		i4tserver(jsonComponent_t *config) {
+		i4tserver(const jsonComponent_t &config) {
 			struct sockaddr_in srvaddr;
 			int backlog;
 				srvaddr.sin_family = AF_INET;
-				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
-				srvaddr.sin_port = htons(dynamic_cast<jsonInt_t &>(cfg.gie("port")).getVal());
+				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
+				srvaddr.sin_port = htons(dynamic_cast<const jsonInt_t &>(cfg.gie("port")).getVal());
 				try {
-					srvaddr.sin_addr.s_addr = inet_addr(dynamic_cast<jsonStr_t &>(cfg.gie("IP")).getVal().c_str());
+					srvaddr.sin_addr.s_addr = inet_addr(dynamic_cast<const jsonStr_t &>(cfg.gie("IP")).getVal().c_str());
 				}
 				catch(exception &e) {
 					srvaddr.sin_addr.s_addr = INADDR_ANY;
 				}
 
 				try {
-					backlog = dynamic_cast<jsonInt_t &>(cfg.gie("backlog")).getVal();
+					backlog = dynamic_cast<const jsonInt_t &>(cfg.gie("backlog")).getVal();
 				}
 				catch(exception &e) {
 					backlog = 10;
@@ -134,18 +137,18 @@ class i4tCreator : public connectionCreator_t {
 		i4tCreator() {
 			lastErr = "No error";
 		}
-		peer_t *newClient(jsonComponent_t *config) {
+		peer_t *newClient(const jsonComponent_t &config) {
 			int fd;
-			//try {
-				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
+			try {
+				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
 				struct sockaddr_in dstaddr, srcaddr;
-				jsonStr_t &dstIP = dynamic_cast<jsonStr_t &>(cfg.gie("destIP"));
-				jsonInt_t &dstPort = dynamic_cast<jsonInt_t &>(cfg.gie("destPort"));
+				const jsonStr_t &dstIP = dynamic_cast<const jsonStr_t &>(cfg.gie("destIP"));
+				const jsonInt_t &dstPort = dynamic_cast<const jsonInt_t &>(cfg.gie("destPort"));
 
 				// We will skip bind if no value is set
 				srcaddr.sin_family = AF_UNSPEC; // temporary initialize
 				try {
-					srcaddr.sin_addr.s_addr = inet_addr(dynamic_cast<jsonStr_t &>(cfg.gie("sourceIP")).getVal().c_str());
+					srcaddr.sin_addr.s_addr = inet_addr(dynamic_cast<const jsonStr_t &>(cfg.gie("sourceIP")).getVal().c_str());
 					srcaddr.sin_family = AF_INET;
 				}
 				catch(exception &e) {
@@ -153,7 +156,7 @@ class i4tCreator : public connectionCreator_t {
 				}
 
 				try {
-					srcaddr.sin_port = htons(dynamic_cast<jsonInt_t &>(cfg.gie("sourcePort")).getVal());
+					srcaddr.sin_port = htons(dynamic_cast<const jsonInt_t &>(cfg.gie("sourcePort")).getVal());
 					srcaddr.sin_addr.s_addr = INADDR_ANY;
 				}
 				catch(exception &e) {
@@ -169,9 +172,10 @@ class i4tCreator : public connectionCreator_t {
 				dstaddr.sin_addr.s_addr = inet_addr(dstIP.getVal().c_str());
 				dstaddr.sin_port = htons(dstPort.getVal());
 
-				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("connect: ") + strerror(errno));
+				connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in));
+				if(errno) throw runtime_error(string("connect: ") + strerror(errno));
 				return new i4tPeer(fd, dstIP.getVal());
-			/*}
+			}
 			catch(exception &e) {
 				if(fd > -1) closesocket(fd);
 				fd = -1;
@@ -180,11 +184,11 @@ class i4tCreator : public connectionCreator_t {
 			catch(...) {
 				if(fd > -1) closesocket(fd);
 				fd = -1;
-			}*/
-	//		return NULL;
+			}
+			return NULL;
 	}
 
-	serverPlugin_t *newServer(jsonComponent_t *config) {
+	serverPlugin_t *newServer(const jsonComponent_t &config) {
 		try {
 			return new i4tserver(config);
 		}
@@ -198,11 +202,6 @@ class i4tCreator : public connectionCreator_t {
 		}
 	}
 
-	authenticationPlugin_t *newAuth(jsonComponent_t *config) {
-		(void)config;
-		return NULL;
-	}
-
 	const char *getErr() {
 		return lastErr.c_str();
 	}
@@ -210,9 +209,7 @@ class i4tCreator : public connectionCreator_t {
 
 extern "C" {
 	pluginInstanceCreator_t *getCreator() {
-		static pluginInstanceCreator_t *creator = NULL;
-
-		if(!creator) creator = new i4tCreator();
+		static pluginInstanceCreator_t *creator = new i4tCreator();
 		return creator;
 	}
 }
