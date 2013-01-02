@@ -27,7 +27,9 @@ string getSystemPluginDir() {
 #ifdef SYSPLUGINDIR
 	return SYSPLUGINDIR;
 #else
-	return getSystemDataDir() + "\\instantsend\\plugins";
+	char *s = getenv("ProgramFiles");
+	if(!s) throw runtime_error("ProgramFiles variable undefined");
+	return string(s) + "\\instantsend\\plugins";
 #endif
 }
 
@@ -35,14 +37,16 @@ string getSystemCfgDir() {
 #ifdef SYSCFGNDIR
 	return SYSCFGNDIR;
 #else
-	return getSystemDataDir() + "\\instantsend\\config";
+	char *s = getenv("ProgramFiles");
+	if(!s) throw runtime_error("ProgramFiles variable undefined");
+	return string(s) + "\\instantsend\\config";
 #endif
 }
 
 const char *getFileName(const char *path) {
 	const char *fileName = path;
 	while(*path) {
-		if(*path == '/' || *path == '\\') fileName = path;
+		if(*path == '/' || *path == '\\') fileName = path + 1;
 		++path;
 	}
 	return fileName;
