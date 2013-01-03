@@ -3,7 +3,7 @@
 # Builds debian package for your distribution
 
 INSTANTSEND_VERSION=`grep '^AC_INIT' configure.ac | sed -re 's/^.*\[.*\].*\[([0-9.]*)\].*\[.*\].*$/\1/'`
-REVISION=1
+REVISION=0
 
 # this function was found at http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
 vercomp () {
@@ -60,6 +60,19 @@ else
 	LIBNOTIFY=4
 fi
 
+if LIBCAJA_EXTENSION_VERSION=`pkg-config --modversion libcaja-extension`;
+then
+	vercomp $LIBCAJA_EXTENSION_VERSION 1.2.1
+	if [ $? -eq 2 ];
+	then
+		echo 'Warning: caja-extension may be too old!'
+	fi
+
+	LIBCAJA_EXTENSION=2
+else
+	LIBCAJA_EXTENSION=0
+fi
+
 #There may be more tests/dependencies in the future
 if [ $LIBNOTIFY -eq 1 ];
 then
@@ -68,7 +81,12 @@ fi
 
 if [ $LIBNOTIFY -eq 4 ];
 then
-	DISTRIBUTION=maya
+	if [ $LIBCAJA_EXTENSION -eq 2 ];
+	then
+		DISTRIBUTION=maya
+	else
+		DISTRIBUTION=raspbian
+	fi
 fi
 
 echo Building InstantSend
