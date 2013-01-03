@@ -45,7 +45,7 @@ auto_ptr<jsonComponent_t> cfgReadStr(const char *str) {
 
 auto_ptr<jsonComponent_t> cfgReadFile(const char *path) {
 	string str;
-	FILE *file = fopen(path, "r");
+	FILE *file = fopen(path, "rb");
 	ssize_t len;
 	char buf[SECTOR_SIZE + 1];
 
@@ -214,7 +214,7 @@ void jsonFloat_t::fromString(string *str) {
 
 	str->erase(0, 1);
 	expval = parseInt(str);
-	res *= pow(10, expval);
+	res *= pow((double)10, expval);
 	setVal(res);
 }
 
