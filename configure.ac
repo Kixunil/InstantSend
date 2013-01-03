@@ -7,6 +7,49 @@ AM_INIT_AUTOMAKE(instantsend, 0.6)
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 
+# Determine OS
+operating_system=linux # Default value
+AS_IF([test "x$host_alias" '=' "xi686-w64-mingw32"], [operating_system=windows], [])
+AS_IF([test "x$host_alias" '=' "xx86_64-w64-mingw32"], [operating_system=windows], [])
+AS_IF([test "x$host_alias" '=' "xi686-apple-darwin10"], [operating_system=macosx], [])
+
+# Default package settings
+AS_IF([test "x$operating_system" '=' xlinux], [
+       default_widget_gtk=yes
+       default_plugin_ip6tcp=yes
+       default_plugin_dbus=yes
+       default_plugin_notify=yes
+       default_plugin_avahi=yes
+       default_scanners=yes
+       default_scanner_avahi=yes
+       default_filemanager_caja=auto
+       default_filemanager_nautilus=auto
+       ], [])
+
+AS_IF([test "x$operating_system" '=' xmacosx], [
+       default_widget_gtk=no
+       default_plugin_ip6tcp=yes
+       default_plugin_dbus=no
+       default_plugin_notify=no
+       default_plugin_avahi=no
+       default_scanners=yes
+       default_scanner_avahi=no
+       default_filemanager_caja=no
+       default_filemanager_nautilus=no
+       ], [])
+
+AS_IF([test "x$operating_system" '=' xwindows], [
+       default_widget_gtk=no
+       default_plugin_ip6tcp=no
+       default_plugin_dbus=no
+       default_plugin_notify=no
+       default_plugin_avahi=no
+       default_scanners=no
+       default_scanner_avahi=no
+       default_filemanager_caja=no
+       default_filemanager_nautilus=no
+       ], [])
+
 # Options
 
 AC_ARG_ENABLE([automatic],
@@ -21,7 +64,7 @@ AC_ARG_ENABLE([server],
 		[AS_HELP_STRING([--enable-server@<:@=yes|no|auto@:>@],
 				[define whether server plugin should be compiled @<:@default=yes@:>@]
 		)],
-		[]
+		[],
 		[AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_server=auto],
 		       [enable_server=yes])
@@ -32,7 +75,7 @@ AC_ARG_ENABLE([client],
 		[AS_HELP_STRING([--enable-client@<:@=yes|no|auto@:>@],
 				[define whether client plugin should be compiled @<:@default=yes@:>@]
 		)],
-		[]
+		[],
 		[AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_client=auto],
 		       [enable_client=yes])
@@ -43,7 +86,7 @@ AC_ARG_ENABLE([configtool],
 		[AS_HELP_STRING([--enable-configtool@<:@=yes|no|auto@:>@],
 				[define whether configtool plugin should be compiled @<:@default=yes@:>@]
 		)],
-		[]
+		[],
 		[AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_configtool=auto],
 		       [enable_configtool=yes])
@@ -52,14 +95,14 @@ AC_ARG_ENABLE([configtool],
 
 AC_ARG_ENABLE([widget-gtk],
 		[AS_HELP_STRING([--enable-widget-gtk@<:@=yes|no|auto@:>@],
-				[define whether widget-gtk should be compiled @<:@default=yes@:>@]
+				[define whether widget-gtk should be compiled @<:@default=$default_widget_gtk@:>@]
 		)],
 		[],
 		[
 		 AC_MSG_NOTICE([Assingning default value to enable_widget_gtk])
 		 AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_widget_gtk=auto],
-		       [enable_widget_gtk=yes])
+		       [enable_widget_gtk=$default_widget_gtk])
 		]
 		)
 
@@ -68,7 +111,7 @@ AC_ARG_ENABLE([plugin-ip4tcp],
 		[AS_HELP_STRING([--enable-plugin-ip4tcp@<:@=yes|no|auto@:>@],
 				[define whether ip4tcp plugin should be compiled @<:@default=yes@:>@]
 		)],
-		[]
+		[],
 		[AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_plugin_ip4tcp=auto],
 		       [enable_plugin_ip4tcp=yes])
@@ -77,23 +120,34 @@ AC_ARG_ENABLE([plugin-ip4tcp],
 
 AC_ARG_ENABLE([plugin-ip6tcp],
 		[AS_HELP_STRING([--enable-plugin-ip6tcp@<:@=yes|no|auto@:>@],
-				[define whether ip6tcp plugin should be compiled @<:@default=yes@:>@]
+				[define whether ip6tcp plugin should be compiled @<:@default=$default_plugin_ip6tcp@:>@]
 		)],
-		[]
+		[],
 		[AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_plugin_ip6tcp=auto],
-		       [enable_plugin_ip6tcp=yes])
+		       [enable_plugin_ip6tcp=$default_plugin_ip6tcp])
 		]
 		)
 
 AC_ARG_ENABLE([plugin-dbus],
 		[AS_HELP_STRING([--enable-plugin-dbus@<:@=yes|no|auto@:>@],
-				[define whether dbus plugin should be compiled @<:@default=yes@:>@]
+				[define whether dbus plugin should be compiled @<:@default=$default_plugin_dbus@:>@]
 		)],
-		[]
+		[],
 		[AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_plugin_dbus=auto],
-		       [enable_plugin_dbus=yes])
+		       [enable_plugin_dbus=$default_plugin_dbus])
+		]
+		)
+
+AC_ARG_ENABLE([plugin-avahi],
+	      [AS_HELP_STRING([--enable-plugin-avahi@<:@=yes|no|auto@:>@],
+			      [define whether avahi plugin should be compiled @<:@default=$default_plugin_avahi@:>@]
+		)],
+		[],
+		[AS_IF([test "x$enable_automatic" = xyes],
+		       [enable_plugin_avahi=auto],
+		       [enable_plugin_avahi=$default_plugin_avahi])
 		]
 		)
 
@@ -102,7 +156,7 @@ AC_ARG_ENABLE([scanners],
 			      [define whether scanners should be installed @<:@default=yes@:>@]
 	      )],
 	      [have_scan="$enable_scanners"],
-	      [have_scan=yes]
+	      [have_scan=$default_scanners]
 	      )
 
 AC_ARG_ENABLE([scanner-avahi],
@@ -110,16 +164,42 @@ AC_ARG_ENABLE([scanner-avahi],
 			      [define whether avahi scanner should be installed @<:@default=scanners@:>@]
 	      )],
 	      [],
-	      [enable_scanner_avahi=$have_scan])
+	      [AS_IF([test "x$have_scan" = xyes],
+		     [enable_scanner_avahi=$default_scanner_avahi],
+		     [enable_scanner_avahi=no])
+	      ]
+	      )
 
 AC_ARG_ENABLE([plugin-notify],
 	      [AS_HELP_STRING([--enable-plugin-notify@<:@=yes|no|auto@:>@],
-			      [define whether notify plugin should be compiled @<:@default=yes@:>@]	      
+			      [define whether notify plugin should be compiled @<:@default=$default_plugin_notify@:>@] 
 		)],
-		[]
+		[],
 		[AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_plugin_notify=auto],
-		       [enable_plugin_notify=yes])
+		       [enable_plugin_notify=$default_plugin_notify])
+		]
+		)
+
+AC_ARG_ENABLE([filemanager-caja],
+	      [AS_HELP_STRING([--enable-filemanager-caja@<:@=yes|no|auto@:>@],
+			      [define whether extension for caja file manager should be compiled @<:@default=$default_filemanager_caja@:>@] 
+		)],
+		[],
+		[AS_IF([test "x$enable_automatic" = xyes],
+		       [enable_filemanager_caja=auto],
+		       [enable_filemanager_caja=$default_filemanager_caja])
+		]
+		)
+
+AC_ARG_ENABLE([filemanager-nautilus],
+	      [AS_HELP_STRING([--enable-filemanager-nautilus@<:@=yes|no|auto@:>@],
+			      [define whether extension for nautilus file manager should be compiled @<:@default=$default_filemanager_nautilus@:>@] 
+		)],
+		[],
+		[AS_IF([test "x$enable_automatic" = xyes],
+		       [enable_filemanager_nautilus=auto],
+		       [enable_filemanager_nautilus=$default_filemanager_nautilus])
 		]
 		)
 
@@ -152,10 +232,10 @@ AS_IF([test "x$enable_client" '!=' xno], [have_client=yes], [have_client=no])
 AS_IF([test "x$enable_configtool" '!=' xno], [have_configtool=yes], [have_configtool=no])
 
 AS_IF([test "x$enable_plugin_ip4tcp" '!=' xno], [have_ip4tcp=yes], [have_ip4tcp=no])
-AS_IF([test "x$enable_plugin_ip6tcp" '!=' xno], [have_ip6tcp=yes], [have_ip6tcp=no])
+AS_IF([test "x$enable_plugin_ip6tcp" '!=' xno], [have_ip6tcp=$default_plugin_ip6tcp], [have_ip6tcp=no])
 
+# Test libnotify version
 AS_IF([test "x$enable_plugin_notify" '!=' xno], [
-	# Test libnotify version
 	PKG_CHECK_MODULES([LIBNOTIFY4], [libnotify >= 0.7.5],
 			  [AC_DEFINE([HAVE_LIBNOTIFY4], [1], [Use libnotify4])
 			  have_notify=yes
@@ -200,7 +280,7 @@ AS_IF([test "x$enable_widget_gtk" '!=' xno], [
 ])
 
 
-# Caja and Nautilus are always automatic
+# Caja and Nautilus are always automatic or disabled
 AS_IF([test "x$enable_filemanager_caja" '!=' xno], [
 	PKG_CHECK_MODULES([CAJA_EXTENSION], [libcaja-extension],
 			  [AC_DEFINE([HAVE_CAJA], [1], [Use caja])

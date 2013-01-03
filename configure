@@ -741,9 +741,12 @@ enable_widget_gtk
 enable_plugin_ip4tcp
 enable_plugin_ip6tcp
 enable_plugin_dbus
+enable_plugin_avahi
 enable_scanners
 enable_scanner_avahi
 enable_plugin_notify
+enable_filemanager_caja
+enable_filemanager_nautilus
 enable_dependency_tracking
 '
       ac_precious_vars='build_alias
@@ -1413,16 +1416,19 @@ Optional Features:
                           [default=yes]
   --enable-widget-gtk[=yes|no|auto]
                           define whether widget-gtk should be compiled
-                          [default=yes]
+                          [default=$default_widget_gtk]
   --enable-plugin-ip4tcp[=yes|no|auto]
                           define whether ip4tcp plugin should be compiled
                           [default=yes]
   --enable-plugin-ip6tcp[=yes|no|auto]
                           define whether ip6tcp plugin should be compiled
-                          [default=yes]
+                          [default=$default_plugin_ip6tcp]
   --enable-plugin-dbus[=yes|no|auto]
                           define whether dbus plugin should be compiled
-                          [default=yes]
+                          [default=$default_plugin_dbus]
+  --enable-plugin-avahi[=yes|no|auto]
+                          define whether avahi plugin should be compiled
+                          [default=$default_plugin_avahi]
   --enable-scanners[=yes|no]
                           define whether scanners should be installed
                           [default=yes]
@@ -1431,7 +1437,15 @@ Optional Features:
                           [default=scanners]
   --enable-plugin-notify[=yes|no|auto]
                           define whether notify plugin should be compiled
-                          [default=yes]
+                          [default=$default_plugin_notify]
+  --enable-filemanager-caja[=yes|no|auto]
+                          define whether extension for caja file manager
+                          should be compiled
+                          [default=$default_filemanager_caja]
+  --enable-filemanager-nautilus[=yes|no|auto]
+                          define whether extension for nautilus file manager
+                          should be compiled
+                          [default=$default_filemanager_nautilus]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
 
@@ -2997,6 +3011,61 @@ am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
 ac_config_headers="$ac_config_headers config.h"
 
 
+# Determine OS
+operating_system=linux # Default value
+if test "x$host_alias" '=' "xi686-w64-mingw32"; then :
+  operating_system=windows
+fi
+if test "x$host_alias" '=' "xx86_64-w64-mingw32"; then :
+  operating_system=windows
+fi
+if test "x$host_alias" '=' "xi686-apple-darwin10"; then :
+  operating_system=macosx
+fi
+
+# Default package settings
+if test "x$operating_system" '=' xlinux; then :
+
+       default_widget_gtk=yes
+       default_plugin_ip6tcp=yes
+       default_plugin_dbus=yes
+       default_plugin_notify=yes
+       default_plugin_avahi=yes
+       default_scanners=yes
+       default_scanner_avahi=yes
+       default_filemanager_caja=auto
+       default_filemanager_nautilus=auto
+
+fi
+
+if test "x$operating_system" '=' xmacosx; then :
+
+       default_widget_gtk=no
+       default_plugin_ip6tcp=yes
+       default_plugin_dbus=no
+       default_plugin_notify=no
+       default_plugin_avahi=no
+       default_scanners=yes
+       default_scanner_avahi=no
+       default_filemanager_caja=no
+       default_filemanager_nautilus=no
+
+fi
+
+if test "x$operating_system" '=' xwindows; then :
+
+       default_widget_gtk=no
+       default_plugin_ip6tcp=no
+       default_plugin_dbus=no
+       default_plugin_notify=no
+       default_plugin_avahi=no
+       default_scanners=no
+       default_scanner_avahi=no
+       default_filemanager_caja=no
+       default_filemanager_nautilus=no
+
+fi
+
 # Options
 
 # Check whether --enable-automatic was given.
@@ -3008,7 +3077,8 @@ fi
 # Check whether --enable-server was given.
 if test "${enable_server+set}" = set; then :
   enableval=$enable_server;
-		if test "x$enable_automatic" = xyes; then :
+else
+  if test "x$enable_automatic" = xyes; then :
   enable_server=auto
 else
   enable_server=yes
@@ -3021,7 +3091,8 @@ fi
 # Check whether --enable-client was given.
 if test "${enable_client+set}" = set; then :
   enableval=$enable_client;
-		if test "x$enable_automatic" = xyes; then :
+else
+  if test "x$enable_automatic" = xyes; then :
   enable_client=auto
 else
   enable_client=yes
@@ -3034,7 +3105,8 @@ fi
 # Check whether --enable-configtool was given.
 if test "${enable_configtool+set}" = set; then :
   enableval=$enable_configtool;
-		if test "x$enable_automatic" = xyes; then :
+else
+  if test "x$enable_automatic" = xyes; then :
   enable_configtool=auto
 else
   enable_configtool=yes
@@ -3054,7 +3126,7 @@ $as_echo "$as_me: Assingning default value to enable_widget_gtk" >&6;}
 		 if test "x$enable_automatic" = xyes; then :
   enable_widget_gtk=auto
 else
-  enable_widget_gtk=yes
+  enable_widget_gtk=$default_widget_gtk
 fi
 
 
@@ -3065,7 +3137,8 @@ fi
 # Check whether --enable-plugin-ip4tcp was given.
 if test "${enable_plugin_ip4tcp+set}" = set; then :
   enableval=$enable_plugin_ip4tcp;
-		if test "x$enable_automatic" = xyes; then :
+else
+  if test "x$enable_automatic" = xyes; then :
   enable_plugin_ip4tcp=auto
 else
   enable_plugin_ip4tcp=yes
@@ -3078,10 +3151,11 @@ fi
 # Check whether --enable-plugin-ip6tcp was given.
 if test "${enable_plugin_ip6tcp+set}" = set; then :
   enableval=$enable_plugin_ip6tcp;
-		if test "x$enable_automatic" = xyes; then :
+else
+  if test "x$enable_automatic" = xyes; then :
   enable_plugin_ip6tcp=auto
 else
-  enable_plugin_ip6tcp=yes
+  enable_plugin_ip6tcp=$default_plugin_ip6tcp
 fi
 
 
@@ -3091,10 +3165,25 @@ fi
 # Check whether --enable-plugin-dbus was given.
 if test "${enable_plugin_dbus+set}" = set; then :
   enableval=$enable_plugin_dbus;
-		if test "x$enable_automatic" = xyes; then :
+else
+  if test "x$enable_automatic" = xyes; then :
   enable_plugin_dbus=auto
 else
-  enable_plugin_dbus=yes
+  enable_plugin_dbus=$default_plugin_dbus
+fi
+
+
+fi
+
+
+# Check whether --enable-plugin-avahi was given.
+if test "${enable_plugin_avahi+set}" = set; then :
+  enableval=$enable_plugin_avahi;
+else
+  if test "x$enable_automatic" = xyes; then :
+  enable_plugin_avahi=auto
+else
+  enable_plugin_avahi=$default_plugin_avahi
 fi
 
 
@@ -3105,7 +3194,7 @@ fi
 if test "${enable_scanners+set}" = set; then :
   enableval=$enable_scanners; have_scan="$enable_scanners"
 else
-  have_scan=yes
+  have_scan=$default_scanners
 
 fi
 
@@ -3114,17 +3203,52 @@ fi
 if test "${enable_scanner_avahi+set}" = set; then :
   enableval=$enable_scanner_avahi;
 else
-  enable_scanner_avahi=$have_scan
+  if test "x$have_scan" = xyes; then :
+  enable_scanner_avahi=$default_scanner_avahi
+else
+  enable_scanner_avahi=no
+fi
+
+
 fi
 
 
 # Check whether --enable-plugin-notify was given.
 if test "${enable_plugin_notify+set}" = set; then :
   enableval=$enable_plugin_notify;
-		if test "x$enable_automatic" = xyes; then :
+else
+  if test "x$enable_automatic" = xyes; then :
   enable_plugin_notify=auto
 else
-  enable_plugin_notify=yes
+  enable_plugin_notify=$default_plugin_notify
+fi
+
+
+fi
+
+
+# Check whether --enable-filemanager-caja was given.
+if test "${enable_filemanager_caja+set}" = set; then :
+  enableval=$enable_filemanager_caja;
+else
+  if test "x$enable_automatic" = xyes; then :
+  enable_filemanager_caja=auto
+else
+  enable_filemanager_caja=$default_filemanager_caja
+fi
+
+
+fi
+
+
+# Check whether --enable-filemanager-nautilus was given.
+if test "${enable_filemanager_nautilus+set}" = set; then :
+  enableval=$enable_filemanager_nautilus;
+else
+  if test "x$enable_automatic" = xyes; then :
+  enable_filemanager_nautilus=auto
+else
+  enable_filemanager_nautilus=$default_filemanager_nautilus
 fi
 
 
@@ -4951,11 +5075,12 @@ else
   have_ip4tcp=no
 fi
 if test "x$enable_plugin_ip6tcp" '!=' xno; then :
-  have_ip6tcp=yes
+  have_ip6tcp=$default_plugin_ip6tcp
 else
   have_ip6tcp=no
 fi
 
+# Test libnotify version
 
 
 
@@ -5078,7 +5203,6 @@ $as_echo "no" >&6; }
 fi
 if test "x$enable_plugin_notify" '!=' xno; then :
 
-	# Test libnotify version
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBNOTIFY4" >&5
@@ -5653,7 +5777,7 @@ fi
 fi
 
 
-# Caja and Nautilus are always automatic
+# Caja and Nautilus are always automatic or disabled
 if test "x$enable_filemanager_caja" '!=' xno; then :
 
 

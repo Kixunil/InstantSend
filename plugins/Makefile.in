@@ -37,23 +37,23 @@ endif
 ALL=
 
 ifeq ($(HAVE_IP4TCP),yes)
-	ALL+=ip4tcp$(EXTENSION)
+	ALL+=ip4tcp$(LIBEXTENSION)
 endif
 
 ifeq ($(HAVE_IP6TCP),yes)
-	ALL+=ip6tcp$(EXTENSION)
+	ALL+=ip6tcp$(LIBEXTENSION)
 endif
 
 ifeq ($(HAVE_NOTIFY),yes)
-	ALL+=desktop-notify$(EXTENSION)
+	ALL+=desktop-notify$(LIBEXTENSION)
 endif
 
 ifeq ($(HAVE_DBUS),yes)
-	ALL+=dbus$(EXTENSION)
+	ALL+=dbus$(LIBEXTENSION)
 endif
 
 ifeq ($(HAVE_AVAHI),yes)
-	ALL+=avahi-publish$(EXTENSION)
+	ALL+=avahi-publish$(LIBEXTENSION)
 endif
 
 ifeq ($(HOST),i686-linux-gnu)
@@ -72,63 +72,67 @@ ifeq ($(HOST),x86_64-w64-mingw32)
 	ARCH=x86_64
 endif
 
+ifeq ($(HOST),i686-apple-darwin10)
+	OS=macosx
+endif
+
 OS ?= linux
 
 ifeq ($(OS),linux)
-	LDFLAGS+=-ldl -pthread -rdynamic -shared
-	EXTENSION=.so
+	PLATFORM=posix
+	LIBEXTENSION=.so
+endif
+
+ifeq ($(OS),macosx)
+	PLATFORM=posix
+	LIBEXTENSION=.dylib
 endif
 
 ifeq ($(OS),windows)
-#	CXXFLAGS+=-mdll
+	PLATFORM=windows
 	LDFLAGS+=-shared
 	DEFS+=-DWINDOWS
-	EXTENSION=.dll
+	LIBEXTENSION=.dll
 	DLLTOOL=$(HOST)-dlltool
+	IP4TCP_LDFLAGS+=-lwsock32
+	IP6TCP_LDFLAGS+=-lwsock32
+endif
+
+ifeq ($(PLATFORM),posix)
+	LDFLAGS+=-ldl -pthread -rdynamic -shared
+	LIBEXTENSION?=.so
 endif
 
 all: $(ALL)
 
-../src/libinstantsend-plugin.dll:
-	$(MAKE) -C ../src libinstantsend-plugin.dll
+../src/libinstantsend-plugin$(LIBEXTENSION):
+	$(MAKE) -C ../src libinstantsend-plugin$(LIBEXTENSION)
 
-../src/libinstantsend-json.dll:
-	$(MAKE) -C ../src libinstantsend-json.dll
+../src/libinstantsend-json$(LIBEXTENSION):
+	$(MAKE) -C ../src libinstantsend-json$(LIBEXTENSION)
 
-ip4tcp.so: ../include/pluginapi.h ip4tcp.cpp
-	 $(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcp.cpp $(LDFLAGS)
+ip4tcp$(LIBEXTENSION): ../include/pluginapi.h ip4tcp-$(PLATFORM).cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcp-$(PLATFORM).cpp -L../src/ -linstantsend-json -linstantsend-plugin $(IP4TCP_LDFLAGS) $(LDFLAGS)
 
-ip4tcp-windows.o: ../include/pluginapi.h ip4tcp-windows.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ ip4tcp-windows.cpp
+ip6tcp$(LIBEXTENSION): ../include/pluginapi.h ip6tcp-$(PLATFORM).cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	         $(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp-$(PLATFORM).cpp -L../src/ -linstantsend-json -linstantsend-plugin $(IP6TCP_LDFLAGS) $(LDFLAGS)
 
-ip4tcp.dll: ip4tcp-windows.o ../src/libinstantsend-plugin.dll ../src/libinstantsend-json.dll
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcp-windows.o -L../src/ -linstantsend-json -linstantsend-plugin -lwsock32 $(LDFLAGS)
+zenityprogress$(LIBEXTENSION): zenityprogress.cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ zenityprogress.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS)
 
-ip6tcp-windows.o: ../include/pluginapi.h ip6tcp-windows.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ ip6tcp-windows.cpp
+dbus$(LIBEXTENSION): dbus.cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DBUS_CFLAGS) $(DEFS) -o $@ dbus.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS) $(DBUS_LIBS)
 
-ip6tcp.so: ip6tcp-windows.o ../src/libinstantsend-plugin.dll ../src/libinstantsend-json.dll
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp-windows.o -L../src/ -linstantsend-json -linstantsend-plugin -lwsock32 $(LDFLAGS)
+desktop-notify$(LIBEXTENSION): desktop-notify.cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(NOTIFY_CFLAGS) $(DEFS) -o $@ desktop-notify.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS) $(NOTIFY_LIBS)
 
-ip6tcp.dll: ../include/pluginapi.h ip6tcp-windows.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp-windows.cpp $(LDFLAGS) -lwsock32
-
-zenityprogress.so: zenityprogress.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ zenityprogress.cpp $(LDFLAGS)
-
-dbus.so: dbus.cpp
-	$(CXX) $(CXXFLAGS) $(DBUS_CFLAGS) $(DEFS) -o $@ dbus.cpp $(LDFLAGS) $(DBUS_LIBS)
-
-desktop-notify.so: desktop-notify.cpp
-	$(CXX) $(CXXFLAGS) $(NOTIFY_CFLAGS) $(DEFS) -o $@ desktop-notify.cpp $(LDFLAGS) $(NOTIFY_LIBS)
-
-avahi-publish.so: avahi-publish.cpp
-	$(CXX) $(CXXFLAGS) $(AVAHI_CFLAGS) $(DEFS) -o $@ avahi-publish.cpp $(LDFLAGS) $(AVAHI_LIBS)
+avahi-publish$(LIBEXTENSION): avahi-publish.cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(AVAHI_CFLAGS) $(DEFS) -o $@ avahi-publish.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS) $(AVAHI_LIBS)
 
 check:
 
 clean:
-	rm -f *.so
+	rm -f *.so *.dll *.dylib
 
 distclean: clean
 	rm -f Makefile
