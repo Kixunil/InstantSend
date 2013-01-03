@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <typeinfo>
-#include <malloc.h>
 
 #include "json.h"
 
