@@ -120,7 +120,7 @@ void addEventPlugin(jsonComponent_t &cfg, const char *plugconf) {
 
 void saveCfg(jsonComponent_t &cfg, string file) {
 	string cfgstr = cfg.toString();
-	FILE *tmp = fopen((file + "_tmp").c_str(), "w");
+	FILE *tmp = fopen((file + "_tmp").c_str(), "wb");
 	if(!tmp) {
 		perror("fopen");
 		fprintf(stderr, "File: %s\n", (file + "_tmp").c_str());
