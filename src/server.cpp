@@ -1,3 +1,7 @@
+#ifdef WINDOWS
+	#include <windows.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -309,5 +313,7 @@ int main(int argc, char **argv) {
 
 #ifndef WINDOWS
 	pthread_exit(NULL);
+#else
+	while(1) Sleep(1000000); // TODO: get rid of this work-around
 #endif
 }
