@@ -1,6 +1,7 @@
 #include <dbus/dbus.h>
 #include <string.h>
 #include <sys/time.h>
+#include <cstdio> // TODO: improve exception handling and error printing
 
 #include <map>
 #include <stdexcept>
