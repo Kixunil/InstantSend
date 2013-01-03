@@ -125,12 +125,13 @@ int main(int argc, char **argv) {
 		jsonObj_t &config = dynamic_cast<jsonObj_t &>(*configptr.get());
 		jsonObj_t &targets = dynamic_cast<jsonObj_t &>(config.gie("targets"));
 
+		/*
 		try {
 			eventSink_t::instance().autoLoad(dynamic_cast<jsonObj_t &>(config.gie("eventhandlers")));
 		}
 		catch(...) {
 		}           
-
+*/
 		char *tname = NULL;
 		for(int i = 1; i+1 < argc; ++i) {
 			if(string(argv[i]) == string("-t")) {
