@@ -5,12 +5,14 @@
 #include "pluginloader.h"
 
 string pluginLoader_t::getFullName(const string &path, const string &name) {
-	return path + "/" + name + ".so";
+	return path + "/" + name + LIBRARY_EXTENSION;
 }
 
 void *pluginLoader_t::tryLoad(const string &path) {
 	fprintf(stderr, "Loading: %s\n", path.c_str());
-	return dlopen(path.c_str(), RTLD_LAZY);
+	void *result = dlopen(path.c_str(), RTLD_LAZY);
+	if(!result) throw runtime_error(dlerror());
+	return result;
 }
 
 
