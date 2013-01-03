@@ -7,8 +7,6 @@ void eventName::sendEvent(event_t &event) {\
 	dynamic_cast<eventType &>(event).eventCall(evdata);\
 }
 
-event_t::~event_t() {}
-
 eventData_t::~eventData_t() {}
 
 eventSink_t &eventSink_t::instance() {
