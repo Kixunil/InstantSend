@@ -30,7 +30,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">InstantSend
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
    <div id="projectbrief">Multiprotocol file transfer toolkit</div>
   </td>
@@ -90,10 +90,16 @@ This is the complete list of members for <a class="el" href="classeventSink__t.h
   <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a7339c49521260767b8fe4f916b537530">regProgress</a>(eventProgress_t &amp;progressEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a23bbd3acc81245047d7e75befdb0b828">regReceive</a>(eventReceive_t &amp;receiveEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classeventSink__t.html#aba491c989268123534c707dc9abdd2aa">regSend</a>(eventSend_t &amp;sendEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#aaa85e2bdc99f02bb0b84bf51b189073f">regServer</a>(eventServer_t &amp;serverEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>sendConnection</b>(eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [inline]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>sendEvent</b>(vector&lt; event_t * &gt; &amp;handlers, eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>sendEvent</b>(set&lt; event_t * &gt; &amp;handlers, eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>sendProgress</b>(eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [inline]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classevent__t.html#a6821a871982158486d6fac8a1a1c204c">~event_t</a>()</td><td><a class="el" href="classevent__t.html">event_t</a></td><td><code> [virtual]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>sendServer</b>(eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [inline]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>unregConnections</b>(eventConnections_t &amp;connectionEvent) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a6c4ed33c87f8f6d928d4e6dcbeb0da71">unregProgress</a>(eventProgress_t &amp;progressEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a3b7740dda2630928752f0acf7281394b">unregReceive</a>(eventReceive_t &amp;receiveEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a511378eb9b71424cc767e8622bb03d19">unregSend</a>(eventSend_t &amp;sendEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#ab6119c05c032362c9d42e83dc037760e">unregServer</a>(eventServer_t &amp;serverEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
 </table></div><!-- contents -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
@@ -112,7 +118,7 @@ This is the complete list of members for <a class="el" href="classeventSink__t.h
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 8 2012 23:17:11 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

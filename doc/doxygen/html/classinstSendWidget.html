@@ -30,7 +30,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">InstantSend
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
    <div id="projectbrief">Multiprotocol file transfer toolkit</div>
   </td>
@@ -105,6 +105,8 @@ Public Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>addFile</b> (unsigned int id, const ustring &amp;fileName, const ustring &amp;machineId, uint64_t fileSize, char direction)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac02750ff02e273e63863d4e0b2b8ac44"></a><!-- doxytag: member="instSendWidget::updateBytes" ref="ac02750ff02e273e63863d4e0b2b8ac44" args="(unsigned int id, uint64_t bytes)" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>updateBytes</b> (unsigned int id, uint64_t bytes)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d306ad698fb7384c2589e3de5e29337"></a><!-- doxytag: member="instSendWidget::fileEnded" ref="a4d306ad698fb7384c2589e3de5e29337" args="(uint32_t id, uint32_t status)" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>fileEnded</b> (uint32_t id, uint32_t status)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a33c6d042b9eeb1451e045be080143a63"></a><!-- doxytag: member="instSendWidget::show" ref="a33c6d042b9eeb1451e045be080143a63" args="()" -->
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>show</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adaf00468c149683c46a37f70397346ef"></a><!-- doxytag: member="instSendWidget::hide" ref="adaf00468c149683c46a37f70397346ef" args="()" -->
@@ -113,6 +115,16 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide</b> ()</
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>togle</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad2efffdb4e6949285b36315d92a57092"></a><!-- doxytag: member="instSendWidget::quit" ref="ad2efffdb4e6949285b36315d92a57092" args="()" -->
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>quit</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1c0d7e37bd93a67d0289799ff5e84f5e"></a><!-- doxytag: member="instSendWidget::sendFiles" ref="a1c0d7e37bd93a67d0289799ff5e84f5e" args="()" -->
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>sendFiles</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a95a1345c5a3b0d33ec74cacec58b4f67"></a><!-- doxytag: member="instSendWidget::preferences" ref="a95a1345c5a3b0d33ec74cacec58b4f67" args="()" -->
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>preferences</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0565b8b5f8673a07dfe79fbeb34514a8"></a><!-- doxytag: member="instSendWidget::startServer" ref="a0565b8b5f8673a07dfe79fbeb34514a8" args="()" -->
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>startServer</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa2bb99fd19cdac3afd6a1d2da27280c8"></a><!-- doxytag: member="instSendWidget::stopServer" ref="aa2bb99fd19cdac3afd6a1d2da27280c8" args="()" -->
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>stopServer</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a111d7604088c48fb0eaa7f2d4a2cdb91"></a><!-- doxytag: member="instSendWidget::serverRunning" ref="a111d7604088c48fb0eaa7f2d4a2cdb91" args="()" -->
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>serverRunning</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a71c6fe0a67b57e65d5a348a3c348100c"></a><!-- doxytag: member="instSendWidget::isVisible" ref="a71c6fe0a67b57e65d5a348a3c348100c" args="()" -->
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isVisible</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab93807e8365c07c466d1e537e2a27460"></a><!-- doxytag: member="instSendWidget::recvInProgress" ref="ab93807e8365c07c466d1e537e2a27460" args="()" -->
@@ -131,19 +143,37 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>on_timeout</b> ()</td
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>on_icon_timeout</b> ()</td></tr>
 <tr><td colspan="2"><h2><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a64331b2e1c2415e9c79c77716d8dfbee"></a><!-- doxytag: member="instSendWidget::mutex" ref="a64331b2e1c2415e9c79c77716d8dfbee" args="" -->
+auto_ptr&lt; <a class="el" href="classmutex__t.html">mutex_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>mutex</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac76f8d942fefe4f4b810de2173de9407"></a><!-- doxytag: member="instSendWidget::scrollWindowAll" ref="ac76f8d942fefe4f4b810de2173de9407" args="" -->
 ScrolledWindow&#160;</td><td class="memItemRight" valign="bottom"><b>scrollWindowAll</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aabd97dd58c1f3c5560d365226e42a7f7"></a><!-- doxytag: member="instSendWidget::scrollWindowRecv" ref="aabd97dd58c1f3c5560d365226e42a7f7" args="" -->
 ScrolledWindow&#160;</td><td class="memItemRight" valign="bottom"><b>scrollWindowRecv</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a66f87351f59d013c874e996e17c08914"></a><!-- doxytag: member="instSendWidget::scrollWindowSend" ref="a66f87351f59d013c874e996e17c08914" args="" -->
 ScrolledWindow&#160;</td><td class="memItemRight" valign="bottom"><b>scrollWindowSend</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5506434b0141c5a248527315f4ad62a0"></a><!-- doxytag: member="instSendWidget::scrollWindowPending" ref="a5506434b0141c5a248527315f4ad62a0" args="" -->
+ScrolledWindow&#160;</td><td class="memItemRight" valign="bottom"><b>scrollWindowPending</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab11670bc083cb9d144545160e2875f1d"></a><!-- doxytag: member="instSendWidget::scrollWindowRecved" ref="ab11670bc083cb9d144545160e2875f1d" args="" -->
+ScrolledWindow&#160;</td><td class="memItemRight" valign="bottom"><b>scrollWindowRecved</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a414b94531e16e3ccf14ddf8647de5b8d"></a><!-- doxytag: member="instSendWidget::allBox" ref="a414b94531e16e3ccf14ddf8647de5b8d" args="" -->
 VBox&#160;</td><td class="memItemRight" valign="bottom"><b>allBox</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad675c3af5ee4dccc4048cbf67cd23eec"></a><!-- doxytag: member="instSendWidget::pendingBox" ref="ad675c3af5ee4dccc4048cbf67cd23eec" args="" -->
+VBox&#160;</td><td class="memItemRight" valign="bottom"><b>pendingBox</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adc5fb91921483ce392eabcbe0ea0c638"></a><!-- doxytag: member="instSendWidget::recvBox" ref="adc5fb91921483ce392eabcbe0ea0c638" args="" -->
+VBox&#160;</td><td class="memItemRight" valign="bottom"><b>recvBox</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae874df0889f90ff68ebf66ae251f402d"></a><!-- doxytag: member="instSendWidget::sendBox" ref="ae874df0889f90ff68ebf66ae251f402d" args="" -->
+VBox&#160;</td><td class="memItemRight" valign="bottom"><b>sendBox</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae4bc1fe410c159f9d5023a6981b68cd4"></a><!-- doxytag: member="instSendWidget::recvedBox" ref="ae4bc1fe410c159f9d5023a6981b68cd4" args="" -->
+VBox&#160;</td><td class="memItemRight" valign="bottom"><b>recvedBox</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a68f4337f7e51064ca697974c2a2ed136"></a><!-- doxytag: member="instSendWidget::files" ref="a68f4337f7e51064ca697974c2a2ed136" args="" -->
 std::map&lt; unsigned int, <br class="typebreak"/>
 <a class="el" href="classFileInfoItem.html">FileInfoItem</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>files</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9426f91f1218912fa5b8f3493c8d7fd5"></a><!-- doxytag: member="instSendWidget::nextid" ref="a9426f91f1218912fa5b8f3493c8d7fd5" args="" -->
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>nextid</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac8eee3ce9a812d960be9140d6c0458b6"></a><!-- doxytag: member="instSendWidget::pending" ref="ac8eee3ce9a812d960be9140d6c0458b6" args="" -->
+std::map&lt; unsigned int, <br class="typebreak"/>
+<a class="el" href="classFileInfoItem.html">FileInfoItem</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>pending</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad7068a4c9394b2cc4969741e1dd5e9a8"></a><!-- doxytag: member="instSendWidget::received" ref="ad7068a4c9394b2cc4969741e1dd5e9a8" args="" -->
+std::map&lt; unsigned int, <br class="typebreak"/>
+<a class="el" href="classFileInfoItem.html">FileInfoItem</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>received</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa775c313536882fe723432fd67afe025"></a><!-- doxytag: member="instSendWidget::notebook" ref="aa775c313536882fe723432fd67afe025" args="" -->
 Notebook&#160;</td><td class="memItemRight" valign="bottom"><b>notebook</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a14f02ed5957bfe560a37d0fbc8f0db6c"></a><!-- doxytag: member="instSendWidget::dberr" ref="a14f02ed5957bfe560a37d0fbc8f0db6c" args="" -->
@@ -152,6 +182,10 @@ DBusError&#160;</td><td class="memItemRight" valign="bottom"><b>dberr</b></td></
 DBusConnection *&#160;</td><td class="memItemRight" valign="bottom"><b>dbconn</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af0421447c6aafe2f5d376f0e70082d36"></a><!-- doxytag: member="instSendWidget::trIcon" ref="af0421447c6aafe2f5d376f0e70082d36" args="" -->
 <a class="el" href="classgtkTrayIcon.html">gtkTrayIcon</a>&#160;</td><td class="memItemRight" valign="bottom"><b>trIcon</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afb8311fdb2a10d10336706bab2ac6cb7"></a><!-- doxytag: member="instSendWidget::sendFileCount" ref="afb8311fdb2a10d10336706bab2ac6cb7" args="" -->
+unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>sendFileCount</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7cfb59439316524edf6a0dd4ff68ef9e"></a><!-- doxytag: member="instSendWidget::recvFileCount" ref="a7cfb59439316524edf6a0dd4ff68ef9e" args="" -->
+unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>recvFileCount</b></td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/widget-gtk.cpp</li>
@@ -174,7 +208,7 @@ DBusConnection *&#160;</td><td class="memItemRight" valign="bottom"><b>dbconn</b
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 8 2012 23:17:11 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>
