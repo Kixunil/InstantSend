@@ -1,5 +1,6 @@
 #include <cstring>
 #include <stdexcept>
+#include <cstdio>
 
 #include "datareceiver.h"
 #include "filewriter.h"

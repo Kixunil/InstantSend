@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <cstdio>
 
 #include "connectionreceiver.h"
 #include "datareceiver.h"
