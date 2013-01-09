@@ -1,9 +1,8 @@
+CXX=@CXX@
 CXXFLAGS=@CXXFLAGS@
 CXXFLAGS+=-I../include -I. -I../
 DEFS=@DEFS@
 LDFLAGS=@LDFLAGS@ @LIBS@
-SERVER_LDFLAGS=-ldl
-CLIENT_CFLAGS=-ldl
 
 prefix=@prefix@
 PREFIX=$(prefix)
@@ -15,8 +14,6 @@ DATADIR=@datadir@
 LOCALEDIR=@localedir@
 
 GETTEXT_DOMAINNAME=instantsend-dialog-gtk
-
-DEFS+=-DPREFIX=\"$(PREFIX)\" -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DGETTEXT_PACKAGE=\"$(GETTEXT_DOMAINNAME)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 HAVE_CLIENT=@have_client@
 HAVE_SERVER=@have_server@
@@ -33,90 +30,127 @@ SERVER_BIN=$(DESTDIR)$(BINDIR)/instsendd
 CONFIGTOOL_BIN=$(DESTDIR)$(BINDIR)/instsend-config
 WIDGET_GTK_BIN=$(DESTDIR)$(BINDIR)/instsend-dialog-gtk
 
-ifndef OS
-	OS=linux
-	CLIENT_LDFLAGS+=-ldl -pthread -rdynamic
-	SERVER_LDFLAGS+=-ldl -pthread -rdynamic
-endif
+DEFS+=-DLIBRARY_EXTENSION=\"$(LIBEXTENSION)\"
 
-ifeq ($(OS),windows)
-	CXX=$(ARCH)-w64-mingw32-g++
-	CXXFLAGS+=-I/usr/$(ARCH)-w64-mingw32/include/ -DWINDOWS
-	EXTENSION=.exe
-endif
+LIBCXXFLAGS=-fPIC
+LIBLDFLAGS=-shared
 
 ifeq ($(HOST),i686-linux-gnu)
 	CFLAGS+=-march=i686 -m32
+	OS=linux
 endif
 
 ifeq ($(HOST),arm-linux-gnueabihf)
-	CXX=arm-linux-gnueabihf-g++
+	OS=linux
 endif
 
 ifeq ($(HOST),arm-linux-gnueabi)
-	CXX=arm-linux-gnueabi-g++
+	OS=linux
+endif
+
+ifeq ($(HOST),i686-w64-mingw32)
+	OS=windows
+	ARCH=i686
+endif
+
+ifeq ($(HOST),x86_64-w64-mingw32)
+	OS=windows
+	ARCH=x86_64
+endif
+
+ifeq ($(HOST),i686-apple-darwin10)
+	OS=macosx
+endif
+
+ifndef OS
+	OS=linux
+endif
+
+ifeq ($(OS),linux)
+	PLATFORM=posix
+	LIBEXTENSION=.so
+endif
+
+ifeq ($(OS),macosx)
+	PLATFORM=posix
+	LIBEXTENSION=.dylib
+endif
+
+ifeq ($(OS),windows)
+	PLATFORM=windows
+	DEFS+=-DWINDOWS
+	BINEXTENSION=.exe
+	LIBEXTENSION=.dll
+	DLLTOOL=$(HOST)-dlltool
+endif
+
+ifeq ($(PLATFORM),posix)
+	CLIENT_LDFLAGS+=-ldl -pthread -rdynamic
+	SERVER_LDFLAGS+=-ldl -pthread -rdynamic
+	DEFS+=-DPREFIX=\"$(PREFIX)\" -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DGETTEXT_PACKAGE=\"$(GETTEXT_DOMAINNAME)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+	LIBEXTENSION?=.so
 endif
 
 ifeq ($(HAVE_CLIENT),yes)
-	ALL+=client$(EXTENSION)
+	ALL+=client$(BINEXTENSION)
 	INSTALL+=install-client
 endif
 
 ifeq ($(HAVE_SERVER),yes)
-	ALL+=server$(EXTENSION)
+	ALL+=server$(BINEXTENSION)
 	INSTALL+=install-server
 endif
 
 ifeq ($(HAVE_CONFIGTOOL),yes)
-	ALL+=configtool$(EXTENSION)
+	ALL+=configtool$(BINEXTENSION)
 	INSTALL+=install-configtool
 endif
 
 ifeq ($(HAVE_WIDGET_GTK),yes)
-	ALL+=widget-gtk$(EXTENSION)
+	ALL+=widget-gtk$(BINEXTENSION)
 	INSTALL+=install-widget-gtk
 endif
 
 all: $(ALL)
 
-client$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o eventsink.o ../include/pluginapi.h client.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o eventsink.o client.cpp $(LDFLAGS) $(CLIENT_LDFLAGS)
+client$(BINEXTENSION): ../include/pluginapi.h client.cpp libinstantsend-plugin$(LIBEXTENSION) libinstantsend-json$(LIBEXTENSION) libinstantsend-pluginloading$(LIBEXTENSION) libinstantsend-sysapi$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ client.cpp -L. -linstantsend-plugin -linstantsend-json -linstantsend-pluginloading -linstantsend-sysapi $(LDFLAGS) $(CLIENT_LDFLAGS)
 
-server$(EXTENSION): json.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o datareceiver.o connectionreceiver.o appcontrol-platformdependent.o ../include/pluginapi.h server.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o pluginloader-platformdependent.o pluginloader.o pluginlist.o plugin.o sysapi.o multithread.o filewriter.o filelist.o eventsink.o datareceiver.o connectionreceiver.o appcontrol-platformdependent.o server.cpp $(LDFLAGS) $(SERVER_LDFLAGS)
+server$(BINEXTENSION): filewriter.o filelist.o eventsink.o connectionreceiver.o datareceiver.o ../include/pluginapi.h server.cpp libinstantsend-plugin$(LIBEXTENSION) libinstantsend-json$(LIBEXTENSION) libinstantsend-multithread$(LIBEXTENSION) libinstantsend-common$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ filewriter.o filelist.o eventsink.o connectionreceiver.o datareceiver.o server.cpp -L. -linstantsend-plugin -linstantsend-json -linstantsend-pluginloading -linstantsend-sysapi -linstantsend-multithread -linstantsend-common $(LDFLAGS) $(SERVER_LDFLAGS)
 
-widget-gtk: json.o sysapi.o multithread.o widget-gtk.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp json.o sysapi.o multithread.o $(WIDGET_GTK_LIBS)
+widget-gtk: libinstantsend-json$(LIBEXTENSION) libinstantsend-sysapi$(LIBEXTENSION) libinstantsend-multithread$(LIBEXTENSION) widget-gtk.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp -L. -linstantsend-json -linstantsend-sysapi -linstantsend-multithread $(WIDGET_GTK_LIBS)
 
-configtool: configtool.cpp json.o sysapi.o
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o sysapi.o configtool.cpp
-
-libinstantsend.o: libinstantsend.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ libinstantsend.cpp
+configtool$(BINEXTENSION): configtool.cpp sysapi.o libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ sysapi.o configtool.cpp -L. -linstantsend-json $(LDFLAGS)
 
 json.o: json.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ json.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ json.cpp
 
 pluginlist.o: pluginlist.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ pluginlist.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ pluginlist.cpp
 
 plugin.o: plugin.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ plugin.cpp
+	$(CXX) $(LIBCXXFLAGS) $(CXXFLAGS) $(DEFS) -c -o $@ plugin.cpp
 
-environment.o: sysapi/$(OS)/environment.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/environment.cpp
+plugin-common.o: plugin-common.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ plugin-common.cpp
+
+environment.o: sysapi/$(PLATFORM)/environment.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(PLATFORM)/environment.cpp
 
 pluginloader.o: pluginloader.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ pluginloader.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ pluginloader.cpp
 
-pluginloader-platformdependent.o: sysapi/$(OS)/pluginloader-$(OS).cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/pluginloader-$(OS).cpp
+pluginloader-platformdependent.o: sysapi/$(PLATFORM)/pluginloader-$(PLATFORM).cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(PLATFORM)/pluginloader-$(PLATFORM).cpp
 
-sysapi.o: sysapi/$(OS)/misc.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/misc.cpp
+sysapi.o: sysapi/$(PLATFORM)/misc.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(PLATFORM)/misc.cpp
 
-multithread.o: sysapi/$(OS)/multithread.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) $(LDFLAGS) -c -o $@ sysapi/$(OS)/multithread.cpp
+multithread.o: sysapi/$(PLATFORM)/multithread.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) $(LDFLAGS) -c -o $@ sysapi/$(PLATFORM)/multithread.cpp
 
 filewriter.o: filewriter.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ filewriter.cpp
@@ -134,28 +168,51 @@ connectionreceiver.o: connectionreceiver.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ connectionreceiver.cpp
 
 appcontrol-platformdependent.o: sysapi/$(OS)/appcontrol-platformdependent.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/appcontrol-platformdependent.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/appcontrol-platformdependent.cpp
+
+libinstantsend-plugin$(LIBEXTENSION): plugin-common.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ plugin-common.o $(LIBLDFLAGS) $(LDFLAGS)
+
+libinstantsend-json$(LIBEXTENSION): json.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ json.o $(LIBLDFLAGS) $(LDFLAGS)
+
+libinstantsend-pluginloading$(LIBEXTENSION): pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o $(LIBLDFLAGS) $(LDFLAGS)
+
+libinstantsend-sysapi$(LIBEXTENSION): sysapi.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ sysapi.o $(LIBLDFLAGS) $(LDFLAGS)
+
+libinstantsend-multithread$(LIBEXTENSION): multithread.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ multithread.o $(LIBLDFLAGS) $(LDFLAGS)
+
+libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ appcontrol-platformdependent.o $(LIBLDFLAGS) $(LDFLAGS)
 
 check:
 
 clean:
-	rm -f *.o client$(EXTENSION) server$(EXTENSION) configtool$(EXTENSION) widget-gtk
+	rm -f *.o client server configtool widget-gtk *.so *.dylib *.exe *.dll *-install-lib
 
 distclean: clean
 	rm -f Makefile
 
-install-client: client
-	install -D client $(CLIENT_BIN)
+%-install-lib: libinstantsend-%$(LIBEXTENSION)
+	install -Dm 644 $< $(LIBDIR)/$<
+	touch $@
 
-install-server: server
-	install -D server $(SERVER_BIN)
+install-client: client sysapi-install-lib plugin-install-lib pluginloading-install-lib json-install-lib
+	install -D client$(BINEXTENSION) $(CLIENT_BIN)
 
-install-configtool: configtool
-	install -D configtool $(CONFIGTOOL_BIN)
+install-server: server sysapi-install-lib plugin-install-lib pluginloading-install-lib json-install-lib multithread-install-lib common-install-lib
+	install -D server$(BINEXTENSION) $(SERVER_BIN)
 
-install-widget-gtk: widget-gtk
-	install -D widget-gtk $(WIDGET_GTK_BIN)
+install-configtool: configtool sysapi-install-lib json-install-lib
+	install -D configtool$(BINEXTENSION) $(CONFIGTOOL_BIN)
+
+install-widget-gtk: widget-gtk multithread-install-lib sysapi-install-lib json-install-lib
+	install -D widget-gtk$(BINEXTENSION) $(WIDGET_GTK_BIN)
 
 install: $(INSTALL)
+	rm -f *-install-lib
 
 .PHONY: all check clean distclean install install-client install-server install-configtool install-widget-gtk

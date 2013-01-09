@@ -52,10 +52,3 @@ plugin_t::~plugin_t() {
 		handle = NULL;
 	}
 }
-
-pluginInstance_t::~pluginInstance_t() {
-	;
-}
-
-pluginInstanceCreator_t::~pluginInstanceCreator_t() {
-}

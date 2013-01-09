@@ -5,7 +5,7 @@
 #include "pluginloader.h"
 
 string pluginLoader_t::getFullName(const string &path, const string &name) {
-	return path + "\\" + name + ".dll";
+	return path + "\\" + name + LIBRARY_EXTENSION;
 }
 
 void *pluginLoader_t::tryLoad(const string &path) {
@@ -29,7 +29,7 @@ pluginInstanceCreator_t *pluginLoader_t::getCreator(void *handle) {
 
 void closePlugin(void *handle) {
 	FreeLibrary(*(HMODULE *)handle);
-	delete handle;
+	delete (HMODULE *)handle;
 }
 
 void (*pluginLoader_t::getPluginDestructor())(void *) {

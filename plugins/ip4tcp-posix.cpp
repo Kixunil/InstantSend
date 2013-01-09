@@ -12,6 +12,14 @@
 
 #define min(a, b) ((a < b)?a:b)
 
+#ifndef MSG_MORE // For non-Linux Unixes
+	#define MSG_MORE 0
+#endif
+
+#ifndef MSG_NOSIGNAL // For non-Linux Unixes
+	#define MSG_NOSIGNAL 0
+#endif
+
 class i4tPeer : public peer_t {
 	private:
 		int fd;

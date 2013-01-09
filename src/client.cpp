@@ -13,68 +13,62 @@
 int outputpercentage = 0;
 
 int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
-	try {
-		long fs, sb;
-		if(fseek(file, 0, SEEK_END) < 0) throw runtime_error("Can't seek");
-		if((fs = ftell(file)) < 0) throw runtime_error("Unknown size");
-		rewind(file);
+	long fs, sb;
+	if(fseek(file, 0, SEEK_END) < 0) throw runtime_error("Can't seek");
+	if((fs = ftell(file)) < 0) throw runtime_error("Unknown size");
+	rewind(file);
 
-		auto_ptr<anyData> data(allocData(DMAXSIZE+1));
+	auto_ptr<anyData> data(allocData(DMAXSIZE+1));
 
-		jsonObj_t msgobj;
-		msgobj.insertNew("service", new jsonStr_t("filetransfer"));
-		msgobj.insertNew("filename", new jsonStr_t(basename));
-		msgobj.insertNew("filesize", new jsonInt_t(fs));
+	jsonObj_t msgobj;
+	msgobj.insertNew("service", new jsonStr_t("filetransfer"));
+	msgobj.insertNew("filename", new jsonStr_t(basename));
+	msgobj.insertNew("filesize", new jsonInt_t(fs));
+	string msg = msgobj.toString();
+	strcpy(data->data, msg.c_str());
+	data->size = msg.size() + 1;
+	msgobj.deleteContent();
+
+	if(!client->sendData(data.get())) throw runtime_error("Can't send!");
+	data->size = DMAXSIZE;
+	if(!client->recvData(data.get())) throw runtime_error("No response");
+	data->data[data->size] = 0;
+
+	msg = string(data->data);
+	msgobj = jsonObj_t(&msg);
+	if(dynamic_cast<jsonStr_t &>(msgobj.gie("service")) != "filetransfer") throw runtime_error("Unknown protocol");
+	jsonStr_t &action = dynamic_cast<jsonStr_t &>(msgobj.gie("action"));
+	if(action.getVal() != string("accept")) {
+		try {
+			jsonStr_t &reason = dynamic_cast<jsonStr_t &>(msgobj.gie("reason"));
+			throw (string("File rejected: ") + reason.getVal()).c_str();
+		} catch(jsonNotExist) {
+			throw "File rejected: unknown reason";
+		}
+	}
+
+	auto_ptr<jsonInt_t> fp(new jsonInt_t(0));
+	msgobj["position"] = fp.get();
+	sb = 0;
+
+	do {
+		long fpos = ftell(file);
+		if(fpos < 0) throw runtime_error("Unknown position");
+		fp->setVal(fpos);
 		string msg = msgobj.toString();
 		strcpy(data->data, msg.c_str());
-		data->size = msg.size() + 1;
-		msgobj.deleteContent();
+		data->size = fread(data->data + msg.size() + 1, 1, 1022 - msg.size(), file);
+		if(ferror(file)) throw runtime_error("Can't read");
+		sb += data->size;
+		data->size += msg.size() + 1;
 
 		if(!client->sendData(data.get())) throw runtime_error("Can't send!");
-		data->size = DMAXSIZE;
-		if(!client->recvData(data.get())) throw runtime_error("No response");
-		data->data[data->size] = 0;
-
-		msg = string(data->data);
-		msgobj = jsonObj_t(&msg);
-		if(dynamic_cast<jsonStr_t &>(msgobj.gie("service")) != "filetransfer") throw runtime_error("Unknown protocol");
-		jsonStr_t &action = dynamic_cast<jsonStr_t &>(msgobj.gie("action"));
-		if(action.getVal() != string("accept")) {
-			try {
-				jsonStr_t &reason = dynamic_cast<jsonStr_t &>(msgobj.gie("reason"));
-				throw (string("File rejected: ") + reason.getVal()).c_str();
-			} catch(jsonNotExist) {
-				throw "File rejected: unknown reason";
-			}
+		if(outputpercentage) {
+			printf("%ld\n", 100*sb / fs);
+			fflush(stdout);
 		}
-
-		auto_ptr<jsonInt_t> fp(new jsonInt_t(0));
-		msgobj["position"] = fp.get();
-		sb = 0;
-
-		do {
-			long fpos = ftell(file);
-			if(fpos < 0) throw runtime_error("Unknown position");
-			fp->setVal(fpos);
-			string msg = msgobj.toString();
-			strcpy(data->data, msg.c_str());
-			data->size = fread(data->data + msg.size() + 1, 1, 1022 - msg.size(), file);
-			if(ferror(file)) throw runtime_error("Can't read");
-			sb += data->size;
-			data->size += msg.size() + 1;
-
-			if(!client->sendData(data.get())) throw runtime_error("Can't send!");
-			if(outputpercentage) {
-				printf("%ld\n", 100*sb / fs);
-				fflush(stdout);
-			}
-		} while(!feof(file));
-		return 1;
-	}
-	catch(...) {
-		return 0;
-	}
-
+	} while(!feof(file));
+	return 1;
 }
 
 auto_ptr<peer_t> findWay(jsonArr_t &ways) {
@@ -131,12 +125,13 @@ int main(int argc, char **argv) {
 		jsonObj_t &config = dynamic_cast<jsonObj_t &>(*configptr.get());
 		jsonObj_t &targets = dynamic_cast<jsonObj_t &>(config.gie("targets"));
 
+		/*
 		try {
 			eventSink_t::instance().autoLoad(dynamic_cast<jsonObj_t &>(config.gie("eventhandlers")));
 		}
 		catch(...) {
 		}           
-
+*/
 		char *tname = NULL;
 		for(int i = 1; i+1 < argc; ++i) {
 			if(string(argv[i]) == string("-t")) {
@@ -154,7 +149,7 @@ int main(int argc, char **argv) {
 					return 1;
 				}
 				// Open file
-				FILE *file = fopen(argv[i], "r");
+				FILE *file = fopen(argv[i], "rb");
 				if(!file) throw runtime_error("Can't open file");
 
 				// Find way to send file
