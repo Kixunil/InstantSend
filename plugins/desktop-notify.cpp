@@ -33,7 +33,7 @@ class notifyProgressHandler : public eventProgress_t{
 		
 		}
 	public:
-		notifyProgressHandler() {
+		notifyProgressHandler(pluginInstanceCreator_t &creator) : eventProgress_t(creator) {
 			icon = NULL;
 		}
 
@@ -77,7 +77,7 @@ class notifyCreator_t : public eventHandlerCreator_t {
 	private:
 		notifyProgressHandler progress;
 	public:
-		notifyCreator_t() {
+		notifyCreator_t(pluginEmptyCallback_t &callback) : eventHandlerCreator_t(callback), progress(*this) {
 			if(!notify_init("InstantSend")) throw runtime_error("Can't init libnotify");
 		}
 
@@ -91,6 +91,10 @@ class notifyCreator_t : public eventHandlerCreator_t {
 			}
 		}
 
+		void unregEvents(eventRegister_t &reg) {
+			reg.unregProgress(progress);
+		}
+
 		const char *getErr() {
 			return "No error occured";
 		}
@@ -101,8 +105,8 @@ class notifyCreator_t : public eventHandlerCreator_t {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator() {
-		static notifyCreator_t creator;
-		return &creator;
+	pluginInstanceCreator_t *getCreator(pluginEmptyCallback_t &callback) {
+		static notifyCreator_t *creator = new notifyCreator_t(callback);
+		return creator;
 	}
 }

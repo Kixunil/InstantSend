@@ -8,13 +8,7 @@ pluginHandle_t::pluginHandle_t(void *handle, pluginInstanceCreator_t *pluginInst
 }
 
 pluginHandle_t::~pluginHandle_t() {
-	set<pluginInstance_t *>::iterator b = instances.begin(), e = instances.end();
-
-	for(; b != e; ++b) {
-		delete *b;
-	}
-
-	delete instCreator;
+	delete instCreator; //Should we dothis?
 	instCreator = NULL;
 	handleDestructor(handle);
 	handle = NULL;

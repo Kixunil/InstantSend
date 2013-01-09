@@ -25,7 +25,7 @@ class i4tPeer : public peer_t {
 		int fd;
 		string machineId;
 	public:
-		inline i4tPeer(int newfd, const string &mId) {
+		inline i4tPeer(int newfd, const string &mId, pluginInstanceCreator_t &creator) : peer_t(creator) {
 			fd = newfd;
 			machineId = mId;
 		}
@@ -93,7 +93,7 @@ class i4tserver : public serverPlugin_t {
 	private:
 		int fd;
 	public:
-		i4tserver(const jsonComponent_t &config) {
+		i4tserver(const jsonComponent_t &config, pluginInstanceCreator_t &creator) : serverPlugin_t(creator) {
 			struct sockaddr_in srvaddr;
 			int backlog;
 				srvaddr.sin_family = AF_INET;
@@ -128,7 +128,7 @@ class i4tserver : public serverPlugin_t {
 			socklen_t socksize = sizeof(struct sockaddr_in);
 			int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
 			if(res < 0) return NULL;
-			return new i4tPeer(res, string(inet_ntoa(saddr.sin_addr)));
+			return new i4tPeer(res, string(inet_ntoa(saddr.sin_addr)), getCreator());
 		}
 
 		void reconfigure(jsonComponent_t *config) { (void)config; }
@@ -142,7 +142,7 @@ class i4tCreator : public connectionCreator_t {
 	private:
 		string lastErr;
 	public:
-		i4tCreator() {
+		i4tCreator(pluginEmptyCallback_t &callback) : connectionCreator_t(callback) {
 			lastErr = "No error";
 		}
 		peer_t *newClient(const jsonComponent_t &config) {
@@ -181,7 +181,7 @@ class i4tCreator : public connectionCreator_t {
 				dstaddr.sin_port = htons(dstPort.getVal());
 
 				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("connect: ") + strerror(errno));
-				return new i4tPeer(fd, dstIP.getVal());
+				return new i4tPeer(fd, dstIP.getVal(), *this);
 			}
 			catch(exception &e) {
 				if(fd > -1) close(fd);
@@ -197,7 +197,7 @@ class i4tCreator : public connectionCreator_t {
 
 	serverPlugin_t *newServer(const jsonComponent_t &config) {
 		try {
-			return new i4tserver(config);
+			return new i4tserver(config, *this);
 		}
 		catch(exception &e) {
 			lastErr = e.what();
@@ -215,10 +215,8 @@ class i4tCreator : public connectionCreator_t {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator() {
-		static pluginInstanceCreator_t *creator = NULL;
-
-		if(!creator) creator = new i4tCreator();
+	pluginInstanceCreator_t *getCreator(pluginEmptyCallback_t &callback) {
+		static pluginInstanceCreator_t *creator = new i4tCreator(callback);
 		return creator;
 	}
 }

@@ -16,11 +16,14 @@ void *pluginLoader_t::tryLoad(const string &path) {
 }
 
 
-pluginInstanceCreator_t *pluginLoader_t::getCreator(void *handle) {
-	pluginInstanceCreator_t *(* creator)();
+pluginInstanceCreator_t *pluginLoader_t::getCreator(void *handle, const string &name) {
+	pluginInstanceCreator_t *(* creator)(pluginEmptyCallback_t &);
 	*(void **)(&creator) = dlsym(handle, "getCreator");
 	if(!creator) throw runtime_error("Invalid plugin");
-	return creator();
+	auto_ptr<checkUnloadCallback_t> callback(new checkUnloadCallback_t(name));
+	pluginInstanceCreator_t *result = creator(*callback);
+	callback.release();
+	return result;
 }
 
 void closePlugin(void *handle) {

@@ -20,3 +20,14 @@ pluginInstanceCreator_t &getPluginInstanceCreator(const string &name) { // Inter
 	pluginList_t &pl = pluginList_t::instance();
 	return *pl[name].creator();
 }
+
+void pluginList_t::checkUnload(const string &name) {
+	map<string, plugin_t>::iterator plugin = storage.find(name);
+	if(plugin != storage.end()) {
+		if(plugin->second.isLast()) storage.erase(plugin);
+	}
+}
+
+void pluginEmpty(const string &name) {
+	pluginList_t::instance().checkUnload(name);
+}

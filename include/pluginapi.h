@@ -26,32 +26,60 @@ inline auto_ptr<anyData> allocData(size_t size) {
 	return auto_ptr<anyData>((anyData *)operator new(sizeof(anyData) + size));
 }
 
+class pluginEmptyCallback_t {
+	public:
+		virtual void empty() = 0;
+};
+
+/*! \brief Base for creator of plugin instances */
+class pluginInstanceCreator_t {
+	public:
+		/*! \return Human readable description of last error */
+		inline pluginInstanceCreator_t(pluginEmptyCallback_t &emptyCallback) : count(0), callback(emptyCallback) {}
+		virtual const char *getErr() = 0;
+		virtual ~pluginInstanceCreator_t();
+		inline void inc() { ++count; }
+		inline void dec() { if(!--count) callback.empty(); }
+		inline bool isEmpty() { return !count; }
+	private:
+		unsigned int count;
+		pluginEmptyCallback_t &callback;
+};
+
 /*! \brief Ancestor of all plugin instances.
  * All plugin instances should inherit from this class.
  */
 class pluginInstance_t {
 	public:
 		/*! \brief Default constructor */
-		inline pluginInstance_t() {;}
+		inline pluginInstance_t(pluginInstanceCreator_t &instanceCreator) : instcreator(instanceCreator) { instcreator.inc(); }
 
+#if 0
 		/*! \brief change configuration during run-time.
 		 *
 		 * This function has no purpose now and I'm unsure, if it'll have. It may be removed in the future.
 		 * \param config New configuration of plugin instance.
 		 */
 		virtual void reconfigure(jsonComponent_t *config) = 0;
+#endif
 
 		/*! \brief Destructor made virtual.
 		 *
 		 * Purpose is, instance can be easily deleted anywhere in the code.
 		 */
 		virtual ~pluginInstance_t();
+	protected:
+		inline pluginInstanceCreator_t &getCreator() { return instcreator; }
+	private:
+		pluginInstanceCreator_t &instcreator;
 };
 
 /*! \brief Interface used fo communication with remote machines
  */
 class peer_t : public pluginInstance_t {
 	public:
+		inline peer_t(pluginInstanceCreator_t &creator) : pluginInstance_t(creator) {}
+
 		/*! \brief Sends chunk of data to remote machine.
 		 *
 		 * This function should send chunk of data using arbitrary communication channel.
@@ -83,6 +111,7 @@ class peer_t : public pluginInstance_t {
  */
 class serverPlugin_t : public pluginInstance_t {
 	public:
+		inline serverPlugin_t(pluginInstanceCreator_t &creator) : pluginInstance_t(creator) {}
 		/*! \brief Waits for client to connect.
 		 * \return Instance of peer_t which should communicate with connected client
 		 * \attention This function MUST block!
@@ -171,17 +200,10 @@ class connectionStatus_t {
 		virtual void disconnect() = 0;
 };
 
-/*! \brief Base for creator of plugin instances */
-class pluginInstanceCreator_t {
-	public:
-		/*! \return Human readable description of last error */
-		virtual const char *getErr() = 0;
-		virtual ~pluginInstanceCreator_t();
-};
-
 /*! \brief Creator of server and client instances */
 class connectionCreator_t : public pluginInstanceCreator_t {
 	public:
+		inline connectionCreator_t(pluginEmptyCallback_t &callback) : pluginInstanceCreator_t(callback) {}
 		/*! \brief Connects to server 
 		 *  \return Instance of peer_t, which will communicate with server
 		 */
@@ -211,6 +233,8 @@ class asyncDataReceiver_t {
  */
 class securityCreator_t : public pluginInstanceCreator_t {
 	public:
+		inline securityCreator_t(pluginEmptyCallback_t &callback) : pluginInstanceCreator_t(callback) {}
+
 		/*! \brief Publishes supported encryption settings
 		 * \details Encryption plugins can support multiple settings. Return value of this function is delivered to client, during handshake. Client can choose settings (method chooseSettings(() is called) and reply is sent back to server.
 		 * \see chooseSettings()
@@ -249,6 +273,7 @@ class securityCreator_t : public pluginInstanceCreator_t {
 #define IS_TRANSFER_CANCELED_SERVER 3
 #define IS_TRANSFER_ERROR 4
 
+#if 0
 /*! \brief Base class for events
  */
 class event_t {
@@ -256,11 +281,15 @@ class event_t {
 		/*! \breif Destructor made virtual, so class will contain RTTI. */
 		virtual ~event_t();
 };
+#endif
+
+typedef pluginInstance_t event_t;
 
 /*! \brief Interface for progress event handlers
  */
 class eventProgress_t : public event_t {
 	public:
+		inline eventProgress_t(pluginInstanceCreator_t &creator) : pluginInstance_t(creator) {}
 		/*! \brief This event is called every time, when transfer started
 		 * \param fStatus Reference to file controller assigned to file
 		 */
@@ -289,6 +318,7 @@ class eventProgress_t : public event_t {
 
 class eventConnections_t : public event_t {
 	public:
+		inline eventConnections_t(pluginInstanceCreator_t &creator) : pluginInstance_t(creator) {}
 		/*! \brief This event is called every time, when connetcion is created
 		 * \param fStatus File which is associated with connection
 		 * \param connectionIdentifier Human readable description of connection
@@ -305,12 +335,14 @@ class eventConnections_t : public event_t {
 
 class eventReceive_t : public event_t {
 	public:
+		inline eventReceive_t(pluginInstanceCreator_t &creator) : pluginInstance_t(creator) {}
 		virtual int onAuth() = 0;
 		virtual ~eventReceive_t();
 };
 
 class eventSend_t : public event_t {
 	public:
+		inline eventSend_t(pluginInstanceCreator_t &creator) : pluginInstance_t(creator) {}
 		virtual void onAuthAttemp(fileStatus_t &fStatus) = 0;
 		virtual void onAuthAccept(fileStatus_t &fStatus) = 0;
 		virtual void onAuthReject(fileStatus_t &fStatus) = 0;
@@ -327,6 +359,7 @@ class serverController_t {
 
 class eventServer_t : public event_t {
 	public:
+		inline eventServer_t(pluginInstanceCreator_t &creator) : pluginInstance_t(creator) {}
 		virtual void onServerStarted(serverController_t &server) = 0;
 		virtual void onServerStopped(serverController_t &server) = 0;
 };
@@ -381,12 +414,19 @@ class eventRegister_t {
  */
 class eventHandlerCreator_t : public pluginInstanceCreator_t {
 	public:
+		inline eventHandlerCreator_t(pluginEmptyCallback_t &callback) : pluginInstanceCreator_t(callback) {}
+
 		/*! \brief Tells plugin to register its' events
 		 * \details This method is called after plugin is loaded, so it can create event handlers and register them.
 		 * \param reg Interface for registering events
 		 * \param config User configuration stored in Json
 		 */
 		virtual void regEvents(eventRegister_t &reg, jsonComponent_t *config) = 0;
+
+		/*! \brief Tells plugin to unregister all its' registered events
+		 * \details This method is called before plugin is unloaded.
+		 */
+		virtual void unregEvents(eventRegister_t &reg) = 0;
 };
 
 /*! \brief Loads other plugin

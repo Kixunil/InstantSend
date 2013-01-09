@@ -25,7 +25,7 @@ class progressHandler : public eventProgress_t {
 		struct timeval lastUpdate;
 		//int updatenum;
 	public:
-		inline progressHandler(dbusConnectionHandle &handle) : dbconnhandle(handle) {}
+		inline progressHandler(dbusConnectionHandle &handle, pluginInstanceCreator_t &creator) : eventProgress_t(creator), dbconnhandle(handle) {}
 		void onBegin(fileStatus_t &fStatus) {
 			DBusMessage *dbmsg = dbus_message_new_signal("/sk/pixelcomp/instantsend", "sk.pixelcomp.instantsend", "onBegin");
 			if(!dbmsg) {
@@ -99,7 +99,7 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 		DBusError dberr;
 		DBusConnection *dbconn;
 	public:
-		ehCreator_t() : progress(*this) {
+		ehCreator_t(pluginEmptyCallback_t &callback) : eventHandlerCreator_t(callback), progress(*this, *this) {
 			try {
 				dbus_error_init(&dberr);
 				dbconn = dbus_bus_get(DBUS_BUS_SESSION, &dberr);
@@ -123,6 +123,10 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 			reg.regProgress(progress);
 		}
 
+		void unregEvents(eventRegister_t &reg) {
+			reg.unregProgress(progress);
+		}
+
 		void sendMsg(DBusMessage *dbmsg) {
 			if(!dbus_connection_send(dbconn, dbmsg, NULL)) {
 				fprintf(stderr, "Failed to send message");
@@ -140,8 +144,8 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator() {
-		static ehCreator_t creator;
-		return &creator;
+	pluginInstanceCreator_t *getCreator(pluginEmptyCallback_t &callback) {
+		static ehCreator_t *creator = new ehCreator_t(callback);
+		return creator;
 	}
 }

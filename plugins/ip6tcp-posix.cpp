@@ -26,7 +26,7 @@ class i6tPeer : public peer_t {
 		int fd;
 		string machineId;
 	public:
-		inline i6tPeer(int newfd, const string &mId) {
+		inline i6tPeer(int newfd, const string &mId, pluginInstanceCreator_t &creator) : peer_t(creator) {
 			fd = newfd;
 			machineId = mId;
 		}
@@ -94,7 +94,7 @@ class i6tserver : public serverPlugin_t {
 	private:
 		int fd;
 	public:
-		i6tserver(const jsonComponent_t &config) {
+		i6tserver(const jsonComponent_t &config, pluginInstanceCreator_t &creator) : serverPlugin_t(creator) {
 			struct sockaddr_in6 srvaddr;
 			int backlog;
 				srvaddr.sin6_family = AF_INET6;
@@ -132,7 +132,7 @@ class i6tserver : public serverPlugin_t {
 			int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
 			char buf[256];
 			if(res < 0) return NULL;
-			return new i6tPeer(res, string(inet_ntop(AF_INET6, &saddr.sin6_addr, buf, 256)));
+			return new i6tPeer(res, string(inet_ntop(AF_INET6, &saddr.sin6_addr, buf, 256)), getCreator());
 		}
 
 		void reconfigure(jsonComponent_t *config) {
@@ -148,7 +148,7 @@ class i6tCreator : public connectionCreator_t {
 	private:
 		string lastErr;
 	public:
-		i6tCreator() {
+		i6tCreator(pluginEmptyCallback_t &callback) : connectionCreator_t(callback) {
 			lastErr = "No error";
 		}
 		peer_t *newClient(const jsonComponent_t &config) {
@@ -236,7 +236,7 @@ class i6tCreator : public connectionCreator_t {
 				dstaddr.sin6_port = htons(dstPort);
 
 				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in6)) < 0) throw runtime_error(string("connect: ") + strerror(errno));
-				return new i6tPeer(fd, dstHost);
+				return new i6tPeer(fd, dstHost, *this);
 			}
 			catch(exception &e) {
 				if(fd > -1) close(fd);
@@ -252,7 +252,7 @@ class i6tCreator : public connectionCreator_t {
 
 	serverPlugin_t *newServer(const jsonComponent_t &config) {
 		try {
-			return new i6tserver(config);
+			return new i6tserver(config, *this);
 		}
 		catch(exception &e) {
 			lastErr = e.what();
@@ -270,8 +270,8 @@ class i6tCreator : public connectionCreator_t {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator() {
-		static i6tCreator *creator = new i6tCreator();
+	pluginInstanceCreator_t *getCreator(pluginEmptyCallback_t &callback) {
+		static i6tCreator *creator = new i6tCreator(callback);
 		return creator;
 	}
 }

@@ -43,7 +43,7 @@ class serverHandler : public eventServer_t {
 		AvahiEntryGroup *group;
 		char *name;
 	public:
-		serverHandler() : pollObj(avahi_threaded_poll_new()) {
+		serverHandler(pluginInstanceCreator_t &creator) : eventServer_t(creator), pollObj(avahi_threaded_poll_new()), group(NULL) {
 			char buf[HOST_NAME_MAX + 1];
 			gethostname(buf, HOST_NAME_MAX);
 			buf[HOST_NAME_MAX] = 0;
@@ -172,6 +172,7 @@ class ehCreator_t : public eventHandlerCreator_t {
 		serverHandler sh;
 		eventRegister_t *er;
 	public:
+		ehCreator_t(pluginEmptyCallback_t &callback) : eventHandlerCreator_t(callback), sh(*this) {}
 		const char *getErr() {
 			return "No error occured";
 		}
@@ -182,14 +183,18 @@ class ehCreator_t : public eventHandlerCreator_t {
 			reg.regServer(sh);
 		}
 
+		void unregEvents(eventRegister_t &reg) {
+			reg.unregServer(sh);
+		}
+
 		~ehCreator_t() {
-			er->unregServer(sh);
+//			er->unregServer(sh);
 		}
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator() {
-		static ehCreator_t creator;
-		return &creator;
+	pluginInstanceCreator_t *getCreator(pluginEmptyCallback_t &callback) {
+		static ehCreator_t *creator = new ehCreator_t(callback);
+		return creator;
 	}
 }

@@ -10,7 +10,6 @@ class pluginHandle_t {
 		void *handle;
 		pluginInstanceCreator_t *instCreator;
 		void (*handleDestructor)(void *);
-		set<pluginInstance_t *> instances;
 	public:
 		pluginHandle_t(void *handle, pluginInstanceCreator_t *pluginInstanceCreator, void (*handleDestructor)(void *));
 
@@ -20,19 +19,15 @@ class pluginHandle_t {
 		}
 
 		inline int decRC() {
-			return !--refCnt;
+			return !--refCnt && instCreator->isEmpty();
+		}
+
+		inline int getRC() {
+			return refCnt;
 		}
 
 		inline pluginInstanceCreator_t *creator() {
 			return instCreator;
-		}
-
-		inline void addInstance(pluginInstance_t *instance) {
-			instances.insert(instance);
-		}
-
-		inline void removeInstance(pluginInstance_t *instance) {
-			instances.erase(instance);
 		}
 
 		inline bool loaded() {
@@ -71,5 +66,11 @@ class plugin_t {
 
 		inline const char *lastError() {
 			return handle->creator()->getErr();
+		}
+
+		/* \brief Returns true, if instance of plugin_t is last thing that depends on plugin
+		 */
+		inline bool isLast() {
+			return handle->getRC() == 1 && handle->creator()->isEmpty();
 		}
 };

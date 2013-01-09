@@ -19,5 +19,7 @@ class pluginList_t { // Singleton DP
 		inline void addSearchPath(const string &path) {
 			loader.addPath(path);
 		}
+
+		void checkUnload(const string &name);
 };
 
