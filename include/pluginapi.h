@@ -90,6 +90,18 @@ class serverPlugin_t : public pluginInstance_t {
 		virtual peer_t *acceptClient() = 0;
 };
 
+/*! \brief Interface for asynchronously stopping server or peer
+ * \description This is optionl feature of plugin but good quality plugin should have it. It's used when user decides to unload plugin, cancel transfer or stop application. This prevents delays.
+ */
+class asyncStop_t {
+	public:
+		/*! \brief Stops waiting for connection or data
+		 * \description If plugin is executing function, which waits for something (connection or data), calling of this function should cause it to return. If plugin isn't executing such function, calling of stop() should cause next call to such function return immediately, to prevent race conditions.
+		 * If such function was interrupted by stop(), it should return NULL (meaning no data/connection received)
+		 */
+		virtual void stop() = 0;
+};
+
 #define IS_DIRECTION_DOWNLOAD 0
 #define IS_DIRECTION_UPLOAD 1
 

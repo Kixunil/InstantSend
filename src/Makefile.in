@@ -116,8 +116,8 @@ all: $(ALL)
 client$(BINEXTENSION): ../include/pluginapi.h client.cpp libinstantsend-plugin$(LIBEXTENSION) libinstantsend-json$(LIBEXTENSION) libinstantsend-pluginloading$(LIBEXTENSION) libinstantsend-sysapi$(LIBEXTENSION)
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ client.cpp -L. -linstantsend-plugin -linstantsend-json -linstantsend-pluginloading -linstantsend-sysapi $(LDFLAGS) $(CLIENT_LDFLAGS)
 
-server$(BINEXTENSION): filewriter.o filelist.o eventsink.o ../include/pluginapi.h server.cpp libinstantsend-plugin$(LIBEXTENSION) libinstantsend-json$(LIBEXTENSION) libinstantsend-multithread$(LIBEXTENSION)
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ filewriter.o filelist.o eventsink.o server.cpp -L. -linstantsend-plugin -linstantsend-json -linstantsend-pluginloading -linstantsend-sysapi -linstantsend-multithread $(LDFLAGS) $(SERVER_LDFLAGS)
+server$(BINEXTENSION): filewriter.o filelist.o eventsink.o connectionreceiver.o datareceiver.o ../include/pluginapi.h server.cpp libinstantsend-plugin$(LIBEXTENSION) libinstantsend-json$(LIBEXTENSION) libinstantsend-multithread$(LIBEXTENSION) libinstantsend-common$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ filewriter.o filelist.o eventsink.o connectionreceiver.o datareceiver.o server.cpp -L. -linstantsend-plugin -linstantsend-json -linstantsend-pluginloading -linstantsend-sysapi -linstantsend-multithread -linstantsend-common $(LDFLAGS) $(SERVER_LDFLAGS)
 
 widget-gtk: libinstantsend-json$(LIBEXTENSION) libinstantsend-sysapi$(LIBEXTENSION) libinstantsend-multithread$(LIBEXTENSION) widget-gtk.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp -L. -linstantsend-json -linstantsend-sysapi -linstantsend-multithread $(WIDGET_GTK_LIBS)
@@ -161,6 +161,15 @@ filelist.o: filelist.cpp
 eventsink.o: eventsink.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ eventsink.cpp
 
+datareceiver.o: datareceiver.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ datareceiver.cpp
+
+connectionreceiver.o: connectionreceiver.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ connectionreceiver.cpp
+
+appcontrol-platformdependent.o: sysapi/$(OS)/appcontrol-platformdependent.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/appcontrol-platformdependent.cpp
+
 libinstantsend-plugin$(LIBEXTENSION): plugin-common.o
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ plugin-common.o $(LIBLDFLAGS) $(LDFLAGS)
 
@@ -175,6 +184,9 @@ libinstantsend-sysapi$(LIBEXTENSION): sysapi.o
 
 libinstantsend-multithread$(LIBEXTENSION): multithread.o
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ multithread.o $(LIBLDFLAGS) $(LDFLAGS)
+
+libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ appcontrol-platformdependent.o $(LIBLDFLAGS) $(LDFLAGS)
 
 check:
 
@@ -191,7 +203,7 @@ distclean: clean
 install-client: client sysapi-install-lib plugin-install-lib pluginloading-install-lib json-install-lib
 	install -D client$(BINEXTENSION) $(CLIENT_BIN)
 
-install-server: server sysapi-install-lib plugin-install-lib pluginloading-install-lib json-install-lib multithread-install-lib
+install-server: server sysapi-install-lib plugin-install-lib pluginloading-install-lib json-install-lib multithread-install-lib common-install-lib
 	install -D server$(BINEXTENSION) $(SERVER_BIN)
 
 install-configtool: configtool sysapi-install-lib json-install-lib
