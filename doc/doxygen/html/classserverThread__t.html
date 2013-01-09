@@ -30,7 +30,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">InstantSend
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
    <div id="projectbrief">Multiprotocol file transfer toolkit</div>
   </td>
@@ -85,13 +85,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">serverThread_t Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<!-- doxytag: class="serverThread_t" --><!-- doxytag: inherits="thread_t" --><div class="dynheader">
+<!-- doxytag: class="serverThread_t" --><!-- doxytag: inherits="thread_t,serverController_t" --><div class="dynheader">
 Inheritance diagram for serverThread_t:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="classserverThread__t.png" usemap="#serverThread_t_map" alt=""/>
   <map id="serverThread_t_map" name="serverThread_t_map">
-<area href="classthread__t.html" alt="thread_t" shape="rect" coords="0,0,99,24"/>
+<area href="classthread__t.html" alt="thread_t" shape="rect" coords="0,0,115,24"/>
+<area href="classserverController__t.html" alt="serverController_t" shape="rect" coords="125,0,240,24"/>
 </map>
  </div></div>
 
@@ -99,12 +100,18 @@ Inheritance diagram for serverThread_t:</div>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac847d44fa098f21dd1fe2bb909878dd5"></a><!-- doxytag: member="serverThread_t::serverThread_t" ref="ac847d44fa098f21dd1fe2bb909878dd5" args="(serverPlugin_t *srv)" -->
-&#160;</td><td class="memItemRight" valign="bottom"><b>serverThread_t</b> (<a class="el" href="classserverPlugin__t.html">serverPlugin_t</a> *srv)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5c655e46f238b3cb5bee97d60fb75ace"></a><!-- doxytag: member="serverThread_t::serverThread_t" ref="a5c655e46f238b3cb5bee97d60fb75ace" args="(auto_ptr&lt; serverPlugin_t &gt; srv)" -->
-&#160;</td><td class="memItemRight" valign="bottom"><b>serverThread_t</b> (auto_ptr&lt; <a class="el" href="classserverPlugin__t.html">serverPlugin_t</a> &gt; srv)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acd62a342337381c3a741e5daf9d51b74"></a><!-- doxytag: member="serverThread_t::serverThread_t" ref="acd62a342337381c3a741e5daf9d51b74" args="(const string &amp;plugin, auto_ptr&lt; jsonComponent_t &gt; config)" -->
+&#160;</td><td class="memItemRight" valign="bottom"><b>serverThread_t</b> (const string &amp;plugin, auto_ptr&lt; <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &gt; config)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae4c87808542827929435721080a3dfd6"></a><!-- doxytag: member="serverThread_t::checkRunning" ref="ae4c87808542827929435721080a3dfd6" args="()" -->
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>checkRunning</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a96573d0f8f03adca58a258b84eb743f0"></a><!-- doxytag: member="serverThread_t::run" ref="a96573d0f8f03adca58a258b84eb743f0" args="()" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>run</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0b74f0de7c50238de2b57215217f5259"></a><!-- doxytag: member="serverThread_t::stop" ref="a0b74f0de7c50238de2b57215217f5259" args="()" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aef9b86c3cec7177151c2f7222e1d3e19"></a><!-- doxytag: member="serverThread_t::getPluginName" ref="aef9b86c3cec7177151c2f7222e1d3e19" args="()" -->
+const string &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getPluginName</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9919850b22213fe850313594c44f8892"></a><!-- doxytag: member="serverThread_t::getPluginConf" ref="a9919850b22213fe850313594c44f8892" args="()" -->
+const <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getPluginConf</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3ae7166292d6f00a40921cc485bd0f4a"></a><!-- doxytag: member="serverThread_t::autoDelete" ref="a3ae7166292d6f00a40921cc485bd0f4a" args="()" -->
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>autoDelete</b> ()</td></tr>
 </table>
@@ -129,7 +136,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>autoDelete</b> ()</td
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 8 2012 23:17:11 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

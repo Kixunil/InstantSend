@@ -30,7 +30,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">InstantSend
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
    <div id="projectbrief">Multiprotocol file transfer toolkit</div>
   </td>
@@ -80,58 +80,74 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">src/eventsink.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#include &quot;pluginapi.h&quot;</span>
+<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#include &lt;set&gt;</span>
 <a name="l00002"></a>00002 
-<a name="l00003"></a>00003 <span class="preprocessor">#define BCAST_SIMPLE_EVENT(eventName, eventCall) \</span>
-<a name="l00004"></a>00004 <span class="preprocessor">        class eventName :public eventData_t {\</span>
-<a name="l00005"></a>00005 <span class="preprocessor">                private:\</span>
-<a name="l00006"></a>00006 <span class="preprocessor">                        fileStatus_t *fstatus;\</span>
-<a name="l00007"></a>00007 <span class="preprocessor">                public:\</span>
-<a name="l00008"></a>00008 <span class="preprocessor">                        inline eventName(fileStatus_t &amp;fileStatus) {\</span>
-<a name="l00009"></a>00009 <span class="preprocessor">                                fstatus = &amp;fileStatus;\</span>
-<a name="l00010"></a>00010 <span class="preprocessor">                                eventSink_t::instance().eventCall(*this);\</span>
-<a name="l00011"></a>00011 <span class="preprocessor">                        }\</span>
-<a name="l00012"></a>00012 <span class="preprocessor">                        void sendEvent(event_t &amp;event);\</span>
-<a name="l00013"></a>00013 <span class="preprocessor">        };</span>
-<a name="l00014"></a>00014 <span class="preprocessor"></span>
-<a name="l00015"></a><a class="code" href="classeventData__t.html">00015</a> <span class="keyword">class </span><a class="code" href="classeventData__t.html">eventData_t</a> {
-<a name="l00016"></a>00016         <span class="keyword">public</span>:
-<a name="l00017"></a>00017                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> sendEvent(<a class="code" href="classevent__t.html" title="Base class for events.">event_t</a> &amp;event) = 0;
-<a name="l00018"></a>00018                 <span class="keyword">virtual</span> ~<a class="code" href="classeventData__t.html">eventData_t</a>();
-<a name="l00019"></a>00019 };
-<a name="l00020"></a>00020 
-<a name="l00021"></a><a class="code" href="classeventSink__t.html">00021</a> <span class="keyword">class </span><a class="code" href="classeventSink__t.html">eventSink_t</a> : <span class="keyword">public</span> <a class="code" href="classeventRegister__t.html" title="Interface for registering events.">eventRegister_t</a> {
-<a name="l00022"></a>00022         <span class="keyword">private</span>:
-<a name="l00023"></a>00023                 vector&lt;event_t *&gt; progressEvents;
-<a name="l00024"></a>00024                 vector&lt;event_t *&gt; connectionEvents;
-<a name="l00025"></a>00025                 vector&lt;event_t *&gt; recvEvents;
-<a name="l00026"></a>00026                 vector&lt;event_t *&gt; sendEvents;
-<a name="l00027"></a>00027 
-<a name="l00028"></a>00028 
-<a name="l00029"></a>00029         <span class="keyword">public</span>:
-<a name="l00030"></a>00030                 <span class="keywordtype">void</span> sendEvent(vector&lt;event_t *&gt; &amp;handlers, <a class="code" href="classeventData__t.html">eventData_t</a> &amp;eventData);
-<a name="l00031"></a>00031                 <span class="keyword">static</span> <a class="code" href="classeventSink__t.html">eventSink_t</a> &amp;instance();
-<a name="l00032"></a>00032                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#a7339c49521260767b8fe4f916b537530" title="Registers progress event.">regProgress</a>(<a class="code" href="classeventProgress__t.html" title="Interface for progress event handlers.">eventProgress_t</a> &amp;progressEvent);
-<a name="l00033"></a>00033                 <span class="keywordtype">void</span> regConnections(<a class="code" href="classeventConnections__t.html">eventConnections_t</a> &amp;connectionEvent);
-<a name="l00034"></a>00034                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#a23bbd3acc81245047d7e75befdb0b828" title="Registers receive event.">regReceive</a>(<a class="code" href="classeventReceive__t.html">eventReceive_t</a> &amp;receiveEvent);
-<a name="l00035"></a>00035                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#aba491c989268123534c707dc9abdd2aa" title="Registers send event.">regSend</a>(<a class="code" href="classeventSend__t.html">eventSend_t</a> &amp;sendEvent);
-<a name="l00036"></a>00036 
-<a name="l00037"></a>00037                 <span class="keyword">inline</span> <span class="keywordtype">void</span> sendProgress(<a class="code" href="classeventData__t.html">eventData_t</a> &amp;eventData) {
-<a name="l00038"></a>00038                         sendEvent(progressEvents, eventData);
-<a name="l00039"></a>00039                 }
-<a name="l00040"></a>00040                 <span class="keyword">inline</span> <span class="keywordtype">void</span> sendConnection(<a class="code" href="classeventData__t.html">eventData_t</a> &amp;eventData) {
-<a name="l00041"></a>00041                         sendEvent(connectionEvents, eventData);
-<a name="l00042"></a>00042                 }
-<a name="l00043"></a>00043 
-<a name="l00044"></a>00044                 <span class="keywordtype">void</span> autoLoad(<a class="code" href="classjsonObj__t.html">jsonObj_t</a> &amp;plugins);
-<a name="l00045"></a>00045 
-<a name="l00046"></a>00046 };
-<a name="l00047"></a>00047 
-<a name="l00048"></a>00048 BCAST_SIMPLE_EVENT(bcastProgressBegin, sendProgress);
-<a name="l00049"></a>00049 BCAST_SIMPLE_EVENT(bcastProgressUpdated, sendProgress);
-<a name="l00050"></a>00050 BCAST_SIMPLE_EVENT(bcastProgressPaused, sendProgress);
-<a name="l00051"></a>00051 BCAST_SIMPLE_EVENT(bcastProgressResumed, sendProgress);
-<a name="l00052"></a>00052 BCAST_SIMPLE_EVENT(bcastProgressEnded, sendProgress);
+<a name="l00003"></a>00003 <span class="preprocessor">#include &quot;pluginapi.h&quot;</span>
+<a name="l00004"></a>00004 
+<a name="l00005"></a>00005 <span class="preprocessor">#define BCAST_SIMPLE_EVENT(eventName, eventCall, dataType) \</span>
+<a name="l00006"></a>00006 <span class="preprocessor">        class eventName :public eventData_t {\</span>
+<a name="l00007"></a>00007 <span class="preprocessor">                private:\</span>
+<a name="l00008"></a>00008 <span class="preprocessor">                        dataType &amp;evdata;\</span>
+<a name="l00009"></a>00009 <span class="preprocessor">                public:\</span>
+<a name="l00010"></a>00010 <span class="preprocessor">                        inline eventName(dataType &amp;data) : evdata(data) {\</span>
+<a name="l00011"></a>00011 <span class="preprocessor">                                eventSink_t::instance().eventCall(*this);\</span>
+<a name="l00012"></a>00012 <span class="preprocessor">                        }\</span>
+<a name="l00013"></a>00013 <span class="preprocessor">                        void sendEvent(event_t &amp;event);\</span>
+<a name="l00014"></a>00014 <span class="preprocessor">        };</span>
+<a name="l00015"></a>00015 <span class="preprocessor"></span>
+<a name="l00016"></a><a class="code" href="classeventData__t.html">00016</a> <span class="keyword">class </span><a class="code" href="classeventData__t.html">eventData_t</a> {
+<a name="l00017"></a>00017         <span class="keyword">public</span>:
+<a name="l00018"></a>00018                 <span class="keyword">virtual</span> <span class="keywordtype">void</span> sendEvent(<a class="code" href="classevent__t.html" title="Base class for events.">event_t</a> &amp;event) = 0;
+<a name="l00019"></a>00019                 <span class="keyword">virtual</span> ~<a class="code" href="classeventData__t.html">eventData_t</a>();
+<a name="l00020"></a>00020 };
+<a name="l00021"></a>00021 
+<a name="l00022"></a><a class="code" href="classeventSink__t.html">00022</a> <span class="keyword">class </span><a class="code" href="classeventSink__t.html">eventSink_t</a> : <span class="keyword">public</span> <a class="code" href="classeventRegister__t.html" title="Interface for registering events.">eventRegister_t</a> {
+<a name="l00023"></a>00023         <span class="keyword">private</span>:
+<a name="l00024"></a>00024                 set&lt;event_t *&gt; progressEvents;
+<a name="l00025"></a>00025                 set&lt;event_t *&gt; connectionEvents;
+<a name="l00026"></a>00026                 set&lt;event_t *&gt; recvEvents;
+<a name="l00027"></a>00027                 set&lt;event_t *&gt; sendEvents;
+<a name="l00028"></a>00028                 set&lt;event_t *&gt; serverEvents;
+<a name="l00029"></a>00029 
+<a name="l00030"></a>00030         <span class="keyword">public</span>:
+<a name="l00031"></a>00031                 <span class="keywordtype">void</span> sendEvent(set&lt;event_t *&gt; &amp;handlers, <a class="code" href="classeventData__t.html">eventData_t</a> &amp;eventData);
+<a name="l00032"></a>00032                 <span class="keyword">static</span> <a class="code" href="classeventSink__t.html">eventSink_t</a> &amp;instance();
+<a name="l00033"></a>00033                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#a7339c49521260767b8fe4f916b537530" title="Registers progress event.">regProgress</a>(<a class="code" href="classeventProgress__t.html" title="Interface for progress event handlers.">eventProgress_t</a> &amp;progressEvent);
+<a name="l00034"></a>00034                 <span class="keywordtype">void</span> regConnections(<a class="code" href="classeventConnections__t.html">eventConnections_t</a> &amp;connectionEvent);
+<a name="l00035"></a>00035                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#a23bbd3acc81245047d7e75befdb0b828" title="Registers receive event.">regReceive</a>(<a class="code" href="classeventReceive__t.html">eventReceive_t</a> &amp;receiveEvent);
+<a name="l00036"></a>00036                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#aba491c989268123534c707dc9abdd2aa" title="Registers send event.">regSend</a>(<a class="code" href="classeventSend__t.html">eventSend_t</a> &amp;sendEvent);
+<a name="l00037"></a>00037                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#aaa85e2bdc99f02bb0b84bf51b189073f" title="Registers server event.">regServer</a>(<a class="code" href="classeventServer__t.html">eventServer_t</a> &amp;serverEvent);
+<a name="l00038"></a>00038 
+<a name="l00039"></a>00039                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#a6c4ed33c87f8f6d928d4e6dcbeb0da71" title="Unregisters progress event.">unregProgress</a>(<a class="code" href="classeventProgress__t.html" title="Interface for progress event handlers.">eventProgress_t</a> &amp;progressEvent);
+<a name="l00040"></a>00040                 <span class="keywordtype">void</span> unregConnections(<a class="code" href="classeventConnections__t.html">eventConnections_t</a> &amp;connectionEvent);
+<a name="l00041"></a>00041                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#a3b7740dda2630928752f0acf7281394b" title="Unregisters receive event.">unregReceive</a>(<a class="code" href="classeventReceive__t.html">eventReceive_t</a> &amp;receiveEvent);
+<a name="l00042"></a>00042                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#a511378eb9b71424cc767e8622bb03d19" title="Unregisters send event.">unregSend</a>(<a class="code" href="classeventSend__t.html">eventSend_t</a> &amp;sendEvent);
+<a name="l00043"></a>00043                 <span class="keywordtype">void</span> <a class="code" href="classeventSink__t.html#ab6119c05c032362c9d42e83dc037760e" title="Unregisters server event.">unregServer</a>(<a class="code" href="classeventServer__t.html">eventServer_t</a> &amp;serverEvent);
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045                 <span class="keyword">inline</span> <span class="keywordtype">void</span> sendProgress(<a class="code" href="classeventData__t.html">eventData_t</a> &amp;eventData) {
+<a name="l00046"></a>00046                         sendEvent(progressEvents, eventData);
+<a name="l00047"></a>00047                 }
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049                 <span class="keyword">inline</span> <span class="keywordtype">void</span> sendConnection(<a class="code" href="classeventData__t.html">eventData_t</a> &amp;eventData) {
+<a name="l00050"></a>00050                         sendEvent(connectionEvents, eventData);
+<a name="l00051"></a>00051                 }
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053                 <span class="keyword">inline</span> <span class="keywordtype">void</span> sendServer(<a class="code" href="classeventData__t.html">eventData_t</a> &amp;eventData) {
+<a name="l00054"></a>00054                         sendEvent(serverEvents, eventData);
+<a name="l00055"></a>00055                 }
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057                 <span class="keywordtype">void</span> autoLoad(<a class="code" href="classjsonObj__t.html">jsonObj_t</a> &amp;plugins);
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059 };
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061 BCAST_SIMPLE_EVENT(bcastProgressBegin, sendProgress, <a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a>);
+<a name="l00062"></a>00062 BCAST_SIMPLE_EVENT(bcastProgressUpdated, sendProgress, <a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a>);
+<a name="l00063"></a>00063 BCAST_SIMPLE_EVENT(bcastProgressPaused, sendProgress, <a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a>);
+<a name="l00064"></a>00064 BCAST_SIMPLE_EVENT(bcastProgressResumed, sendProgress, <a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a>);
+<a name="l00065"></a>00065 BCAST_SIMPLE_EVENT(bcastProgressEnded, sendProgress, <a class="code" href="classfileStatus__t.html" title="interface for controlling file transfer">fileStatus_t</a>);
+<a name="l00066"></a>00066 
+<a name="l00067"></a>00067 BCAST_SIMPLE_EVENT(bcastServerStarted, sendServer, <a class="code" href="classserverController__t.html">serverController_t</a>);
+<a name="l00068"></a>00068 BCAST_SIMPLE_EVENT(bcastServerStopped, sendServer, <a class="code" href="classserverController__t.html">serverController_t</a>);
 </pre></div></div><!-- contents -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
@@ -150,7 +166,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 8 2012 23:17:11 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 4 2013 14:50:37 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

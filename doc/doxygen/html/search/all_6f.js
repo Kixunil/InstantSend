@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['observer_5ft',['observer_t',['../classobserver__t.html',1,'']]],
   ['onbegin',['onBegin',['../classeventProgress__t.html#ad53c56ef512c3097bb8bb562b3f5f4e7',1,'eventProgress_t']]],
   ['onconnectionclosed',['onConnectionClosed',['../classeventConnections__t.html#a05bdb89342abf9d5db832c568c408382',1,'eventConnections_t']]],
   ['onconnectioncreated',['onConnectionCreated',['../classeventConnections__t.html#a325741f899797da5c563ba8bc821daf5',1,'eventConnections_t']]],

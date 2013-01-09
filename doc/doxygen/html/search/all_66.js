@@ -1,7 +1,6 @@
 var searchData=
 [
   ['filecontroller_5ft',['fileController_t',['../classfileController__t.html',1,'']]],
-  ['fileinfobaserenderer',['FileInfoBaseRenderer',['../classFileInfoBaseRenderer.html',1,'']]],
   ['fileinfoitem',['FileInfoItem',['../classFileInfoItem.html',1,'']]],
   ['filelist_5ft',['fileList_t',['../classfileList__t.html',1,'']]],
   ['filenotaccesible',['fileNotAccesible',['../classfileNotAccesible.html',1,'']]],

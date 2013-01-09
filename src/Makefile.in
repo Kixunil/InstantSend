@@ -197,7 +197,7 @@ distclean: clean
 	rm -f Makefile
 
 %-install-lib: libinstantsend-%$(LIBEXTENSION)
-	install -Dm 644 $< $(LIBDIR)/$<
+	install -Dm 644 $< $(DESTDIR)$(LIBDIR)/$<
 	touch $@
 
 install-client: client sysapi-install-lib plugin-install-lib pluginloading-install-lib json-install-lib

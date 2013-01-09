@@ -1,3 +1,8 @@
+instantsend (0.7~###DISTRIBUTION###) unstable; urgency=low
+  * Common functionality divided into separate libraries.
+
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Tue, 03 Jan 2013 23:06:40 +0100
+
 instantsend (0.6-1~###DISTRIBUTION###) unstable; urgency=low
   * Christmas update - fixed stuff!
 
