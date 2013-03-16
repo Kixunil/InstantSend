@@ -204,7 +204,7 @@ distclean: clean
 	install -Dm 644 $< $(DESTDIR)$(LIBDIR)/$<
 	touch $@
 
-install-client: client sysapi-install-lib plugin-install-lib json-install-lib
+install-client: client sysapi-install-lib plugin-install-lib json-install-lib common-install-lib
 	install -D client$(BINEXTENSION) $(CLIENT_BIN)
 
 install-server: server sysapi-install-lib plugin-install-lib json-install-lib common-install-lib
@@ -213,7 +213,7 @@ install-server: server sysapi-install-lib plugin-install-lib json-install-lib co
 install-configtool: configtool sysapi-install-lib json-install-lib
 	install -D configtool$(BINEXTENSION) $(CONFIGTOOL_BIN)
 
-install-widget-gtk: widget-gtk common-install-lib sysapi-install-lib json-install-lib
+install-widget-gtk: widget-gtk common-install-lib sysapi-install-lib json-install-lib common-install-lib
 	install -D widget-gtk$(BINEXTENSION) $(WIDGET_GTK_BIN)
 
 install: $(INSTALL)
