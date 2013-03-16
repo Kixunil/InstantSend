@@ -1,5 +1,5 @@
 Instant Send - simplified
-Version: 0.6
+Version: 0.7
 Author: Martin Habovštiak
 
 Features:
@@ -23,7 +23,7 @@ Issues:
 
 Plugins:
 	ip4tcp		- as name suggests, it uses TCP/IP with IPv4
-	ip6tcp		- same as ip6tcp, except it uses IPv6 (Link local adresses not supported yet)
+	ip6tcp		- same as ip4tcp, except it uses IPv6 (Link local adresses not supported yet)
 	dbus		- uses dbus for notifying connected applications
 	desktop-notify	- uses libnotify for showing desktop notifications
 	zenity		- uses zenity for showing progress of downloading

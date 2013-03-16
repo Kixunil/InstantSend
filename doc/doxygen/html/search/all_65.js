@@ -8,5 +8,6 @@ var searchData=
   ['eventreceive_5ft',['eventReceive_t',['../classeventReceive__t.html',1,'']]],
   ['eventregister_5ft',['eventRegister_t',['../classeventRegister__t.html',1,'']]],
   ['eventsend_5ft',['eventSend_t',['../classeventSend__t.html',1,'']]],
+  ['eventserver_5ft',['eventServer_t',['../classeventServer__t.html',1,'']]],
   ['eventsink_5ft',['eventSink_t',['../classeventSink__t.html',1,'']]]
 ];

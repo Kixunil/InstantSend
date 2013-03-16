@@ -1,0 +1,18 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+INCLUDEDIR=@includedir@
+
+all:
+
+check:
+
+clean:
+
+distclean:
+	rm -f Makefile
+
+install:
+	install -Dm 644 pluginapi.h $(DESTDIR)$(INCLUDEDIR)/instantsend/pluginapi.h
+	install -Dm 644 json.h $(DESTDIR)$(INCLUDEDIR)/instantsend/json.h
+
+.PHONY: all check clean distclean install

@@ -30,7 +30,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">InstantSend
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
    <div id="projectbrief">Multiprotocol file transfer toolkit</div>
   </td>
@@ -85,7 +85,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">eventRegister_t Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<!-- doxytag: class="eventRegister_t" --><!-- doxytag: inherits="event_t" -->
+<!-- doxytag: class="eventRegister_t" -->
 <p>Interface for registering events.  
  <a href="classeventRegister__t.html#details">More...</a></p>
 
@@ -96,8 +96,7 @@ Inheritance diagram for eventRegister_t:</div>
  <div class="center">
   <img src="classeventRegister__t.png" usemap="#eventRegister_t_map" alt=""/>
   <map id="eventRegister_t_map" name="eventRegister_t_map">
-<area href="classevent__t.html" title="Base class for events." alt="event_t" shape="rect" coords="0,0,99,24"/>
-<area href="classeventSink__t.html" alt="eventSink_t" shape="rect" coords="0,112,99,136"/>
+<area href="classeventSink__t.html" alt="eventSink_t" shape="rect" coords="0,56,99,80"/>
 </map>
  </div></div>
 
@@ -107,10 +106,20 @@ Inheritance diagram for eventRegister_t:</div>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventRegister__t.html#a807110b926e683f81a880ddfd897823a">regProgress</a> (<a class="el" href="classeventProgress__t.html">eventProgress_t</a> &amp;progressEvent)=0</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers progress event.  <a href="#a807110b926e683f81a880ddfd897823a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventRegister__t.html#a012b0ad336a3cf14b5e5f0beb36b5dbb">unregProgress</a> (<a class="el" href="classeventProgress__t.html">eventProgress_t</a> &amp;progressEvent)=0</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters progress event.  <a href="#a012b0ad336a3cf14b5e5f0beb36b5dbb"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventRegister__t.html#a1aac317213afabb70d939c91b7ea2848">regReceive</a> (<a class="el" href="classeventReceive__t.html">eventReceive_t</a> &amp;receiveEvent)=0</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers receive event.  <a href="#a1aac317213afabb70d939c91b7ea2848"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventRegister__t.html#ab81811e8ced1c67a9ec2078b2893fcde">unregReceive</a> (<a class="el" href="classeventReceive__t.html">eventReceive_t</a> &amp;receiveEvent)=0</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters receive event.  <a href="#ab81811e8ced1c67a9ec2078b2893fcde"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventRegister__t.html#ab918520e178622864c7cff50336ac70e">regSend</a> (<a class="el" href="classeventSend__t.html">eventSend_t</a> &amp;sendEvent)=0</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers send event.  <a href="#ab918520e178622864c7cff50336ac70e"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventRegister__t.html#a4294db89d43e8b9a013833c54690d890">unregSend</a> (<a class="el" href="classeventSend__t.html">eventSend_t</a> &amp;sendEvent)=0</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters send event.  <a href="#a4294db89d43e8b9a013833c54690d890"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventRegister__t.html#aeaa37c755f0354084f95497264330af3">regServer</a> (<a class="el" href="classeventServer__t.html">eventServer_t</a> &amp;serverEvent)=0</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers server event.  <a href="#aeaa37c755f0354084f95497264330af3"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventRegister__t.html#aaf50f2c51a2c2731ad01cee6397de7dc">unregServer</a> (<a class="el" href="classeventServer__t.html">eventServer_t</a> &amp;serverEvent)=0</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters server event.  <a href="#aaf50f2c51a2c2731ad01cee6397de7dc"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Interface for registering events. </p>
@@ -197,6 +206,141 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aeaa37c755f0354084f95497264330af3"></a><!-- doxytag: member="eventRegister_t::regServer" ref="aeaa37c755f0354084f95497264330af3" args="(eventServer_t &amp;serverEvent)=0" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void <a class="el" href="classeventRegister__t.html#aeaa37c755f0354084f95497264330af3">eventRegister_t::regServer</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classeventServer__t.html">eventServer_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>serverEvent</em></td><td>)</td>
+          <td><code> [pure virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Registers server event. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">serverEvent</td><td>Event handler for server event </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classeventSink__t.html#aaa85e2bdc99f02bb0b84bf51b189073f">eventSink_t</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a012b0ad336a3cf14b5e5f0beb36b5dbb"></a><!-- doxytag: member="eventRegister_t::unregProgress" ref="a012b0ad336a3cf14b5e5f0beb36b5dbb" args="(eventProgress_t &amp;progressEvent)=0" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void <a class="el" href="classeventRegister__t.html#a012b0ad336a3cf14b5e5f0beb36b5dbb">eventRegister_t::unregProgress</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classeventProgress__t.html">eventProgress_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>progressEvent</em></td><td>)</td>
+          <td><code> [pure virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Unregisters progress event. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">progressEvent</td><td>Event handler for progress event </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classeventSink__t.html#a6c4ed33c87f8f6d928d4e6dcbeb0da71">eventSink_t</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab81811e8ced1c67a9ec2078b2893fcde"></a><!-- doxytag: member="eventRegister_t::unregReceive" ref="ab81811e8ced1c67a9ec2078b2893fcde" args="(eventReceive_t &amp;receiveEvent)=0" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void <a class="el" href="classeventRegister__t.html#ab81811e8ced1c67a9ec2078b2893fcde">eventRegister_t::unregReceive</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classeventReceive__t.html">eventReceive_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>receiveEvent</em></td><td>)</td>
+          <td><code> [pure virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Unregisters receive event. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">receiveEvent</td><td>Event handler for receive event </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classeventSink__t.html#a3b7740dda2630928752f0acf7281394b">eventSink_t</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a4294db89d43e8b9a013833c54690d890"></a><!-- doxytag: member="eventRegister_t::unregSend" ref="a4294db89d43e8b9a013833c54690d890" args="(eventSend_t &amp;sendEvent)=0" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void <a class="el" href="classeventRegister__t.html#a4294db89d43e8b9a013833c54690d890">eventRegister_t::unregSend</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classeventSend__t.html">eventSend_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>sendEvent</em></td><td>)</td>
+          <td><code> [pure virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Unregisters send event. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sendEvent</td><td>Event handler for send event </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classeventSink__t.html#a511378eb9b71424cc767e8622bb03d19">eventSink_t</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aaf50f2c51a2c2731ad01cee6397de7dc"></a><!-- doxytag: member="eventRegister_t::unregServer" ref="aaf50f2c51a2c2731ad01cee6397de7dc" args="(eventServer_t &amp;serverEvent)=0" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void <a class="el" href="classeventRegister__t.html#aaf50f2c51a2c2731ad01cee6397de7dc">eventRegister_t::unregServer</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classeventServer__t.html">eventServer_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>serverEvent</em></td><td>)</td>
+          <td><code> [pure virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Unregisters server event. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">serverEvent</td><td>Event handler for server event </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classeventSink__t.html#ab6119c05c032362c9d42e83dc037760e">eventSink_t</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>include/<a class="el" href="pluginapi_8h_source.html">pluginapi.h</a></li>
 </ul>
@@ -218,7 +362,7 @@ Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 8 2012 23:17:11 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

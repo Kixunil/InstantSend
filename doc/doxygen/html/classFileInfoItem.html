@@ -30,7 +30,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">InstantSend
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
    <div id="projectbrief">Multiprotocol file transfer toolkit</div>
   </td>
@@ -80,6 +80,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">FileInfoItem Class Reference</div>  </div>
@@ -88,6 +89,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="FileInfoItem" -->
 <p><a href="classFileInfoItem-members.html">List of all members.</a></p>
 <table class="memberdecls">
+<tr><td colspan="2"><h2><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aec5cb0a2329a1c0b3faddd088f1be524"></a><!-- doxytag: member="FileInfoItem::obsiterator" ref="aec5cb0a2329a1c0b3faddd088f1be524" args="" -->
+typedef set&lt; <a class="el" href="classobserver__t.html">observer_t</a> * &gt;<br class="typebreak"/>
+::iterator&#160;</td><td class="memItemRight" valign="bottom"><b>obsiterator</b></td></tr>
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5be2766f93a038e8fc805dc4d5a34019"></a><!-- doxytag: member="FileInfoItem::FileInfoItem" ref="a5be2766f93a038e8fc805dc4d5a34019" args="(char dir)" -->
@@ -110,16 +116,26 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setFileName</b> (cons
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setPeerName</b> (const ustring &amp;peerName)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2a06a9fbf9df17c4fbd37c7b870d4d4e"></a><!-- doxytag: member="FileInfoItem::setSize" ref="a2a06a9fbf9df17c4fbd37c7b870d4d4e" args="(uint64_t size)" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setSize</b> (uint64_t size)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6ea6c8a9b93717c33bc7abe728d32106"></a><!-- doxytag: member="FileInfoItem::getSize" ref="a6ea6c8a9b93717c33bc7abe728d32106" args="()" -->
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>getSize</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aebe630cf4ec8725e1985bedd76b99c36"></a><!-- doxytag: member="FileInfoItem::setStatus" ref="aebe630cf4ec8725e1985bedd76b99c36" args="(char status)" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setStatus</b> (char status)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a99b31cc69f12b84ae13860923f2dcbf8"></a><!-- doxytag: member="FileInfoItem::setBytes" ref="a99b31cc69f12b84ae13860923f2dcbf8" args="(uint64_t b)" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setBytes</b> (uint64_t b)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac43c9835a262ab18a6ef8705c28aaccf"></a><!-- doxytag: member="FileInfoItem::setRenderer" ref="ac43c9835a262ab18a6ef8705c28aaccf" args="(auto_ptr&lt; FileInfoBaseRenderer &gt; renderer)" -->
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setRenderer</b> (auto_ptr&lt; <a class="el" href="classFileInfoBaseRenderer.html">FileInfoBaseRenderer</a> &gt; renderer)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a065a8db0d9542a4126f413288522ca28"></a><!-- doxytag: member="FileInfoItem::addObserver" ref="a065a8db0d9542a4126f413288522ca28" args="(observer_t &amp;observer)" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>addObserver</b> (<a class="el" href="classobserver__t.html">observer_t</a> &amp;observer)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8912ca95e9a318ee21e4c2f4db229667"></a><!-- doxytag: member="FileInfoItem::removeObserver" ref="a8912ca95e9a318ee21e4c2f4db229667" args="(observer_t &amp;observer)" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>removeObserver</b> (<a class="el" href="classobserver__t.html">observer_t</a> &amp;observer)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae970e815681d00b223a9440f49553c20"></a><!-- doxytag: member="FileInfoItem::removeObserver" ref="ae970e815681d00b223a9440f49553c20" args="(obsiterator &amp;it)" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>removeObserver</b> (obsiterator &amp;it)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab2f371ad58e6e0e93228dff825b11487"></a><!-- doxytag: member="FileInfoItem::clearObservers" ref="ab2f371ad58e6e0e93228dff825b11487" args="()" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>clearObservers</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1358d76c4ef02390c1d0c94c2385705d"></a><!-- doxytag: member="FileInfoItem::firstObserver" ref="a1358d76c4ef02390c1d0c94c2385705d" args="()" -->
+obsiterator&#160;</td><td class="memItemRight" valign="bottom"><b>firstObserver</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a35eeece2b732b6fea1dab501e37d2f38"></a><!-- doxytag: member="FileInfoItem::lastObserver" ref="a35eeece2b732b6fea1dab501e37d2f38" args="()" -->
+obsiterator&#160;</td><td class="memItemRight" valign="bottom"><b>lastObserver</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a86e97d0058351f7315f1856621fa8aa7"></a><!-- doxytag: member="FileInfoItem::update" ref="a86e97d0058351f7315f1856621fa8aa7" args="()" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>update</b> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a86c0e6ab33762208cf82757260dd86a7"></a><!-- doxytag: member="FileInfoItem::removeRenderer" ref="a86c0e6ab33762208cf82757260dd86a7" args="(Container &amp;container)" -->
-void&#160;</td><td class="memItemRight" valign="bottom"><b>removeRenderer</b> (Container &amp;container)</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/widget-gtk.cpp</li>
@@ -142,7 +158,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>removeRenderer</b> (C
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 8 2012 23:17:11 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

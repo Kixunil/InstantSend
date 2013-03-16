@@ -1,0 +1,214 @@
+Source: instantsend
+Maintainer: Martin Habovštiak <martin.habovstiak@gmail.com>
+Section: misc
+Priority: optional
+Build-Depends: autoconf, automake, libdbus-1-dev, libnotify-dev, libgtkmm-2.4-dev, libavahi-common-dev, libavahi-client-dev, libnautilus-extension-dev
+
+#Libraries
+Package: libinstantsend-plugin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: instantsend-client, instantsend-server, instantsend-plugin-ip4tcp, instantsend-plugin-ip6tcp
+Description: Plugin API library from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This library handles things common to server, client and plugins
+
+Package: libinstantsend-plugin-dev
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json-dev
+Description: Header files for InstantSend plugin API
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ These header files are neccessary to build plugins.
+
+Package: libinstantsend-json
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: instantsend-client, instantsend-server, instantsend-plugin-ip4tcp, instantsend-plugin-ip6tcp
+Description: JSON library from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This library handles JSON parsing, creating and manipulating. It is common to to server, client, plugins and others.
+
+Package: libinstantsend-json-dev
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-json
+Description: Header files for InstantSend JSON library
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ These header files are neccessary to build plugins.
+
+Package: libinstantsend-multithread
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: instantsend-server, instantsend-gtk
+Description: Multiplatform wrapper library for multithreading from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols
+ .
+ This library provides simple object-oriented multiplatform thread support.
+
+Package: libinstantsend-pluginloading
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: instantsend-server, instantsend-client
+Description: Multiplatform plugin loading library from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This library handles loading and unloading of InstantSend plugings.
+
+Package: libinstantsend-sysapi
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: instantsend-server, instantsend-client, instantsend-gtk
+Description: Wrapper for platform specific functions for instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This wrapper library handles communication with OS and defines standard paths.
+
+# Server
+Package: instantsend-server
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json, libinstantsend-multithread, libinstantsend-pluginloading, libinstantsend-sysapi
+Recommends: instantsend-plugins-communication
+Suggests: instantsend-client, instantsend-gtk, instantsend-plugins-standard
+Description: Server from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This program handles receiving files.
+
+#Client
+Package: instantsend-client
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json, libinstantsend-pluginloading, libinstantsend-sysapi
+Recommends: instantsend-plugins-communication
+Suggests: instantsend-server, instantsend-gtk
+Description: Client from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This program handles sending files.
+
+# Communication plugins
+Package: instantsend-plugin-ip4tcp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json
+Enhances: instantsend-client, instantsend-server
+Description: TCP/IPv4 plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin provides TCP/IPv4 protocol
+
+Package: instantsend-plugin-ip6tcp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json
+Enhances: instantsend-client, instantsend-server
+Description: TCP/IPv6 plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin provides TCP/IPv6 protocol
+
+# Virtual package
+Package: instantsend-plugins-communication
+Architecture: all
+Depends: instantsend-plugin-ip4tcp, instantsend-plugin-ip6tcp
+Description: Communication plugins from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This package provides communication plugins created by Martin Habovštiak
+
+# Event handlers
+Package: instantsend-plugin-dbus
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libdbus-1-3, libinstantsend-plugin, libinstantsend-json
+Enhances: instantsend-server
+Suggests: instantsend-gtk
+Description: DBus plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin provides dbus functionality.
+
+Package: instantsend-plugin-notify
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libnotify4 (>=0.7.5), libinstantsend-plugin, libinstantsend-json
+Enhances: instantsend-server
+Description: Desktop notify plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin provides desktop notifications using libnotify.
+
+Package: instantsend-plugin-avahi
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libavahi-common3, libavahi-client3, libinstantsend-plugin, libinstantsend-json
+Enhances: instantsend-server
+Suggests: instantsend-gtk
+Description: Avahi publish plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin publishes instantsend service to network using libavahi (ZeroConf protocols)
+
+# Scanning
+Package: instantsend-scan
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Enhances: instantsend-client, instantsend-gtk
+Suggests: instantsend-scanners-standard
+Description: Scaning tool from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ Use scanning tool to search for instantsend targets
+
+Package: instantsend-scanner-avahi
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, instantsend-scan, avahi-utils
+Enhances: instantsend-scan
+Description: Avahi scanner from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This tool can search for targets using avahi (ZeroConf)
+
+# GTK
+Package: instantsend-gtk
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libgtkmm-2.4-1c2a, instantsend-plugin-dbus, libdbus-1-3, zenity, libinstantsend-plugin, libinstantsend-json, libinstantsend-multithread, libinstantsend-sysapi
+Enhances: instantsend-server, instantsend-client
+Suggests: instantsend-filemanagers
+Description: GTK based GUI from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ Simple GUI shows files in progress and allows users control them.
+
+# File managers
+Package: instantsend-filemanager-nautilus
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, instantsend-gtk, instantsend-client, nautilus, libnautilus-extension1a
+Enhances: instantsend-gtk, nautilus, instantsend-client
+Provides: instantsend-filemanagers
+Description: Nautilus plugin from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ This plugin makes instantsend work with nautilus file manager.
+
+# Virtual package - depends on all plugins made by Martin Habovštiak
+Package: instantsend-plugins-standard
+Architecture: all
+Depends: instantsend-plugins-communication, instantsend-plugin-dbus, instantsend-plugin-notify, instantsend-plugin-avahi
+Description: Plugins from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ These are standard plugins created by Martin Habovštiak
+
+Package: instantsend-scanners-standard
+Architecture: all
+Depends: instantsend-scanner-avahi
+Description: Scanners from instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ These are standard scanners created by Martin Habovštiak
+
+# Virtual package - makes sure everything is installed
+Package: instantsend
+Architecture: all
+Depends: instantsend-server, instantsend-client, instantsend-gtk, instantsend-plugins-standard, instantsend-scanners-standard
+Recommends: instantsend-filemanagers
+Description: Toolkit for sending files over multiple protocols.
+
