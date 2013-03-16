@@ -41,7 +41,7 @@ fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, cons
 	bufsiz = 0;
 	stop = false;
 	hardPause = false;
-	zr = false;
+	zr = true;
 	lastUpdate = 0;
 	updateInterval = 500;
 	tStatus = IS_TRANSFER_IN_PROGRESS;
@@ -114,7 +114,7 @@ void fileWriter_t::writeBuffer() {
 				waitingThreads.erase(it);
 			}
 			mutex->release();
-			if(!(lastUpdate = (lastUpdate + 1) % updateInterval)) bcastProgressUpdated(*this);
+			if(!(lastUpdate = (lastUpdate + 1) % updateInterval)) bcastProgressUpdate(*this);
 		}
 	}
 }
@@ -127,6 +127,7 @@ bool fileWriter_t::shouldRun() {
 }
 
 void fileWriter_t::run() {
+	zr = false;
 	while(shouldRun()) {
 		writeBuffer();
 
@@ -149,7 +150,7 @@ void fileWriter_t::run() {
 
 	stop = true;
 	mutex->release();
-	bcastProgressUpdated(*this);
+	bcastProgressUpdate(*this);
 	cleanupCheck(true);
 	
 }
@@ -207,7 +208,7 @@ bool fileWriter_t::cleanupCheck(bool calledByThisThread) {
 	mutex->get();
 	if(zr && stop) {
 		mutex->release();
-		bcastProgressEnded(*this);
+		bcastProgressEnd(*this);
 		fileList_t::getList().removeController(getId(), !calledByThisThread);
 		return true;
 	}
