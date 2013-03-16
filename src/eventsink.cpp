@@ -1,64 +1,44 @@
 #include <stdio.h>
+#include <stdexcept>
+
 #include "eventsink.h"
 #include "pluginlist.h"
 
-#define BCAST_SIMPLE_EVENT_DEF(eventName, eventType, eventCall) \
-void eventName::sendEvent(event_t &event) {\
-	dynamic_cast<eventType &>(event).eventCall(evdata);\
+#define BCAST_EVENT_DEF(evType, evName, dataType) \
+void eventSink_t::send ## evType ## evName (dataType &eventData) throw() {\
+	sendEvent< event ## evType ## _t, dataType >(evType ## Events, &event ## evType ## _t::on ## evName, eventData); \
 }
 
-eventData_t::~eventData_t() {}
+#define EVENTDEF(evType) \
+	void eventSink_t::reg ## evType (event ## evType ## _t &eventHandler) throw() { \
+		mMutex->get(); \
+		evType ## Events.insert(&eventHandler); \
+		mMutex->release(); \
+	} \
+	void eventSink_t::unreg ## evType (event ## evType ## _t &eventHandler) throw() { \
+		mMutex->get(); \
+		evType ## Events.erase(&eventHandler); \
+		mMutex->release(); \
+	}
+
+//eventData_t::~eventData_t() {}
 
 eventSink_t &eventSink_t::instance() {
-	static auto_ptr<eventSink_t> sink(new eventSink_t());
-	return *sink.get();
+	static eventSink_t sink;
+	return sink;
 }
 
-void eventSink_t::regProgress(eventProgress_t &progressEvent) {
-	progressEvents.insert(&progressEvent);
-}
-
-void eventSink_t::regConnections(eventConnections_t &connectionEvent) {
-	connectionEvents.insert(&connectionEvent);
-}
-
-void eventSink_t::regReceive(eventReceive_t &receiveEvent) {
-	recvEvents.insert(&receiveEvent);
-}
-
-void eventSink_t::regSend(eventSend_t &sendEvent) {
-	sendEvents.insert(&sendEvent);
-}
-
-void eventSink_t::regServer(eventServer_t &serverEvent) {
-	serverEvents.insert(&serverEvent);
-}
-
-void eventSink_t::unregProgress(eventProgress_t &progressEvent) {
-	progressEvents.erase(&progressEvent);
-}
-
-void eventSink_t::unregConnections(eventConnections_t &connectionEvent) {
-	connectionEvents.erase(&connectionEvent);
-}
-
-void eventSink_t::unregReceive(eventReceive_t &receiveEvent) {
-	recvEvents.erase(&receiveEvent);
-}
-
-void eventSink_t::unregSend(eventSend_t &sendEvent) {
-	sendEvents.erase(&sendEvent);
-}
-
-void eventSink_t::unregServer(eventServer_t &serverEvent) {
-	serverEvents.erase(&serverEvent);
-}
+EVENTDEF(Progress);
+EVENTDEF(Connections);
+EVENTDEF(Receive);
+EVENTDEF(Send);
+EVENTDEF(Server);
+EVENTDEF(Plugin);
 
 void eventSink_t::autoLoad(jsonObj_t &plugins) {
-	pluginList_t &pl = pluginList_t::instance();
 	for(jsonIterator it = plugins.begin(); it != plugins.end(); ++it) {
 		try {
-			dynamic_cast<eventHandlerCreator_t &>(*pl[it.key()].creator()).regEvents(*this, it.value());
+			loadEventPlugin(it.key(), it.value());
 		}
 		catch(exception &e) {
 			fprintf(stderr, "Can't load event handler plugin '%s': %s\n", it.key().c_str(), e.what());
@@ -66,17 +46,41 @@ void eventSink_t::autoLoad(jsonObj_t &plugins) {
 	}
 }
 
-void eventSink_t::sendEvent(set<event_t *> &handlers, eventData_t &eventData) {
-	for(set<event_t *>::iterator it = handlers.begin(); it != handlers.end(); ++it) {
-		eventData.sendEvent(**it);
+void eventSink_t::loadEventPlugin(const string &name, jsonComponent_t &config) {
+	if(eventPlugins.count(name)) throw runtime_error(string("Plugin ") + name + " already loaded");
+	PluginPtr<eventHandlerCreator_t> plugin(pluginList_t::instance()[name].as<eventHandlerCreator_t>());
+	plugin->regEvents(*this, &config);
+	eventPlugins[name] = plugin;
+}
+
+void eventSink_t::unloadEventPlugin(const string &name) {
+	map<string, PluginPtr<eventHandlerCreator_t> >::iterator plugin(eventPlugins.find(name));
+	if(plugin == eventPlugins.end()) throw runtime_error(string("Plugin ") + name + " not loaded");
+	plugin->second->unregEvents(*this);
+	eventPlugins.erase(plugin);
+	//pluginList_t::instance().checkUnload(name);
+}
+
+void eventSink_t::unloadAllEventPlugins() {
+	while(eventPlugins.size()) {
+		map<string, PluginPtr<eventHandlerCreator_t> >::iterator it(eventPlugins.begin());
+		string pluginName(it->first);
+		fprintf(stderr, "Unloading: %s\n", pluginName.c_str());
+		it->second->unregEvents(*this);
+		eventPlugins.erase(it);
+		//pl.checkUnload(pluginName);
+		fprintf(stderr, "Unloaded.\n");
 	}
 }
 
-BCAST_SIMPLE_EVENT_DEF(bcastProgressBegin, eventProgress_t, onBegin);
-BCAST_SIMPLE_EVENT_DEF(bcastProgressUpdated, eventProgress_t, onUpdate);
-BCAST_SIMPLE_EVENT_DEF(bcastProgressPaused, eventProgress_t, onPause);
-BCAST_SIMPLE_EVENT_DEF(bcastProgressResumed, eventProgress_t, onResume);
-BCAST_SIMPLE_EVENT_DEF(bcastProgressEnded, eventProgress_t, onEnd);
+BCAST_EVENT_DEF(Progress, Begin, fileStatus_t);
+BCAST_EVENT_DEF(Progress, Update, fileStatus_t);
+BCAST_EVENT_DEF(Progress, Pause, fileStatus_t);
+BCAST_EVENT_DEF(Progress, Resume, fileStatus_t);
+BCAST_EVENT_DEF(Progress, End, fileStatus_t);
 
-BCAST_SIMPLE_EVENT_DEF(bcastServerStarted, eventServer_t, onServerStarted);
-BCAST_SIMPLE_EVENT_DEF(bcastServerStopped, eventServer_t, onServerStopped);
+BCAST_EVENT_DEF(Server, Started, serverController_t);
+BCAST_EVENT_DEF(Server, Stopped, serverController_t);
+
+BCAST_EVENT_DEF(Plugin, Load, const string);
+BCAST_EVENT_DEF(Plugin, Unload, const string);
