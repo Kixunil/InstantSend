@@ -6,6 +6,15 @@
 #include <map>
 #include <memory>
 
+// For debugging
+#define NOPURE
+
+#ifdef NOPURE
+#define PURE
+#else
+#define PURE = 0
+#endif
+
 using namespace std;
 
 typedef int intL_t;
@@ -91,25 +100,23 @@ class fileUnreadable : public exception {
 class jsonComponent_t
 {
 	public:
-		virtual string toString() = 0;
-		virtual void fromString(string *str) = 0;
-		virtual jsonComponent_t *clone() const = 0;
+		virtual string toString() PURE;
+		virtual void fromString(string *str) PURE;
+		virtual jsonComponent_t *clone() const PURE;
 		virtual ~jsonComponent_t();
 };
 
-class jsonInt_t: public jsonComponent_t {
+class jsonInt_t : public jsonComponent_t {
 	public:
 		jsonInt_t(intL_t value) {
 			val = value;
 		}
 		jsonInt_t(string *str);
+		~jsonInt_t();
 
 		string toString();
 		void fromString(string *str);
-		jsonComponent_t *clone() const {
-			return new jsonInt_t(val);
-		}
-
+		jsonComponent_t *clone() const;
 		inline intL_t getVal() const {
 			return val;
 		}
@@ -150,15 +157,14 @@ class jsonInt_t: public jsonComponent_t {
 		intL_t val;
 };
 
-class jsonFloat_t: public jsonComponent_t {
+class jsonFloat_t : public jsonComponent_t {
 	public:
 		jsonFloat_t(floatL_t value);
 		jsonFloat_t(string *str);
+		~jsonFloat_t();
 		string toString();
 		void fromString(string *str);
-		jsonComponent_t *clone() const {
-			return new jsonFloat_t(val);
-		}
+		jsonComponent_t *clone() const;
 
 		inline floatL_t getVal() const {
 			return val;
@@ -183,10 +189,11 @@ class jsonFloat_t: public jsonComponent_t {
 		floatL_t val;
 };
 
-class jsonStr_t: public jsonComponent_t {
+class jsonStr_t : public jsonComponent_t {
 	public:
 		jsonStr_t();
 		jsonStr_t(string *str);
+		~jsonStr_t();
 		inline jsonStr_t(const char *str) {
 			val = string(str);
 		}
@@ -201,11 +208,7 @@ class jsonStr_t: public jsonComponent_t {
 			val = value;
 		}
 
-		jsonComponent_t *clone() const {
-			jsonStr_t *tmp = new jsonStr_t();
-			tmp->setVal(val);
-			return tmp;
-		}
+		jsonComponent_t *clone() const;
 
 		inline bool operator==(const char *str) {
 			return val == string(str);
@@ -236,15 +239,14 @@ class jsonStr_t: public jsonComponent_t {
 		string val;
 };
 
-class jsonBool_t:  public jsonComponent_t {
+class jsonBool_t : public jsonComponent_t {
 	public:
 		jsonBool_t(bool value);
 		jsonBool_t(string *str);
+		~jsonBool_t();
 		string toString();
 		void fromString(string *str);
-		jsonComponent_t *clone() const {
-			return new jsonBool_t(val);
-		}
+		jsonComponent_t *clone() const;
 
 		inline bool getVal() const {
 			return val;
@@ -262,15 +264,14 @@ class jsonBool_t:  public jsonComponent_t {
 		bool val;
 };
 
-class jsonNull_t:  public jsonComponent_t {
+class jsonNull_t :  public jsonComponent_t {
 	public:
 		jsonNull_t() {}
 		jsonNull_t(string *str) {
 			fromString(str);
 		}
-		jsonComponent_t *clone() const {
-			return new jsonNull_t();
-		}
+		~jsonNull_t();
+		jsonComponent_t *clone() const;
 
 		string toString() {
 			return "null";
@@ -281,27 +282,61 @@ class jsonNull_t:  public jsonComponent_t {
 		}
 };
 
+/*
 class jsonStructuredComponent_t : public jsonComponent_t {
-	virtual void deleteContent() = 0;
+	public:
+		virtual void deleteContent() = 0;
+		~jsonStructuredComponent_t();
 };
+*/
+
+typedef jsonComponent_t jsonStructuredComponent_t;
 
 class itemContainer_t {
 	private:
-		bool owner;
-	public:
-		jsonComponent_t *item;
+		unsigned int *mRC;
+		jsonComponent_t *mItem;
 
-		inline itemContainer_t() {
-			owner = false;
+		inline void invalidate() {
+			if(mRC && !--*mRC) {
+				delete mRC;
+				delete mItem;
+				mRC = NULL;
+			}
 		}
+	public:
 
-		inline itemContainer_t(jsonComponent_t *value, bool owns) {
-			item = value;
-			owner = owns;
+		inline itemContainer_t() : mRC(NULL), mItem(NULL) {
+			//puts("itemContainer_t created");
+		}
+		inline itemContainer_t(const itemContainer_t &other) : mRC(other.mRC), mItem(other.mItem) { if(mRC) ++*mRC; }
+
+		inline itemContainer_t(jsonComponent_t *value, bool owns) : mRC(owns?new unsigned int:NULL), mItem(value) {
+			if(owns) *mRC = 1;
 		}
 
 		inline bool isOwner() const {
-			return owner;
+			return mRC;
+		}
+
+		inline itemContainer_t &operator=(const itemContainer_t &other) {
+			invalidate();
+			mRC = other.mRC;
+			mItem = other.mItem;
+			return *this;
+		}
+
+		inline jsonComponent_t &operator*() const {
+			if(!mItem) throw jsonNotExist("UNKNOWN");
+			return *mItem;
+		}
+
+		inline jsonComponent_t *operator->() const {
+			return mItem;
+		}
+
+		inline ~itemContainer_t() {
+			invalidate();
 		}
 };
 
@@ -328,8 +363,8 @@ class jsonIterator {
 			return mapiterator->first;
 		}
 
-		inline jsonComponent_t *&value() {
-			return mapiterator->second.item;
+		inline jsonComponent_t &value() {
+			return *mapiterator->second;
 		}
 
 		inline bool operator!=(const jsonIterator &it) {
@@ -360,17 +395,17 @@ class jsonArr_t: public jsonStructuredComponent_t {
 			data.push_back(itemContainer_t(value, true));
 		}
 
-		inline jsonComponent_t *&operator[] (int ptr) {
-			return data[ptr].item;
+		inline jsonComponent_t &operator[] (int ptr) {
+			return *data[ptr];
 		}
 
 		inline bool empty() {
 			return data.empty();
 		}
 
-		void iterate(void (* func)(jsonComponent_t *)) {
+		/*void iterate(void (* func)(jsonComponent_t *)) {
 			for(unsigned int i = 0; i < data.size(); ++i) func(data[i].item);
-		}
+		}*/
 
 		inline int count() {
 			return data.size();
@@ -401,42 +436,30 @@ class jsonObj_t: public jsonStructuredComponent_t {
 			fromString(&tmp);
 		}
 
-		inline jsonComponent_t *&operator[] (const string &key) {
-			return data[key].item;
+		inline const jsonComponent_t &operator[] (const string &key) const {
+			return gie(key);
 		}
 
-		inline const jsonComponent_t *operator[] (const string &key) const {
-			return data.find(key)->second.item;
-		}
-
-		inline jsonComponent_t *&operator[] (const char *key) {
-			return data[string(key)].item;
-		}
-
-		inline const jsonComponent_t *operator[] (const char *key) const {
-			return data.find(string(key))->second.item;
+		inline jsonComponent_t &operator[] (const string &key) {
+			return gie(key);
 		}
 
 		inline bool exists(const string &key) {
 			return data.count(key) > 0;
 		}
 
-		inline bool exists(const char *key) {
-			return data.count(string(key)) > 0;
+		inline jsonComponent_t &gie(const string &key) const {
+			map<string, itemContainer_t>::const_iterator it(data.find(key));
+			if(it == data.end()) throw jsonNotExist(key);
+			return *it->second;
 		}
-
+/*
 		inline jsonComponent_t &gie(const string &key) {
-			if(data.count(key) > 0 && data[key].item) return *data[key].item; else throw jsonNotExist(key);
+			map<string, itemContainer_t>::iterator it(data.find(key));
+			if(it == data.end()) throw jsonNotExist(key);
+			return *it->second;
 		}
-
-		inline const jsonComponent_t &gie(const string &key) const {
-			if(data.count(key) > 0 && data.find(key)->second.item) return *data.find(key)->second.item; else throw jsonNotExist(key);
-		}
-
-		inline jsonComponent_t &gie(const char *key) {
-			if(data.count(string(key)) > 0) return *data[string(key)].item; else throw jsonNotExist(string(key));
-		}
-
+*/
 		inline bool empty() {
 			return data.empty();
 		}
@@ -450,8 +473,8 @@ class jsonObj_t: public jsonStructuredComponent_t {
 		}
 
 		void insertNew(const string &key, jsonComponent_t *value);
-		inline void insertNew(const char *key, jsonComponent_t *value) {
-			insertNew(string(key), value);
+		inline void insertVal(const string &key, jsonComponent_t *value) {
+			data[key] = itemContainer_t(value, false);
 		}
 
 		string toString();
@@ -500,24 +523,4 @@ class JALArrParser_t : public JALParser_t {
 auto_ptr<jsonComponent_t> cfgReadStr(const char *str);
 auto_ptr<jsonComponent_t> cfgReadFile(const char *path);
 
-/*Obsolette
-int cfgIsObj(jsonComponent_t *config);
-int cfgIsArr(jsonComponent_t *config);
-int cfgIsInt(jsonComponent_t *config);
-int cfgIsFloat(jsonComponent_t *config);
-int cfgIsNum(jsonComponent_t *config);
-int cfgIsBool(jsonComponent_t *config);
-int cfgIsNull(jsonComponent_t *config);
-int cfgIsStr(jsonComponent_t *config);
-intL_t cfgGetValInt(jsonInt_t *config);
-floatL_t cfgGetValFloat(jsonComponent_t *config);	// can be eighter jsonFloat_t or jsonInt_t
-int cfgGetValBool(jsonBool_t *config);
-const char *cfgGetValStr(jsonStr_t *config);
-jsonComponent_t *cfgGetChild(jsonObj_t *config, const char *key);
-jsonComponent_t *cfgGetChildIfExists(jsonObj_t *config, const char *key);
-jsonComponent_t *cfgGetItem(jsonArr_t *config, int ptr);
-int cfgItemCount(jsonComponent_t *config);		// can be eighter jsonArr_t or jsonObj_t
-int cfgIsEmpty(jsonComponent_t *config);		// can be eighter jsonArr_t or jsonObj_t
-int cfgChildExists(jsonObj_t *config, const char *key);
-*/
 #endif
