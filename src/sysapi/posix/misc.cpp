@@ -7,7 +7,7 @@
 
 using namespace std;
 
-string combinePath(string dir, string file) {
+string combinePath(const string &dir, const string &file) {
 	return dir + "/" + file;
 }
 
