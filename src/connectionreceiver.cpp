@@ -6,17 +6,12 @@
 #include "pluginlist.h"
 #include "eventsink.h"
 #include "sysapi.h"
+#include "appcontrol.h"
 
-connectionReceiver_t::connectionReceiver_t(const string &plugin, const jsonComponent_t &config) : runningmutex(mutex_t::getNew()), running(true), pluginName(plugin), pluginConfig(config.clone()), server(pluginList_t::instance()[pluginName].newServer(*pluginConfig)) {
-	if(!server.get()) {
-		const char *errmsg = pluginList_t::instance()[pluginName].lastError();
-		if(errmsg)
-			throw runtime_error("Could not load plugin " + pluginName + ": " + errmsg);
-		else
-			throw runtime_error("Could not load plugin " + pluginName);
-	}
+int runningServers;
+auto_ptr<mutex_t> mRunningServers = mutex_t::getNew();
 
-}
+connectionReceiver_t::connectionReceiver_t(const string &plugin, const jsonComponent_t &config) : runningmutex(mutex_t::getNew()), running(true), pluginName(plugin), pluginConfig(config.clone()), server(pluginList_t::instance()[pluginName].as<connectionCreator_t>()->newServer(*pluginConfig)) {}
 
 bool connectionReceiver_t::checkRunning() {
 	runningmutex->get();
@@ -26,48 +21,59 @@ bool connectionReceiver_t::checkRunning() {
 }
 
 void connectionReceiver_t::run() {
-	try {
-		auto_ptr<peer_t> client;
-		bcastServerStarted(*this);
+	pluginInstanceAutoPtr<peer_t> client;
 
-		while((client = auto_ptr<peer_t>(server->acceptClient())).get() && checkRunning()) {
-			puts("Client connected.");
-			(new dataReceiver_t(client))->start();
-		}
+	mRunningServers->get();
+	++runningServers;
+	mRunningServers->release();
 
+	bcastServerStarted(*this);
 
+	while((client = pluginInstanceAutoPtr<peer_t>(server->acceptClient())).valid() && checkRunning()) {
+		puts("Client connected.");
+		(new dataReceiver_t(client))->start();
 	}
-	catch(exception &e) {
-		fprintf(stderr, "connectionReceiver failed: %s\n", e.what());
-	}
+
+	runningmutex->get(); // synchronization trick
+	runningmutex->release();
+
+	mRunningServers->get();
+	--runningServers;
+	mRunningServers->release();
 
 	bcastServerStopped(*this);
+	unfreezeMainThread();
 }
 
-void connectionReceiver_t::stop() {
+void connectionReceiver_t::stop() throw() {
 	runningmutex->get();
+
+	fprintf(stderr, "Stopping server.\n");
 
 	running = false;
 
 	try {
 		dynamic_cast<asyncStop_t &>(*server).stop();
+		fprintf(stderr, "Server should stop immediately.\n");
 	}
 	catch(std::bad_cast &e) {
 		// ignore error
+		fprintf(stderr, "Sorry, you must wait for server to stop\n");
 	}
 
 	runningmutex->release();
 }
 
-const string &connectionReceiver_t::getPluginName() {
+const string &connectionReceiver_t::getPluginName() throw() {
 	return pluginName;
 }
 
-const jsonComponent_t &connectionReceiver_t::getPluginConf() {
+const jsonComponent_t &connectionReceiver_t::getPluginConf() throw() {
 	return *pluginConfig;
 }
 
 bool connectionReceiver_t::autoDelete() {
+	fprintf(stderr, "connectionReceiver_t::autoDelete();\n");
 	return true;
 }
 
