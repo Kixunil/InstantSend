@@ -151,7 +151,7 @@ sysapi.o: sysapi/$(PLATFORM)/misc.cpp
 	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(PLATFORM)/misc.cpp
 
 multithread.o: sysapi/$(PLATFORM)/multithread.cpp
-	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) $(LDFLAGS) -I./sysapi/$(OS)/ -c -o $@ sysapi/$(PLATFORM)/multithread.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) $(LDFLAGS) -I./sysapi/$(PLATFORM)/ -c -o $@ sysapi/$(PLATFORM)/multithread.cpp
 
 filewriter.o: filewriter.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ filewriter.cpp
@@ -171,8 +171,8 @@ connectionreceiver.o: connectionreceiver.cpp
 serverlist.o: serverlist.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ serverlist.cpp
 
-appcontrol-platformdependent.o: sysapi/$(OS)/appcontrol-platformdependent.cpp
-	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(OS)/appcontrol-platformdependent.cpp
+appcontrol-platformdependent.o: sysapi/$(PLATFORM)/appcontrol-platformdependent.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(PLATFORM)/appcontrol-platformdependent.cpp
 
 internalevents.o: internalevents.cpp
 	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ internalevents.cpp
@@ -190,7 +190,7 @@ libinstantsend-sysapi$(LIBEXTENSION): sysapi.o
 #	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ multithread.o $(LIBLDFLAGS) libinstantsend-common$(LIBEXTENSION) $(LDFLAGS)
 
 libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ -I./sysapi/$(OS)/ appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o $(LIBLDFLAGS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ -I./sysapi/$(PLATFORM)/ appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o $(LIBLDFLAGS) $(LDFLAGS)
 
 check:
 
