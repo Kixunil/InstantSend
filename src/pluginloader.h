@@ -4,13 +4,24 @@
 
 using namespace std;
 
-class checkUnloadCallback_t : public pluginEmptyCallback_t {
+class CheckUnloadCallback : public pluginDestrCallback_t {
 	public:
-		inline checkUnloadCallback_t(const string &pluginName) : name(pluginName) {}
-		void empty();
+		typedef map<string, pluginHandle_t>::iterator StorageRef;
+		inline CheckUnloadCallback(const StorageRef &storageRef) : mStorRef(storageRef) {}
+		void onUnload();
 
 	private:
-		string name;
+		StorageRef mStorRef;
+};
+
+class LibraryHandleWithCallback : public LibraryHandle {
+	public:
+		inline LibraryHandleWithCallback(auto_ptr<CheckUnloadCallback> callback) : mCallback(callback) {};
+		~LibraryHandleWithCallback();
+		void onUnload();
+	private:
+		auto_ptr<CheckUnloadCallback> mCallback;
+
 };
 
 class pluginLoader_t {
@@ -18,14 +29,12 @@ class pluginLoader_t {
 		vector<string> paths;
 
 		string getFullName(const string &path, const string &name);
-		void *tryLoad(const string &path);
-		pluginInstanceCreator_t *getCreator(void *handle, const string &pluginName);
-		void (*getPluginDestructor())(void *);
+		auto_ptr<LibraryHandle> tryLoad(const string &path, const CheckUnloadCallback::StorageRef &storageRef);
 	public:
 //		pluginLoader_t();
 		inline void addPath(const string &path) {
 			paths.push_back(path);
 		}
 
-		plugin_t loadPlugin(string name);
+		auto_ptr<LibraryHandle> loadPlugin(const string &name, const CheckUnloadCallback::StorageRef &storageRef);
 };
