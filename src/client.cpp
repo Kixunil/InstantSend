@@ -12,7 +12,7 @@
 
 int outputpercentage = 0;
 
-int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
+int sendFile(pluginInstanceAutoPtr<peer_t> &client, FILE *file, const char *basename) {
 	long fs, sb;
 	if(fseek(file, 0, SEEK_END) < 0) throw runtime_error("Can't seek");
 	if((fs = ftell(file)) < 0) throw runtime_error("Unknown size");
@@ -27,7 +27,7 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 	string msg = msgobj.toString();
 	strcpy(data->data, msg.c_str());
 	data->size = msg.size() + 1;
-	msgobj.deleteContent();
+	//msgobj.deleteContent();
 
 	if(!client->sendData(data.get())) throw runtime_error("Can't send!");
 	data->size = DMAXSIZE;
@@ -48,7 +48,7 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 	}
 
 	auto_ptr<jsonInt_t> fp(new jsonInt_t(0));
-	msgobj["position"] = fp.get();
+	msgobj.insertVal("position", fp.get());
 	sb = 0;
 
 	do {
@@ -71,19 +71,19 @@ int sendFile(auto_ptr<peer_t> client, FILE *file, const char *basename) {
 	return 1;
 }
 
-auto_ptr<peer_t> findWay(jsonArr_t &ways) {
+pluginInstanceAutoPtr<peer_t> findWay(jsonArr_t &ways) {
 	pluginList_t &pl = pluginList_t::instance();
 	for(int i = 0; i < ways.count(); ++i) {
 		string pname = "UNKNOWN";
 		try {
 			// Prepare plugin configuration
-			jsonObj_t &way = dynamic_cast<jsonObj_t &>(*ways[i]);
+			jsonObj_t &way = dynamic_cast<jsonObj_t &>(ways[i]);
 			pname = dynamic_cast<jsonStr_t &>(way.gie("plugin")).getVal();
 
 			// Load plugin and try to connect
 			fprintf(stderr, "Connecting...\n");
-			auto_ptr<peer_t> client(pl[pname].newClient(way.gie("config")));
-			if(client.get()) return client; else fprintf(stderr, "Couldn't connect with way %d: %s\n", i, pl[pname].lastError());
+			pluginInstanceAutoPtr<peer_t> client(pl[pname].as<connectionCreator_t>()->newClient(way.gie("config")));
+			if(client.valid()) return client; // else fprintf(stderr, "Couldn't connect with way %d: %s\n", i, pl[pname].lastError());
 		}
 		catch(exception &e) {
 			printf("Skipping %s: %s\n", pname.c_str(), e.what());
@@ -92,7 +92,7 @@ auto_ptr<peer_t> findWay(jsonArr_t &ways) {
 			// continue trying
 		}
 	}
-	return auto_ptr<peer_t>(NULL); // Return empty
+	throw runtime_error("No usable way found");
 }
 
 int main(int argc, char **argv) {
@@ -153,8 +153,8 @@ int main(int argc, char **argv) {
 				if(!file) throw runtime_error("Can't open file");
 
 				// Find way to send file
-				auto_ptr<peer_t> client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
-				if(!client.get()) {
+				pluginInstanceAutoPtr<peer_t> client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
+				if(!client.valid()) {
 					printf("Failed to connet to %s\n", tname);
 					fflush(stdout);
 					failuredetected = 1;
