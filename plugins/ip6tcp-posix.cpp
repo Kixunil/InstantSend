@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/select.h>
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
@@ -26,7 +27,7 @@ class i6tPeer : public peer_t {
 		int fd;
 		string machineId;
 	public:
-		inline i6tPeer(int newfd, const string &mId, pluginInstanceCreator_t &creator) : peer_t(creator) {
+		inline i6tPeer(int newfd, const string &mId, pluginMultiInstanceCreator_t &creator) : peer_t(creator) {
 			fd = newfd;
 			machineId = mId;
 		}
@@ -90,13 +91,14 @@ class i6tPeer : public peer_t {
 
 };
 
-class i6tserver : public serverPlugin_t {
+class i6tserver : public serverPlugin_t, public asyncStop_t {
 	private:
-		int fd;
+		int fd, pipefd[2];
 	public:
-		i6tserver(const jsonComponent_t &config, pluginInstanceCreator_t &creator) : serverPlugin_t(creator) {
+		i6tserver(const jsonComponent_t &config, pluginMultiInstanceCreator_t &creator) : serverPlugin_t(creator) {
 			struct sockaddr_in6 srvaddr;
 			int backlog;
+			if(pipe(pipefd) < 0) throw runtime_error(string("pipe: ") + strerror(errno));
 				srvaddr.sin6_family = AF_INET6;
 				srvaddr.sin6_scope_id = 0;
 				srvaddr.sin6_flowinfo = 0;
@@ -125,14 +127,41 @@ class i6tserver : public serverPlugin_t {
 
 		}
 
-		peer_t *acceptClient() {
-			struct sockaddr_in6 saddr;
-			saddr.sin6_family = AF_INET6;
-			socklen_t socksize = sizeof(struct sockaddr_in6);
-			int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
-			char buf[256];
-			if(res < 0) return NULL;
-			return new i6tPeer(res, string(inet_ntop(AF_INET6, &saddr.sin6_addr, buf, 256)), getCreator());
+		auto_ptr<peer_t> acceptClient() throw() {
+			try {
+				struct sockaddr_in6 saddr;
+				saddr.sin6_family = AF_INET6;
+				socklen_t socksize = sizeof(struct sockaddr_in6);
+				fd_set fds;
+				FD_ZERO(&fds);
+				FD_SET(pipefd[0], &fds);
+				FD_SET(fd, &fds);
+
+				errno = 0;
+				while(select((fd > pipefd[0])?fd+1:pipefd[0]+1, &fds, NULL, NULL, NULL) < 0 && errno == EINTR) errno = 0;
+
+				if(errno) throw runtime_error(string("select: ") + strerror(errno));
+
+				if(FD_ISSET(pipefd[0], &fds)) {
+					char buf;
+					if(read(pipefd[0], &buf, 1) < 0) throw runtime_error(string("accept: ") + strerror(errno));
+					return auto_ptr<peer_t>();
+				}
+
+				int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
+				if(res < 0) throw runtime_error(string("accept: ") + strerror(errno));
+
+				char buf[256];
+				return auto_ptr<peer_t>(new i6tPeer(res, string(inet_ntop(AF_INET6, &saddr.sin6_addr, buf, 256)), getCreator()));
+			}
+			catch(...) {
+				return auto_ptr<peer_t>();
+			}
+		}
+
+		bool stop() {
+			char buf = 0;
+			return write(pipefd[1], &buf, 1) > 0;
 		}
 
 		void reconfigure(jsonComponent_t *config) {
@@ -141,6 +170,8 @@ class i6tserver : public serverPlugin_t {
 
 		~i6tserver() {
 			if(fd > -1) close(fd);
+			close(pipefd[0]);
+			close(pipefd[1]);
 		}
 };
 
@@ -148,11 +179,12 @@ class i6tCreator : public connectionCreator_t {
 	private:
 		string lastErr;
 	public:
-		i6tCreator(pluginEmptyCallback_t &callback) : connectionCreator_t(callback) {
+		i6tCreator(pluginDestrCallback_t &callback) : connectionCreator_t(callback) {
 			lastErr = "No error";
 		}
-		peer_t *newClient(const jsonComponent_t &config) {
-			int fd;
+
+		auto_ptr<peer_t> newClient(const jsonComponent_t &config) throw() {
+			int fd = -1;
 			try {
 				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
 				struct sockaddr_in6 srcaddr;
@@ -198,12 +230,12 @@ class i6tCreator : public connectionCreator_t {
 					srcaddr.sin6_port = 0;
 				}
 				fd = socket(AF_INET6, SOCK_STREAM, 0);
-				if(fd < 0) throw runtime_error(string("socket") + strerror(errno));
+				if(fd < 0) throw runtime_error(string("socket: ") + strerror(errno));
 
 
-				if(srcaddr.sin6_family == AF_INET6 && bind(fd, (struct sockaddr *)&srcaddr, sizeof(struct sockaddr_in6)) < 0) throw runtime_error("bind");
+				if(srcaddr.sin6_family == AF_INET6 && bind(fd, (struct sockaddr *)&srcaddr, sizeof(struct sockaddr_in6)) < 0) throw runtime_error(string("bind: ") + strerror(errno));
 
-/*			
+				/*
 				struct addrinfo *ai, *tmpai;
 
 				struct addrinfo filter;
@@ -212,7 +244,7 @@ class i6tCreator : public connectionCreator_t {
 				filter.ai_protocol = 0;
 				filter.ai_flags = AI_ADDRCONFIG;
 				int errcode;
-				printf("getaddrinfo(%s, %s, ...)\n", dstHost.c_str(), dstPort.c_str());
+				//printf("getaddrinfo(%s, %s, ...)\n", dstHost.c_str(), dstPort.c_str());
 				if((errcode = getaddrinfo(dstHost.c_str(), dstPort.c_str(), NULL, &ai))) throw runtime_error(string("getaddrinfo: ") + gai_strerror(errcode));
 				tmpai = ai;
 				while(tmpai) {
@@ -225,7 +257,7 @@ class i6tCreator : public connectionCreator_t {
 				}
 				freeaddrinfo(ai);
 				throw runtime_error(string("connect: ") + strerror(errno));
-*/
+				*/
 
 				struct sockaddr_in6 dstaddr;
 				dstaddr.sin6_family = AF_INET6;
@@ -236,31 +268,23 @@ class i6tCreator : public connectionCreator_t {
 				dstaddr.sin6_port = htons(dstPort);
 
 				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in6)) < 0) throw runtime_error(string("connect: ") + strerror(errno));
-				return new i6tPeer(fd, dstHost, *this);
+				return auto_ptr<peer_t>(new i6tPeer(fd, dstHost, *this));
 			}
 			catch(exception &e) {
 				if(fd > -1) close(fd);
 				fd = -1;
 				lastErr = e.what();
+				return auto_ptr<peer_t>();
 			}
-			catch(...) {
-				if(fd > -1) close(fd);
-				fd = -1;
-			}
-			return NULL;
 	}
 
-	serverPlugin_t *newServer(const jsonComponent_t &config) {
+	auto_ptr<serverPlugin_t> newServer(const jsonComponent_t &config) throw() {
 		try {
-			return new i6tserver(config, *this);
+			return auto_ptr<serverPlugin_t>(new i6tserver(config, *this));
 		}
 		catch(exception &e) {
 			lastErr = e.what();
-			return NULL;
-		}
-		catch(...) {
-			lastErr = "Unknown error";
-			return NULL;
+			return auto_ptr<serverPlugin_t>();
 		}
 	}
 
@@ -270,8 +294,8 @@ class i6tCreator : public connectionCreator_t {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator(pluginEmptyCallback_t &callback) {
-		static i6tCreator *creator = new i6tCreator(callback);
-		return creator;
+	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
+		static i6tCreator creator(callback);
+		return &creator;
 	}
 }

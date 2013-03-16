@@ -20,13 +20,12 @@ class dbusConnectionHandle {
 
 class progressHandler : public eventProgress_t {
 	private:
-		map<fileStatus_t *, FILE *> pipes;
 		dbusConnectionHandle &dbconnhandle;
 		struct timeval lastUpdate;
 		//int updatenum;
 	public:
-		inline progressHandler(dbusConnectionHandle &handle, pluginInstanceCreator_t &creator) : eventProgress_t(creator), dbconnhandle(handle) {}
-		void onBegin(fileStatus_t &fStatus) {
+		inline progressHandler(dbusConnectionHandle &handle) : eventProgress_t(), dbconnhandle(handle) {}
+		void onBegin(fileStatus_t &fStatus) throw() {
 			DBusMessage *dbmsg = dbus_message_new_signal("/sk/pixelcomp/instantsend", "sk.pixelcomp.instantsend", "onBegin");
 			if(!dbmsg) {
 				dbconnhandle.printError();
@@ -51,7 +50,7 @@ class progressHandler : public eventProgress_t {
 //			updatenum = 0;
 		}
 
-		void onUpdate(fileStatus_t &fStatus) {
+		void onUpdate(fileStatus_t &fStatus) throw() {
 			// This prevents overloading dbus
 			struct timeval curTime;
 			gettimeofday(&curTime, NULL);
@@ -71,15 +70,15 @@ class progressHandler : public eventProgress_t {
 			dbus_message_unref(dbmsg);
 		}
 
-		void onPause(fileStatus_t &fStatus) {
+		void onPause(fileStatus_t &fStatus) throw() {
 			(void)fStatus;
 		}
 
-		void onResume(fileStatus_t &fStatus) {
+		void onResume(fileStatus_t &fStatus) throw() {
 			(void)fStatus;
 		}
 
-		void onEnd(fileStatus_t &fStatus) {
+		void onEnd(fileStatus_t &fStatus) throw() {
 			DBusMessage *dbmsg = dbus_message_new_signal("/sk/pixelcomp/instantsend", "sk.pixelcomp.instantsend", "onEnd");
 			if(!dbmsg) {
 				dbconnhandle.printError();
@@ -99,8 +98,9 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 		DBusError dberr;
 		DBusConnection *dbconn;
 	public:
-		ehCreator_t(pluginEmptyCallback_t &callback) : eventHandlerCreator_t(callback), progress(*this, *this) {
+		ehCreator_t() : eventHandlerCreator_t(), progress(*this) {
 			try {
+				dbus_threads_init_default();
 				dbus_error_init(&dberr);
 				dbconn = dbus_bus_get(DBUS_BUS_SESSION, &dberr);
 				if(dbus_error_is_set(&dberr)) {
@@ -118,12 +118,12 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 			return "No error occured";
 		}
 
-		void regEvents(eventRegister_t &reg, jsonComponent_t *config) {
+		void regEvents(eventRegister_t &reg, jsonComponent_t *config) throw() {
 			(void)config;
 			reg.regProgress(progress);
 		}
 
-		void unregEvents(eventRegister_t &reg) {
+		void unregEvents(eventRegister_t &reg) throw() {
 			reg.unregProgress(progress);
 		}
 
@@ -138,14 +138,16 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 		}
 
 		~ehCreator_t() {
-			dbus_connection_close(dbconn);
 			dbus_connection_unref(dbconn);
+			dbus_error_free(&dberr);
+			dbus_shutdown();
 		}
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator(pluginEmptyCallback_t &callback) {
-		static ehCreator_t *creator = new ehCreator_t(callback);
-		return creator;
+	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
+		(void)callback;
+		static ehCreator_t creator;
+		return &creator;
 	}
 }

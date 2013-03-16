@@ -43,40 +43,49 @@ class serverHandler : public eventServer_t {
 		AvahiEntryGroup *group;
 		char *name;
 	public:
-		serverHandler(pluginInstanceCreator_t &creator) : eventServer_t(creator), pollObj(avahi_threaded_poll_new()), group(NULL) {
+		serverHandler() : eventServer_t(), pollObj(avahi_threaded_poll_new()), group(NULL) {
+			if(!pollObj) throw runtime_error("Failed to create threaded poll object.");
+
 			char buf[HOST_NAME_MAX + 1];
 			gethostname(buf, HOST_NAME_MAX);
 			buf[HOST_NAME_MAX] = 0;
 			name = avahi_strdup(buf);
-			
-			if(!pollObj) throw runtime_error("Failed to create threaded poll object.");
 
 			int error;
 			client = avahi_client_new(avahi_threaded_poll_get(pollObj), (AvahiClientFlags)0, clientCallback, (void *)this, &error);
 			if (!client) throw runtime_error(string("Failed to create client: ") + avahi_strerror(error));
 
-			group = avahi_entry_group_new(client, groupCallback, (void *)this);
-
 			avahi_threaded_poll_start(pollObj);
 		}
 
 		~serverHandler() {
-			if (client) avahi_client_free(client);
 			if (pollObj) {
 				avahi_threaded_poll_stop(pollObj);
-				avahi_threaded_poll_free(pollObj);
 			}
+			// avahi_client_free should free group too
+#if 0
 			if(group) {
 				avahi_entry_group_free(group);
 			}
+#endif
+			if (client) {
+				avahi_client_free(client);
+				client = NULL;
+			}
+			if (pollObj) {
+				avahi_threaded_poll_free(pollObj);
+			}
+			
 			for(map<serverController_t *, avahiData *>::iterator it = published.begin(); it != published.end(); ++it) {
 				delete it->second;
 			}
 			avahi_free(name);
+			fprintf(stderr, "avahi-publish freed\n");
 		}
 
 		void createServices() {
-			if(!group) return;
+			if(!group && !(group = avahi_entry_group_new(client, groupCallback, (void *)this))) return;
+			if(!group || !published.size()) return;
 			avahi_entry_group_reset(group);
 			for(map<serverController_t *, avahiData *>::iterator it = published.begin(); it != published.end(); ++it) {
 				avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, (AvahiPublishFlags)0, name, "_instantsend._tcp", NULL, NULL, it->second->getPort(), NULL);
@@ -117,21 +126,20 @@ class serverHandler : public eventServer_t {
 			}
 		}
 
-		void onServerStarted(serverController_t &server) {
-			auto_ptr<jsonComponent_t> conf(server.getPluginConf().clone());
+		void onStarted(serverController_t &server) throw() {
 			if(server.getPluginName() != "ip4tcp") return;
+			auto_ptr<jsonComponent_t> conf(server.getPluginConf().clone());
+			avahi_threaded_poll_lock(pollObj);
 			if(published.count(&server)) return;
 			try {
-			unsigned short port = dynamic_cast<const jsonInt_t &>(dynamic_cast<const jsonObj_t &>(server.getPluginConf()).gie("port")).getVal();
+				unsigned short port = dynamic_cast<const jsonInt_t &>(dynamic_cast<const jsonObj_t &>(server.getPluginConf()).gie("port")).getVal();
 
-			auto_ptr<avahiData> adata(new avahiData(port));
+				auto_ptr<avahiData> adata(new avahiData(port));
 
-			published.insert(pair<serverController_t *, avahiData *>(&server, adata.get()));
-			adata.release();
+				published.insert(pair<serverController_t *, avahiData *>(&server, adata.get()));
+				adata.release();
 
-			avahi_threaded_poll_lock(pollObj);
-			createServices();
-			avahi_threaded_poll_unlock(pollObj);
+				createServices();
 
 			}
 			catch(exception &e) {
@@ -140,25 +148,32 @@ class serverHandler : public eventServer_t {
 			catch(...) {
 				fprintf(stderr, "Exception\n");
 			}
+			avahi_threaded_poll_unlock(pollObj);
 		}
 
-		void onServerStopped(serverController_t &server) {
+		void onStopped(serverController_t &server) throw() {
 			if(server.getPluginName() != "ip4tcp") return;
+			avahi_threaded_poll_lock(pollObj);
 			map<serverController_t *, avahiData *>::iterator it = published.find(&server);
 			if(it == published.end()) return;
 
 			delete it->second;
 			published.erase(it);
 
-			avahi_threaded_poll_lock(pollObj);
 			createServices();
 			avahi_threaded_poll_unlock(pollObj);
 
 		}
+
+		inline void setClient(AvahiClient *c) {
+			if(client == c) return;
+			if(client) avahi_client_free(client);
+			client = c;
+		}
 };
 
 void clientCallback(AvahiClient *c, AvahiClientState state, void * userdata) {
-	(void)c;
+	((serverHandler *)userdata)->setClient(c);
 	((serverHandler *)userdata)->callback(state);
 }
 
@@ -170,20 +185,20 @@ void groupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state, void *use
 class ehCreator_t : public eventHandlerCreator_t {
 	private:
 		serverHandler sh;
-		eventRegister_t *er;
+//		eventRegister_t *er;
 	public:
-		ehCreator_t(pluginEmptyCallback_t &callback) : eventHandlerCreator_t(callback), sh(*this) {}
+		ehCreator_t() : eventHandlerCreator_t(), sh() {}
 		const char *getErr() {
 			return "No error occured";
 		}
 
-		void regEvents(eventRegister_t &reg, jsonComponent_t *config) {
+		void regEvents(eventRegister_t &reg, jsonComponent_t *config) throw() {
 			(void)config;
-			er = &reg;
+			//er = &reg;
 			reg.regServer(sh);
 		}
 
-		void unregEvents(eventRegister_t &reg) {
+		void unregEvents(eventRegister_t &reg) throw() {
 			reg.unregServer(sh);
 		}
 
@@ -193,8 +208,9 @@ class ehCreator_t : public eventHandlerCreator_t {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator(pluginEmptyCallback_t &callback) {
-		static ehCreator_t *creator = new ehCreator_t(callback);
-		return creator;
+	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
+		(void)callback;
+		static ehCreator_t creator;
+		return &creator;
 	}
 }
