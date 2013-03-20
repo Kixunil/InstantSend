@@ -276,7 +276,7 @@ class securityCreator_t : public pluginMultiInstanceCreator_t {
 		 * \param requestedConfig Settings requested by client
 		 * \return instance of peer_t, which encrypts communication between server and client
 		 */
-		virtual auto_ptr<peer_t> seaccept(jsonComponent_t &config, jsonComponent_t &requestedConfig) throw() = 0;
+		virtual auto_ptr<peer_t> seaccept(peer_t &peer, jsonComponent_t &config, jsonComponent_t &requestedConfig) throw() = 0;
 };
 
 #define IS_TRANSFER_IN_PROGRESS 0
