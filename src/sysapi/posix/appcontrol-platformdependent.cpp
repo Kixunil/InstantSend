@@ -6,8 +6,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
+#include <sys/file.h>
 #include <sys/un.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <cstdio>
 #include <queue>
 
 #include "posix-appcontrol.h"
@@ -25,6 +28,8 @@ volatile bool stopAppFast = false;
 pthread_mutex_t threadQueueMutex, threadCountMutex;
 queue<pthread_t> threadQueue;
 unsigned int threadCount = 0;
+int verbose = 0;
+int lockfd = -1;
 
 void unfreezeMainThread() {
 	char buf = 0;
@@ -68,9 +73,31 @@ void useSocket(const char *sockaddr) {
 	}
 }
 
+void writePid(const char *pidFile) {
+	lockfd = open(pidFile, O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR | S_IRGRP);
+	if(lockfd < 0) throw runtime_error(string("open: ") + strerror(errno));
+	if(lockf(lockfd, F_TLOCK, 0) < 0) exit(47);
+	pid_t pid = getpid();
+	char buf[11];
+	int len = sprintf(buf, "%u\n", (unsigned int)pid);
+	if(write(lockfd, buf, len) < len) throw runtime_error(string("fwrite: ") + strerror(errno));
+}
+
 void onAppStart(int argc, char **argv) {
 	// Setup pipe
 	if(pipe(pipefd) < 0) throw runtime_error(string("pipie: ") + strerror(errno));
+
+	for(int i = 1; i < argc; ++i) {
+		//fprintf(stderr, "Parsing argument '%s'\n");
+		if(string(argv[i]).substr(0, 9) == "--socket=") useSocket(argv[i] + 9); else
+		if(string(argv[i]) == "--check") exit(0); else
+		if(string(argv[i]) == "--verbose") verbose = 1; else
+		if(string(argv[i]) == "--daemon") {
+			if(daemon(1, verbose) < 0) throw runtime_error(string("daemon: ") + strerror(errno));
+		} else
+		if(string(argv[i]).substr(0, 11) == "--pid-file=") writePid(argv[i] + 11);
+	}
+
 	// Setup signals
 	struct sigaction sa;
 	sa.sa_handler = &sighandler;
@@ -82,9 +109,6 @@ void onAppStart(int argc, char **argv) {
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
 
-	for(int i = 1; i < argc; ++i)
-		if(string(argv[i]).substr(0, 9) == "--socket=") useSocket(argv[i] + 9);
-
 	pthread_mutex_init(&threadQueueMutex, NULL);
 	pthread_mutex_init(&threadCountMutex, NULL);
 }
@@ -93,6 +117,7 @@ void onAppStop() {
 	close(pipefd[0]);
 	close(pipefd[1]);
 	if(sockfd > -1) close(sockfd);
+	if(lockfd > -1) close(sockfd);
 	pthread_mutex_destroy(&threadQueueMutex);
 	pthread_mutex_destroy(&threadCountMutex);
 }
