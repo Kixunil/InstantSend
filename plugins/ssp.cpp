@@ -35,7 +35,7 @@ class sspPeer : public peer_t {
 			satpacket.dst_dish = get_planet_dishes(satpacket.dst_planet)[get_planet_rotation_index(satpacket.dst_planet, time(NULL))]; // Set dish according to Earth's rotation
 			memcpy(satpacket.dst_secret, load_secret("NASA"), sizeof(satellite_secret)); // copy authentication secret
 
-			strcpy(satpacket.data, "Hello world!"); // fill in test data
+			strcpy(satpacket.data, "Hello Earth!"); // fill in test data
 			satpacket.data_size = strlen(satpacket.data); // just this for testing purpose
 
 			memcpy(satpacket.corr_data, calculate_correction_data(&satpacket));
