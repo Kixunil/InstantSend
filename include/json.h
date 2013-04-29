@@ -20,27 +20,40 @@ using namespace std;
 typedef int intL_t;
 typedef double floatL_t;
 
+/*! Exception thrown on attempt to access not existing item in json object */
 class jsonNotExist : public exception {
 	private:
+		/*! Human readable error message */
 		string msg;
 	public:
+		/*! Constructor
+		 * \param name Name of not existing item
+		 */
 		inline jsonNotExist(const string &name) {
 			msg = string("Item \"") + name + string("\" does not exist");
 		}
 
+		/* Description of exception
+		 * \return Null terminated human readable string */
 		virtual const char *what() const throw() {
 			return msg.c_str();
 		}
 
+		/* Standard (empty) destructor */
 		~jsonNotExist() throw();
 };
 
+/*! Exception thrown when parsing invalid json string */
 class jsonSyntaxErr : public exception {
 	private:
+		/*! Pointer to description of error */
 		string *s;
+		/*! Auto destructing container for self owned string */
 		auto_ptr<string> ownstr;
+		/*! Possition, where error occured */
 		int p;
 	public:
+		/*! Creates exception with error message and position */
 		inline jsonSyntaxErr(string *str, int pos) {
 			s = str;
 			p = pos;
