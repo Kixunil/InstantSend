@@ -19,6 +19,7 @@ class connectionReceiver_t: public thread_t, serverController_t {
 		volatile bool running;
 		string pluginName;
 		auto_ptr<jsonComponent_t> pluginConfig;
+		BPluginRef pref;
 		pluginInstanceAutoPtr<serverPlugin_t> server;
 };
 

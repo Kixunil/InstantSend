@@ -11,7 +11,9 @@
 int runningServers;
 auto_ptr<mutex_t> mRunningServers = mutex_t::getNew();
 
-connectionReceiver_t::connectionReceiver_t(const string &plugin, const jsonComponent_t &config) : runningmutex(mutex_t::getNew()), running(true), pluginName(plugin), pluginConfig(config.clone()), server(pluginList_t::instance()[pluginName].as<connectionCreator_t>()->newServer(*pluginConfig)) {}
+connectionReceiver_t::connectionReceiver_t(const string &plugin, const jsonComponent_t &config) : runningmutex(mutex_t::getNew()), running(true), pluginName(plugin), pluginConfig(config.clone()), pref(pluginList_t::instance()[pluginName]), server(pref.as<connectionCreator_t>()->newServer(*pluginConfig)) {
+	if(!server.valid()) throw runtime_error("Plugin instance creation failed");
+}
 
 bool connectionReceiver_t::checkRunning() {
 	runningmutex->get();
