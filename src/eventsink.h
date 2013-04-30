@@ -1,68 +1,83 @@
+#ifndef EVENTSINK
+#define EVENTSINK
+
 #include <set>
 
 #include "pluginapi.h"
+#include "plugin.h"
+#include "multithread.h"
 
-#define BCAST_SIMPLE_EVENT(eventName, eventCall, dataType) \
-	class eventName :public eventData_t {\
-		private:\
-			dataType &evdata;\
-		public:\
-			inline eventName(dataType &data) : evdata(data) {\
-				eventSink_t::instance().eventCall(*this);\
-			}\
-			void sendEvent(event_t &event);\
-	};
-
+#define BCAST_EVENT(evType, evName, dataType) \
+	inline void bcast ## evType ## evName (dataType &eventData) { \
+		eventSink_t::instance().send ## evType ## evName (eventData); \
+	}
+/*
 class eventData_t {
 	public:
 		virtual void sendEvent(event_t &event) = 0;
 		virtual ~eventData_t();
 };
+*/
+
+#define EVENTTYPE(evType) \
+	private: \
+		set<event ## evType ## _t *> evType ## Events; \
+	public: \
+		void reg ## evType (event ## evType ## _t &eventHandler)  throw(); \
+		void unreg ## evType (event ## evType ## _t &eventHandler)  throw()
+
+#define SENDEVDECL(evType, evName, dataType) \
+	public: \
+		virtual void send ## evType ## evName (dataType &eventData) throw()
 
 class eventSink_t : public eventRegister_t {
+	EVENTTYPE(Progress);
+	EVENTTYPE(Connections);
+	EVENTTYPE(Receive);
+	EVENTTYPE(Send);
+	EVENTTYPE(Server);
+	EVENTTYPE(Plugin);
+
+	SENDEVDECL(Progress, Begin, fileStatus_t);
+	SENDEVDECL(Progress, Update, fileStatus_t);
+	SENDEVDECL(Progress, Pause, fileStatus_t);
+	SENDEVDECL(Progress, Resume, fileStatus_t);
+	SENDEVDECL(Progress, End, fileStatus_t);
+
+	SENDEVDECL(Server, Started, serverController_t);
+	SENDEVDECL(Server, Stopped, serverController_t);
+
+	SENDEVDECL(Plugin, Load, const string);
+	SENDEVDECL(Plugin, Unload, const string);
 	private:
-		set<event_t *> progressEvents;
-		set<event_t *> connectionEvents;
-		set<event_t *> recvEvents;
-		set<event_t *> sendEvents;
-		set<event_t *> serverEvents;
+		template <class TEvent, class TData> void sendEvent(set<TEvent *> &evSet, void (TEvent::*event)(TData &), TData &eventData) {
+			mMutex->get();
+			for(typename set<TEvent *>::iterator it = evSet.begin(); it != evSet.end(); ++it) ((*it)->*event)(eventData);
+			mMutex->release();
+		}
 
+		map<string, PluginPtr<eventHandlerCreator_t> > eventPlugins;
+		auto_ptr<mutex_t> mMutex;
 	public:
-		void sendEvent(set<event_t *> &handlers, eventData_t &eventData);
+		inline eventSink_t() : mMutex(mutex_t::getNew()) {}
 		static eventSink_t &instance();
-		void regProgress(eventProgress_t &progressEvent);
-		void regConnections(eventConnections_t &connectionEvent);
-		void regReceive(eventReceive_t &receiveEvent);
-		void regSend(eventSend_t &sendEvent);
-		void regServer(eventServer_t &serverEvent);
-
-		void unregProgress(eventProgress_t &progressEvent);
-		void unregConnections(eventConnections_t &connectionEvent);
-		void unregReceive(eventReceive_t &receiveEvent);
-		void unregSend(eventSend_t &sendEvent);
-		void unregServer(eventServer_t &serverEvent);
-
-		inline void sendProgress(eventData_t &eventData) {
-			sendEvent(progressEvents, eventData);
-		}
-
-		inline void sendConnection(eventData_t &eventData) {
-			sendEvent(connectionEvents, eventData);
-		}
-
-		inline void sendServer(eventData_t &eventData) {
-			sendEvent(serverEvents, eventData);
-		}
-
 		void autoLoad(jsonObj_t &plugins);
+		void loadEventPlugin(const string &name, jsonComponent_t &config);
+		void unloadEventPlugin(const string &name);
+		void unloadAllEventPlugins();
 
 };
 
-BCAST_SIMPLE_EVENT(bcastProgressBegin, sendProgress, fileStatus_t);
-BCAST_SIMPLE_EVENT(bcastProgressUpdated, sendProgress, fileStatus_t);
-BCAST_SIMPLE_EVENT(bcastProgressPaused, sendProgress, fileStatus_t);
-BCAST_SIMPLE_EVENT(bcastProgressResumed, sendProgress, fileStatus_t);
-BCAST_SIMPLE_EVENT(bcastProgressEnded, sendProgress, fileStatus_t);
+BCAST_EVENT(Progress, Begin, fileStatus_t);
+BCAST_EVENT(Progress, Update, fileStatus_t);
+BCAST_EVENT(Progress, Pause, fileStatus_t);
+BCAST_EVENT(Progress, Resume, fileStatus_t);
+BCAST_EVENT(Progress, End, fileStatus_t);
 
-BCAST_SIMPLE_EVENT(bcastServerStarted, sendServer, serverController_t);
-BCAST_SIMPLE_EVENT(bcastServerStopped, sendServer, serverController_t);
+BCAST_EVENT(Server, Started, serverController_t);
+BCAST_EVENT(Server, Stopped, serverController_t);
+
+BCAST_EVENT(Plugin, Load, const string);
+BCAST_EVENT(Plugin, Unload, const string);
+
+#endif

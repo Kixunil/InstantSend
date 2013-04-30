@@ -57,7 +57,7 @@ void addTargets(jsonComponent_t *cfg, const char *targconf) {
 			printf("Target %s already exists. Use -Ut to update it", it.key().c_str());
 			continue;
 		}
-		targets.insertNew(it.key(), it.value()->clone()); 
+		targets.insertNew(it.key(), it.value().clone()); 
 	}
 }
 
@@ -68,7 +68,7 @@ void addWays(jsonComponent_t &cfg, const char *target, const char *waycfg) {
 	jsonArr_t *warr;
 	if((warr = dynamic_cast<jsonArr_t *>(wcfg.get()))) {
 		for(int i = 0; i < warr->count(); ++i) {
-			ways.addNew((*warr)[i]->clone());
+			ways.addNew((*warr)[i].clone());
 		}
 	} else {
 		 ways.addNew(wcfg.release());
@@ -80,7 +80,7 @@ void importTargets(jsonComponent_t *cfg, const char *filename) {
 	jsonObj_t &thesetargets = dynamic_cast<jsonObj_t &>(dynamic_cast<jsonObj_t &>(*cfg).gie("targets"));
 	jsonObj_t &othertargets = dynamic_cast<jsonObj_t &>(dynamic_cast<jsonObj_t &>(*other.get()).gie("targets"));
 	for(jsonIterator it = othertargets.begin(); it != othertargets.end(); ++it) {
-		thesetargets.insertNew(it.key(), it.value()->clone());
+		thesetargets.insertNew(it.key(), it.value().clone());
 	}
 }
 
@@ -112,7 +112,7 @@ void addEventPlugin(jsonComponent_t &cfg, const char *plugconf) {
 	jsonObj_t newHandlers(&pcfgstr);
 
 	for(jsonIterator it = newHandlers.begin(); it != newHandlers.end(); ++it) {
-		auto_ptr<jsonComponent_t> tmp(it.value()->clone());
+		auto_ptr<jsonComponent_t> tmp(it.value().clone());
 		evhandlers->insertNew(it.key(), tmp.get());
 		tmp.release();
 	}

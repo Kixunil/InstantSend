@@ -3,9 +3,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/select.h>
 #include <errno.h>
 #include <string.h>
+#ifdef DEBUG
 #include <stdio.h>
+#endif
 #include <stdexcept>
 
 #include "pluginapi.h"
@@ -20,12 +23,19 @@
 	#define MSG_NOSIGNAL 0
 #endif
 
+#ifdef DEBUG
+#define D(MSG) fprintf(stderr, MSG "\n"); fflush(stderr)
+#define FD(FORMAT, ...) fprintf(stderr, FORMAT, ##__VA_ARGS__)
+#else
+#define D(MSG) while(0)
+#endif                 
+
 class i4tPeer : public peer_t {
 	private:
 		int fd;
 		string machineId;
 	public:
-		inline i4tPeer(int newfd, const string &mId) {
+		inline i4tPeer(int newfd, const string &mId, pluginMultiInstanceCreator_t &creator) : peer_t(creator) {
 			fd = newfd;
 			machineId = mId;
 		}
@@ -63,6 +73,7 @@ class i4tPeer : public peer_t {
 			char *ptr = data->data;
 			uint32_t torecv;
 			int tmp;
+			//D("Receiving datagram size");
 			if(recv(fd, &tmp, sizeof(uint32_t), MSG_WAITALL) < (int64_t)sizeof(uint32_t)) return 0;
 			tmp = ntohl(tmp);
 			torecv = min((uint32_t)tmp, data->size);
@@ -89,13 +100,14 @@ class i4tPeer : public peer_t {
 
 };
 
-class i4tserver : public serverPlugin_t {
+class i4tserver : public serverPlugin_t, public asyncStop_t {
 	private:
-		int fd;
+		int fd, pipefd[2];
 	public:
-		i4tserver(const jsonComponent_t &config) {
+		i4tserver(const jsonComponent_t &config, pluginMultiInstanceCreator_t &creator) : serverPlugin_t(creator) {
 			struct sockaddr_in srvaddr;
 			int backlog;
+			if(pipe(pipefd) < 0) throw runtime_error(string("pipe: ") + strerror(errno));
 				srvaddr.sin_family = AF_INET;
 				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
 				srvaddr.sin_port = htons(dynamic_cast<const jsonInt_t &>(cfg.gie("port")).getVal());
@@ -122,19 +134,50 @@ class i4tserver : public serverPlugin_t {
 
 		}
 
-		peer_t *acceptClient() {
-			struct sockaddr_in saddr;
-			saddr.sin_family = AF_INET;
-			socklen_t socksize = sizeof(struct sockaddr_in);
-			int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
-			if(res < 0) return NULL;
-			return new i4tPeer(res, string(inet_ntoa(saddr.sin_addr)));
+		auto_ptr<peer_t> acceptClient() throw() {
+			try {
+				struct sockaddr_in saddr;
+				saddr.sin_family = AF_INET;
+				socklen_t socksize = sizeof(struct sockaddr_in);
+				fd_set fds;
+				FD_ZERO(&fds);
+				FD_SET(pipefd[0], &fds);
+				FD_SET(fd, &fds);
+
+				errno = 0;
+				while(select((fd > pipefd[0])?fd+1:pipefd[0]+1, &fds, NULL, NULL, NULL) < 0 && errno == EINTR) errno = 0;
+
+				if(errno) throw runtime_error(string("select: ") + strerror(errno));
+
+				if(FD_ISSET(pipefd[0], &fds)) {
+					char buf;
+					if(read(pipefd[0], &buf, 1) < 0) throw runtime_error(string("accept: ") + strerror(errno));
+					throw runtime_error("stop() called");
+				}
+
+				int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
+				if(res < 0) throw runtime_error(string("accept: ") + strerror(errno));
+				return auto_ptr<peer_t>(new i4tPeer(res, string(inet_ntoa(saddr.sin_addr)), getCreator()));
+			}
+/*			catch(exception &e) {
+				return auto_ptr<peer_t>();
+			}*/
+			catch(...) {
+				return auto_ptr<peer_t>();
+			}
+		}
+
+		bool stop() {
+			char buf = 0;
+			return write(pipefd[1], &buf, 1) > 0;
 		}
 
 		void reconfigure(jsonComponent_t *config) { (void)config; }
 
 		~i4tserver() {
 			if(fd > -1) close(fd);
+			close(pipefd[0]);
+			close(pipefd[1]);
 		}
 };
 
@@ -142,10 +185,10 @@ class i4tCreator : public connectionCreator_t {
 	private:
 		string lastErr;
 	public:
-		i4tCreator() {
-			lastErr = "No error";
+		i4tCreator(pluginDestrCallback_t &callback) : connectionCreator_t(callback), lastErr("No error") {
 		}
-		peer_t *newClient(const jsonComponent_t &config) {
+
+		auto_ptr<peer_t> newClient(const jsonComponent_t &config) throw() {
 			int fd = -1;
 			try {
 				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
@@ -181,31 +224,23 @@ class i4tCreator : public connectionCreator_t {
 				dstaddr.sin_port = htons(dstPort.getVal());
 
 				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("connect: ") + strerror(errno));
-				return new i4tPeer(fd, dstIP.getVal());
+				return auto_ptr<peer_t>(new i4tPeer(fd, dstIP.getVal(), *this));
 			}
 			catch(exception &e) {
 				if(fd > -1) close(fd);
 				fd = -1;
 				lastErr = e.what();
+				return auto_ptr<peer_t>();
 			}
-			catch(...) {
-				if(fd > -1) close(fd);
-				fd = -1;
-			}
-			return NULL;
 	}
 
-	serverPlugin_t *newServer(const jsonComponent_t &config) {
+	auto_ptr<serverPlugin_t> newServer(const jsonComponent_t &config) throw() {
 		try {
-			return new i4tserver(config);
+			return auto_ptr<serverPlugin_t>(new i4tserver(config, *this));
 		}
 		catch(exception &e) {
 			lastErr = e.what();
-			return NULL;
-		}
-		catch(...) {
-			lastErr = "Unknown error";
-			return NULL;
+			return auto_ptr<serverPlugin_t>();
 		}
 	}
 
@@ -215,10 +250,8 @@ class i4tCreator : public connectionCreator_t {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator() {
-		static pluginInstanceCreator_t *creator = NULL;
-
-		if(!creator) creator = new i4tCreator();
-		return creator;
+	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
+		static i4tCreator creator(callback);
+		return &creator;
 	}
 }

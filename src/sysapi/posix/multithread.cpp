@@ -3,8 +3,10 @@
 #include <memory>
 #include <stdexcept>
 #include <string.h>
+#include <signal.h>
 
 #include "multithread.h"
+#include "posix-appcontrol.h"
 
 class linuxMutex_t : public mutex_t {
 	private:
@@ -66,10 +68,20 @@ void delThread(void *thread) {
 	t->mutex->get();
 	t->running = false;
 	t->mutex->release();
-	if(t->parent->autoDelete()) delete t->parent;
+	threadAboutToExit(t->thread);
+	if(t->parent->autoDelete()) {
+		delete t->parent;
+		fprintf(stderr, "Thread deleted.\n");
+	}
 }
 
 void *startThread(void *thread) {
+	sigset_t set;
+	sigemptyset(&set);
+	sigaddset(&set, SIGINT);
+	sigaddset(&set, SIGTERM);
+	// Can't fail - value is valid
+	pthread_sigmask(SIG_BLOCK, &set, NULL);
 	linuxThreadData_t *td = (linuxThreadData_t *)thread;
 	td->running = true;
 	td->paused = false;
@@ -85,10 +97,13 @@ void thread_t::start() {
 	linuxThreadData_t &tdata = dynamic_cast<linuxThreadData_t &>(*threadData.get());
 	tdata.mutex->get();
 	tdata.parent = this;
+	pthread_mutex_lock(&threadCountMutex);
 	if(pthread_create(&tdata.thread, NULL, &startThread, (void *)&tdata)) {
+		pthread_mutex_unlock(&threadCountMutex);
 		throw runtime_error("Can't start thread");
 	}
-	if(autoDelete()) pthread_detach(tdata.thread);
+	++threadCount;
+	pthread_mutex_unlock(&threadCountMutex);
 	tdata.mutex->release();
 }
 

@@ -9,6 +9,22 @@
 	#define SECTOR_SIZE 4096
 #endif
 
+#ifdef NOPURE
+
+string jsonComponent_t::toString() {
+	throw runtime_error("Pure jsonComponent_t::toString called");
+}
+
+void jsonComponent_t::fromString(string *str) {
+	throw runtime_error("Pure jsonComponent_t::fromString called");
+}
+
+jsonComponent_t *jsonComponent_t::clone() const {
+	throw runtime_error("Pure jsonComponent_t::clone called");
+}
+
+#endif
+
 jsonSyntaxErr::~jsonSyntaxErr() throw() { ; }
 
 jsonComponent_t *loadComponent(string *str) {
@@ -68,82 +84,6 @@ auto_ptr<jsonComponent_t> cfgReadFile(const char *path) {
 }
 
 jsonComponent_t::~jsonComponent_t() {;}
-/*
-int cfgIsObj(jsonComponent_t *config) {
-	return typeid(*config) == typeid(jsonObj_t);
-}
-
-int cfgIsArr(jsonComponent_t *config) {
-	return typeid(*config) == typeid(jsonArr_t);
-}
-
-int cfgIsInt(jsonComponent_t *config) {
-	return typeid(*config) == typeid(jsonInt_t);
-}
-
-int cfgIsFloat(jsonComponent_t *config) {
-	return typeid(*config) == typeid(jsonFloat_t);
-}
-
-int cfgIsNum(jsonComponent_t *config) {
-	return typeid(*config) == typeid(jsonInt_t) || typeid(*config) == typeid(jsonFloat_t);
-}
-
-int cfgIsBool(jsonComponent_t *config) {
-	return typeid(*config) == typeid(jsonBool_t);
-}
-
-int cfgIsNull(jsonComponent_t *config) {
-	return typeid(*config) == typeid(jsonNull_t);
-}
-
-int cfgIsStr(jsonComponent_t *config) {
-	return typeid(*config) == typeid(jsonStr_t);
-}
-
-intL_t cfgGetValInt(jsonInt_t *config) {
-	return config->getVal();
-}
-
-floatL_t cfgGetValFloat(jsonComponent_t *config) {
-	if(cfgIsInt(config)) return ((jsonInt_t *)config)->getVal(); else return ((jsonFloat_t *)config)->getVal();
-}
-
-int cfgGetValBool(jsonBool_t *config) {
-	return config->getVal();
-}
-
-const char *cfgGetValStr(jsonStr_t *config) {
-	return config->getVal().c_str();
-}
-
-jsonComponent_t *cfgGetChild(jsonObj_t *config, const char *key) {
-	string keystr = string(key);
-	return (*config)[keystr];
-}
-
-jsonComponent_t *cfgGetChildIfExists(jsonObj_t *config, const char *key) {
-	string keystr = string(key);
-	if(config->exists(string(key))) return (*config)[keystr]; else return NULL;
-}
-
-jsonComponent_t *cfgGetItem(jsonArr_t *config, int ptr) {
-	return (*config)[ptr];
-}
-
-int cfgIsEmpty(jsonComponent_t *config) {
-	if(cfgIsArr(config)) return ((jsonArr_t *)config)->empty(); else return ((jsonObj_t *)config)->empty();
-}
-
-int cfgChildExists(jsonObj_t *config, const char *key) {
-	return config->exists(string(key));
-}
-
-int cfgItemCount(jsonComponent_t *config) {
-	if(cfgIsArr(config)) return ((jsonArr_t *)config)->count(); else return ((jsonObj_t *)config)->count();
-}
-*/
-// End of wrapper functions
 
 intL_t parseInt(string *str) {
 	intL_t value = 0;
@@ -176,11 +116,18 @@ string jsonInt_t::toString() {
 	return string(buf);
 }
 
+jsonComponent_t *jsonInt_t::clone() const {
+	return new jsonInt_t(val);
+}
+
 void jsonInt_t::fromString(string *str) {
 	setVal(parseInt(str));
 }
 
+jsonInt_t::~jsonInt_t() {}
+
 // floatLeaf
+jsonFloat_t::~jsonFloat_t() {}
 jsonFloat_t::jsonFloat_t(floatL_t value) {
 	setVal(value);
 }
@@ -225,10 +172,22 @@ string jsonFloat_t::toString() {
 	return string(buf);
 }
 
+jsonComponent_t *jsonFloat_t::clone() const {
+	return new jsonFloat_t(val);
+}
+
+jsonComponent_t *jsonStr_t::clone() const {
+	jsonStr_t *tmp = new jsonStr_t();
+	tmp->setVal(val);
+	return tmp;                      
+}
+
 // strLeaf
 jsonStr_t::jsonStr_t() {
 	setVal("");
 }
+
+jsonStr_t::~jsonStr_t() {}
 
 jsonStr_t::jsonStr_t(string *str) {
 	fromString(str);
@@ -370,6 +329,12 @@ string jsonStr_t::toString() {
 	return res;
 }
 
+jsonBool_t::~jsonBool_t() {}
+
+jsonComponent_t *jsonBool_t::clone() const {
+	return new jsonBool_t(val);
+}
+
 jsonBool_t::jsonBool_t(bool value) {
 	setVal(value);
 }
@@ -396,11 +361,21 @@ string jsonBool_t::toString() {
 	if(getVal()) return "true"; else return "false";
 }
 
+jsonNull_t::~jsonNull_t() {}
+
+jsonComponent_t *jsonNull_t::clone() const {
+	return new jsonNull_t();
+}
+
+/*
+jsonStructuredComponent_t::~jsonStructuredComponent_t() {}
+*/
+
 // jsonArr_t
 string jsonArr_t::toString() {
 	string res = "[";
 	for(unsigned int i = 0; i < data.size(); ++i) {
-		res += data[i].item->toString() + ", ";
+		res += data[i]->toString() + ", ";
 	}
 
 
@@ -429,33 +404,30 @@ void jsonArr_t::fromString(string *str) {
 jsonComponent_t *jsonArr_t::clone() const {
 	jsonArr_t *tmp = new jsonArr_t();
 	for(unsigned int i = 0; i < data.size(); ++i) {
-		tmp->addNew(data[i].item->clone());
+		tmp->addNew(data[i]->clone());
 	}
 	return tmp;
 }
 
 jsonArr_t &jsonArr_t::operator=(const jsonArr_t &other) {
 	if(this == &other) return *this;
-	deleteContent();                
+	/*deleteContent();                
 
 	for(unsigned int i = 0; i < other.data.size(); ++i) {
-		if(other.data[i].isOwner()) addNew(other.data[i].item->clone());
-		else addVal(other.data[i].item);
-	}
+		if(other.data[i].isOwner()) addNew(other.data[i]->clone());
+		else addVal(other.data[i]);
+	}*/
+	data = other.data;
 
 	return *this;
 }
 
 void jsonArr_t::deleteContent() {
-	for(unsigned int i = 0; i < data.size(); ++i) {
-		if(data[i].isOwner()) delete data[i].item;
-	}
-
 	data.clear();
 }
 
 jsonArr_t::~jsonArr_t() {
-	deleteContent();
+	//deleteContent(); // not needed, because vector automatically clears itself
 }
 
 // jsonObj_t - JSON object
@@ -491,7 +463,7 @@ string jsonObj_t::toString() {
 	jsonStr_t tmp;
 	for (typeof(data.begin()) it = data.begin(); it != data.end(); ++it) {
 		tmp.setVal(it->first);
-		res += tmp.toString() + " : " + (it->second).item->toString() + ", ";
+		res += tmp.toString() + " : " + it->second->toString() + ", ";
 	}
 
 
@@ -501,39 +473,36 @@ string jsonObj_t::toString() {
 }
 
 void jsonObj_t::insertNew(const string &key, jsonComponent_t *value) {
-	itemContainer_t &container = data[key];
-	if(container.isOwner()) delete container.item;
-	container = itemContainer_t(value, true);
+	pair<typeof(data.begin()), bool> inserted(data.insert(pair<string, itemContainer_t>(key, itemContainer_t(value, true))));
+	if(!inserted.second) fprintf(stderr, "Warning: %s already exists!\n", key.c_str());
 }
 
 jsonComponent_t *jsonObj_t::clone() const {
-	jsonObj_t *tmp = new jsonObj_t();
+	auto_ptr<jsonObj_t> tmp(new jsonObj_t());
 	for(typeof(data.begin()) it = data.begin(); it != data.end(); ++it) {
-		tmp->data[it->first] = itemContainer_t(it->second.item->clone(), true);
+		tmp->insertNew(it->first, it->second->clone());
 	}
-	return tmp;
+	return tmp.release();
 }
 
 jsonObj_t &jsonObj_t::operator=(const jsonObj_t &other) {
 	if(this == &other) return *this;
-	deleteContent();
+/*	deleteContent();
 	for(map<string, itemContainer_t>::const_iterator it = other.data.begin(); it != other.data.end(); ++it) {
-		if(it->second.isOwner()) data[it->first] = itemContainer_t(it->second.item->clone(), true);
+		if(it->second.isOwner())
+			data[it->first] = itemContainer_t(it->second->clone(), true);
 		else data[it->first] = it->second;
-	}
+	}*/
+	data = other.data;
 	return *this;
 }
 
 void jsonObj_t::deleteContent() {
-	for(typeof(data.begin()) it = data.begin(); it != data.end(); ++it) {
-		if(it->second.isOwner()) delete it->second.item;
-	}
-
 	data.clear();
 }
 
 jsonObj_t::~jsonObj_t() {
-	deleteContent();
+	//deleteContent();
 }
 
 jsonNotExist::~jsonNotExist() throw() { ;}

@@ -33,7 +33,7 @@ class notifyProgressHandler : public eventProgress_t{
 		
 		}
 	public:
-		notifyProgressHandler() {
+		notifyProgressHandler() : eventProgress_t() {
 			icon = NULL;
 		}
 
@@ -41,20 +41,20 @@ class notifyProgressHandler : public eventProgress_t{
 			this->icon = new string(icon);
 		}
 
-		void onBegin(fileStatus_t &fStatus) {
+		void onBegin(fileStatus_t &fStatus) throw() {
 			sendNotification("Incoming file " + fStatus.getFileName() + " (" + intToStr(fStatus.getFileSize()) + ")");
 		}
 
-		void onUpdate(fileStatus_t &fStatus) {
+		void onUpdate(fileStatus_t &fStatus) throw() {
 			(void)fStatus;
 		}
-		void onPause(fileStatus_t &fStatus) {
+		void onPause(fileStatus_t &fStatus) throw() {
 			(void)fStatus;
 		}
-		void onResume(fileStatus_t &fStatus) {
+		void onResume(fileStatus_t &fStatus) throw() {
 			(void)fStatus;
 		}
-		void onEnd(fileStatus_t &fStatus) {
+		void onEnd(fileStatus_t &fStatus) throw() {
 			string msg = "File transfer ended due to unknown reason.";
 			switch(fStatus.getTransferStatus()) {
 				case IS_TRANSFER_FINISHED:
@@ -77,11 +77,11 @@ class notifyCreator_t : public eventHandlerCreator_t {
 	private:
 		notifyProgressHandler progress;
 	public:
-		notifyCreator_t() {
+		notifyCreator_t() : eventHandlerCreator_t(), progress() {
 			if(!notify_init("InstantSend")) throw runtime_error("Can't init libnotify");
 		}
 
-		void regEvents(eventRegister_t &reg, jsonComponent_t *config) {
+		void regEvents(eventRegister_t &reg, jsonComponent_t *config) throw() {
 			reg.regProgress(progress);
 			//(void)config;
 			try {
@@ -89,6 +89,10 @@ class notifyCreator_t : public eventHandlerCreator_t {
 				progress.setIcon(dynamic_cast<jsonStr_t &>(cfg.gie("icon")).getVal());
 			} catch(...) { // ignore any error
 			}
+		}
+
+		void unregEvents(eventRegister_t &reg) throw() {
+			reg.unregProgress(progress);
 		}
 
 		const char *getErr() {
@@ -101,8 +105,9 @@ class notifyCreator_t : public eventHandlerCreator_t {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator() {
-		static notifyCreator_t creator;
-		return &creator;
+	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
+		(void)callback;
+		static notifyCreator_t *creator = new notifyCreator_t();
+		return creator;
 	}
 }

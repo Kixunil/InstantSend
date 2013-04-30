@@ -1,14 +1,17 @@
-#include "pluginapi.h"
+#include "plugin.h"
 #include "multithread.h"
+
+extern int runningServers;
+extern auto_ptr<mutex_t> mRunningServers;
 
 class connectionReceiver_t: public thread_t, serverController_t {
 	public:
 		connectionReceiver_t(const string &plugin, const jsonComponent_t &config);
 		bool checkRunning();
 		void run();
-		void stop();
-		const string &getPluginName();
-		const jsonComponent_t &getPluginConf();
+		void stop() throw();
+		const string &getPluginName() throw();
+		const jsonComponent_t &getPluginConf() throw();
 		bool autoDelete();
 
 	private:
@@ -16,6 +19,7 @@ class connectionReceiver_t: public thread_t, serverController_t {
 		volatile bool running;
 		string pluginName;
 		auto_ptr<jsonComponent_t> pluginConfig;
-		auto_ptr<serverPlugin_t> server;
+		BPluginRef pref;
+		pluginInstanceAutoPtr<serverPlugin_t> server;
 };
 

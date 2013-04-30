@@ -17,19 +17,32 @@
 #include "appcontrol.h"
 #include "sysapi.h"
 #include "eventsink.h"
-#include "connectionreceiver.h"
+#include "serverlist.h"
+#include "internalevents.h"
 
 string savedir;
 //string recvScript;
 
+extern unsigned int threadCount;
+
+bool checkRunningServers() {
+	mRunningServers->get();
+	bool result = runningServers;
+	mRunningServers->release();
+	return result;
+}
+
 int main(int argc, char **argv) {
 	onAppStart(argc, argv);
+	InternalEventHandler ieh; // no need to do anything - it registers and unregisters itself automatically
 	pluginList_t &pl = pluginList_t::instance();
+	pl.setSink(eventSink_t::instance());
+	auto_ptr<jsonComponent_t> cfgptr;
 
 	try {
 		string userdir = getUserDir();
-		savedir = combinePath(userdir, string("files"));
-		string cfgfile = combinePath(userdir, string("server.cfg"));;
+		savedir = combinePath(userdir, "files");
+		string cfgfile = combinePath(userdir, "server.cfg");
 
 		// Process arguments
 		for(int i = 1; i < argc; ++i) {
@@ -44,7 +57,8 @@ int main(int argc, char **argv) {
 		}
 
 		// Load configuration
-		auto_ptr<jsonComponent_t> cfgptr = cfgReadFile(cfgfile.c_str());
+		fprintf(stderr, "Loading configuration\n");
+		cfgptr = cfgReadFile(cfgfile.c_str());
 		jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*cfgptr.get());
 
 		try {
@@ -54,33 +68,38 @@ int main(int argc, char **argv) {
 		}
 
 // Explicitly defined paths have bigger priority than system path, which has bigger priority than user path
+		fprintf(stderr, "Loading plugin search paths\n");
 		try {
 			jsonArr_t &pluginpaths = dynamic_cast<jsonArr_t &>(cfg.gie("pluginsearchpaths"));
-			for(int i = 0; i < pluginpaths.count(); ++i) pl.addSearchPath(dynamic_cast<jsonStr_t &>(*pluginpaths[i]).getVal());
+			for(int i = 0; i < pluginpaths.count(); ++i) pl.addSearchPath(dynamic_cast<jsonStr_t &>(pluginpaths[i]).getVal());
 		}
 		catch(...) {
 		}
 		pl.addSearchPath(getSystemPluginDir()); 
 		pl.addSearchPath(combinePath(userdir, string("plugins")));
 
+		fprintf(stderr, "Loading events\n");
 		try {
 			eventSink_t::instance().autoLoad(dynamic_cast<jsonObj_t &>(cfg.gie("eventhandlers")));
 		}
-		catch(...) {
+		catch(exception &e) {
+			fprintf(stderr, "No event plugins loaded: %s\n", e.what());
 		}
 
-		jsonArr_t &complugins = dynamic_cast<jsonArr_t &>(cfg.gie("complugins"));
+		fprintf(stderr, "Loading servers\n");
+		jsonComponent_t &comp(cfg.gie("complugins"));
+		fprintf(stderr, "Typename: %s\n", typeid(comp).name());
+		jsonArr_t &complugins = dynamic_cast<jsonArr_t &>(comp);
 
 		// Load communication plugins
 		for(int i = 0; i < complugins.count(); ++i) {
 			try {
 				// Get configuration
-				jsonObj_t &plugin = dynamic_cast<jsonObj_t &>(*complugins[i]);
+				jsonObj_t &plugin = dynamic_cast<jsonObj_t &>(complugins[i]);
 				jsonStr_t &pname = dynamic_cast<jsonStr_t &>(plugin.gie("name"));
 				jsonComponent_t &pconf = plugin.gie("config");
-				serverPlugin_t *srv;
 
-				(new connectionReceiver_t(pname.getVal(), pconf))->start();
+				serverList_t::instance().add(pname.getVal(), pconf);
 				// Load plugin, create server instance and start new thread
 			} catch(exception &e) {
 				fprintf(stderr, "Warning, plugin not loaded: %s\n", e.what());
@@ -107,8 +126,16 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	while(!stopApp) {
+	while(!stopApp && pl.count() && threadCount) {
 		freezeMainThread();
+	}
+
+	serverList_t::instance().remove();
+	eventSink_t::instance().unloadAllEventPlugins();
+
+	while(!stopAppFast && pl.count() && threadCount) {
+		freezeMainThread();
+		//printf("Plugin count: %u\n", pl.count());
 	}
 
 	onAppStop();

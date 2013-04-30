@@ -34,7 +34,7 @@ ifeq ($(LIBNOTIFY_VERSION),1)
 	NOTIFY_LIBS=@LIBNOTIFY1_LIBS@
 endif
 
-ALL=
+ALL=ip4tcps$(LIBEXTENSION)
 
 ifeq ($(HAVE_IP4TCP),yes)
 	ALL+=ip4tcp$(LIBEXTENSION)
@@ -116,6 +116,9 @@ ip4tcp$(LIBEXTENSION): ../include/pluginapi.h ip4tcp-$(PLATFORM).cpp ../src/libi
 
 ip6tcp$(LIBEXTENSION): ../include/pluginapi.h ip6tcp-$(PLATFORM).cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
 	         $(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip6tcp-$(PLATFORM).cpp -L../src/ -linstantsend-json -linstantsend-plugin $(IP6TCP_LDFLAGS) $(LDFLAGS)
+
+ip4tcps$(LIBEXTENSION): ../include/pluginapi.h ip4tcps-$(PLATFORM).cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ ip4tcps-$(PLATFORM).cpp -L../src/ -linstantsend-json -linstantsend-plugin `pkg-config --libs openssl` $(IP4TCPS_LDFLAGS) $(LDFLAGS)
 
 zenityprogress$(LIBEXTENSION): zenityprogress.cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ zenityprogress.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS)

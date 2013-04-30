@@ -1,25 +1,20 @@
 #include "plugin.h"
+#include <cstdio>
 
-pluginHandle_t::pluginHandle_t(void *handle, pluginInstanceCreator_t *pluginInstanceCreator, void (*handleDestructor)(void *)) {
-	this->handle = handle;
-	instCreator = pluginInstanceCreator;
-	this->handleDestructor = handleDestructor;
-	refCnt = 0;
+LibraryHandle::~LibraryHandle() {}
+
+pluginHandle_t::pluginHandle_t(auto_ptr<LibraryHandle> library) : refCnt(0), mLibrary(library.release()), mOwner(true) {
+}
+
+pluginHandle_t::pluginHandle_t(const pluginHandle_t &other) : refCnt(0), mLibrary(other.mLibrary), mOwner(false) {
 }
 
 pluginHandle_t::~pluginHandle_t() {
-	set<pluginInstance_t *>::iterator b = instances.begin(), e = instances.end();
-
-	for(; b != e; ++b) {
-		delete *b;
-	}
-
-	delete instCreator;
-	instCreator = NULL;
-	handleDestructor(handle);
-	handle = NULL;
+	fprintf(stderr, "~pluginHandle_t(); mOwner = %d\n", (int)mOwner);
+	if(mOwner) delete mLibrary;
 }
 
+/*
 plugin_t::plugin_t(const pluginHandle_t *handle) {
 	this->handle = (pluginHandle_t *)handle;
 	if(handle) this->handle->incRC();
@@ -52,3 +47,5 @@ plugin_t::~plugin_t() {
 		handle = NULL;
 	}
 }
+
+*/
