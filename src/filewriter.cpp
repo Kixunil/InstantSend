@@ -45,7 +45,7 @@ fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, cons
 	lastUpdate = 0;
 	updateInterval = 500;
 	tStatus = IS_TRANSFER_IN_PROGRESS;
-	f = fopen(fName.c_str(), "w");
+	f = fopen(fName.c_str(), "wb");
 	if(!f) throw runtime_error("Can't open file \"" + fName + " for writting.");
 	start();
 	bcastProgressBegin(*this);
