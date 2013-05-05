@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "multithread.h"
+#include "windows-appcontrol.h"
 
 class windowsCriticalSection_t : public mutex_t {
 	private:
@@ -95,30 +96,39 @@ void thread_t::start() {
 	windowsThreadData_t &tdata = dynamic_cast<windowsThreadData_t &>(*threadData.get());
 	tdata.mutex->get();
 	tdata.parent = this;
+	EnterCriticalSection(&threadCountMutex);
 	tdata.threadHandle = (HANDLE)_beginthreadex(NULL, 0, startThread, (void *)&tdata, 0, &tdata.threadID);
-	if(!tdata.threadHandle) throw runtime_error("Couldn't start thread");
+	if(!tdata.threadHandle) {
+		LeaveCriticalSection(&threadCountMutex);
+		throw runtime_error("Couldn't start thread");
+	}
+	++threadCount;
+	LeaveCriticalSection(&threadCountMutex);
 	//if(autoDelete()) pthread_detach(tdata.thread);
 	tdata.mutex->release();
 }
 
 void thread_t::pause() {
 	windowsThreadData_t &tdata = dynamic_cast<windowsThreadData_t &>(*threadData.get());
+	SuspendThread(tdata.threadHandle);
 	//EnterCriticalSection(&tdata.condmutex);
-	tdata.pausectrlmutex->get();
+	/*tdata.pausectrlmutex->get();
 	tdata.paused = true;
 	tdata.pausectrlmutex->release();
+	*/
 	//LeaveCriticalSection(&tdata.condmutex);
 }
 
 void thread_t::resume() {
 	windowsThreadData_t &tdata = dynamic_cast<windowsThreadData_t &>(*(threadData.get()));
+	ResumeThread(tdata.threadHandle);
 //	EnterCriticalSection(&tdata.condmutex);
-	tdata.pausectrlmutex->get();
+	/*tdata.pausectrlmutex->get();
 	if(tdata.paused) {
 		tdata.paused = false;
 		tdata.pausemutex->release();
 	}
-	tdata.pausectrlmutex->release();
+	tdata.pausectrlmutex->release();*/
 /*	LeaveCriticalSection(&tdata.condmutex);
 	WakeConditionVariable(&tdata.condition);*/
 }
