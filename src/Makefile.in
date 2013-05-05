@@ -189,8 +189,8 @@ libinstantsend-sysapi$(LIBEXTENSION): sysapi.o
 #libinstantsend-multithread$(LIBEXTENSION): multithread.o libinstantsend-common$(LIBEXTENSION)
 #	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ multithread.o $(LIBLDFLAGS) libinstantsend-common$(LIBEXTENSION) $(LDFLAGS)
 
-libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ -I./sysapi/$(PLATFORM)/ appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o $(LIBLDFLAGS) $(LDFLAGS)
+libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ -I./sysapi/$(PLATFORM)/ appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o -L. -linstantsend-json $(LIBLDFLAGS) $(LDFLAGS)
 
 check:
 
