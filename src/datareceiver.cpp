@@ -7,6 +7,7 @@
 #include "eventsink.h"
 #include "sysapi.h"
 
+#define DEBUG
 #ifdef DEBUG
 #define D(MSG) fprintf(stderr, MSG "\n"); fflush(stderr);
 #else
