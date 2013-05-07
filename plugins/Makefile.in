@@ -15,6 +15,7 @@ HAVE_NOTIFY=@have_notify@
 LIBNOTIFY_VERSION=@libnotify_version@
 HAVE_AVAHI=@have_avahi@
 HAVE_DBUS=@have_dbus@
+HAVE_OPENSSL=@have_openssl@
 
 DBUS_CFLAGS=@DBUS_CFLAGS@
 DBUS_LIBS=@DBUS_LIBS@
@@ -34,7 +35,7 @@ ifeq ($(LIBNOTIFY_VERSION),1)
 	NOTIFY_LIBS=@LIBNOTIFY1_LIBS@
 endif
 
-ALL=ip4tcps$(LIBEXTENSION)
+ALL=
 
 ifeq ($(HAVE_IP4TCP),yes)
 	ALL+=ip4tcp$(LIBEXTENSION)
@@ -46,6 +47,10 @@ endif
 
 ifeq ($(HAVE_NOTIFY),yes)
 	ALL+=desktop-notify$(LIBEXTENSION)
+endif
+
+ifeq ($(HAVE_OPENSSL),yes)
+	ALL+=ip4tcps$(LIBEXTENSION)
 endif
 
 ifeq ($(HAVE_DBUS),yes)
