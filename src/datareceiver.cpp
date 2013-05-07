@@ -7,11 +7,11 @@
 #include "eventsink.h"
 #include "sysapi.h"
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define D(MSG) fprintf(stderr, MSG "\n"); fflush(stderr);
 #else
-#define D(MSG) while(0)
+#define D(MSG) do ; while(0)
 #endif
 
 void sendErrMsg(const pluginInstanceAutoPtr<peer_t> &client, const char *msg) {
@@ -50,13 +50,13 @@ void dataReceiver_t::run() {
 
 			for(unsigned int i = 0; i < fname.size(); ++i) if(fname[i] == '/') fname[i] = '-'; //strip slashes TODO: use OS independent function
 #ifdef DEBUG
-			printf("Receiving file %s (%d bytes)\n", fname.c_str(), fsize);
-			fflush(stdout);
+			fprintf(stderr, "Receiving file %s (%d bytes)\n", fname.c_str(), fsize);
+			fflush(stderr);
 #endif
 
 			writer = dynamic_cast<fileWriter_t *>(&flist.getController(0, combinePath(savedir, fname), (size_t)fsize, cptr->getMachineIdentifier()));
 			writer->incRC();
-			D("Writer created")
+			D("Writer created");
 
 			strcpy(data->data, "{ \"service\" : \"filetransfer\", \"action\" : \"accept\" }");
 			data->size = 52;
@@ -83,7 +83,7 @@ void dataReceiver_t::run() {
 
 	int fileUncompleted = 1;
 
-	D("Receiving data")
+	D("Receiving data");
 	do {
 		string header;
 		data->size = DMAXSIZE;
