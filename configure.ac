@@ -17,6 +17,7 @@ AS_IF([test "x$host_alias" '=' "xi686-apple-darwin10"], [operating_system=macosx
 AS_IF([test "x$operating_system" '=' xlinux], [
        default_widget_gtk=yes
        default_plugin_ip6tcp=yes
+       default_plugin_ip4tcps=yes
        default_plugin_dbus=yes
        default_plugin_notify=yes
        default_plugin_avahi=yes
@@ -29,6 +30,7 @@ AS_IF([test "x$operating_system" '=' xlinux], [
 AS_IF([test "x$operating_system" '=' xmacosx], [
        default_widget_gtk=no
        default_plugin_ip6tcp=yes
+       default_plugin_ip4tcps=yes
        default_plugin_dbus=no
        default_plugin_notify=no
        default_plugin_avahi=no
@@ -41,6 +43,7 @@ AS_IF([test "x$operating_system" '=' xmacosx], [
 AS_IF([test "x$operating_system" '=' xwindows], [
        default_widget_gtk=no
        default_plugin_ip6tcp=no
+       default_plugin_ip4tcps=no
        default_plugin_dbus=no
        default_plugin_notify=no
        default_plugin_avahi=no
@@ -126,6 +129,17 @@ AC_ARG_ENABLE([plugin-ip6tcp],
 		[AS_IF([test "x$enable_automatic" = xyes],
 		       [enable_plugin_ip6tcp=auto],
 		       [enable_plugin_ip6tcp=$default_plugin_ip6tcp])
+		]
+		)
+
+AC_ARG_ENABLE([plugin-ip4tcps],
+		[AS_HELP_STRING([--enable-plugin-ip4tcps@<:@=yes|no|auto@:>@],
+				[define whether ip4tcps plugin should be compiled @<:@default=yes@:>@]
+		)],
+		[],
+		[AS_IF([test "x$enable_automatic" = xyes],
+		       [enable_plugin_ip4tcps=auto],
+		       [enable_plugin_ip4tcps=$default_plugin_ip4tcps])
 		]
 		)
 
@@ -234,6 +248,14 @@ AS_IF([test "x$enable_configtool" '!=' xno], [have_configtool=yes], [have_config
 AS_IF([test "x$enable_plugin_ip4tcp" '!=' xno], [have_ip4tcp=yes], [have_ip4tcp=no])
 AS_IF([test "x$enable_plugin_ip6tcp" '!=' xno], [have_ip6tcp=$default_plugin_ip6tcp], [have_ip6tcp=no])
 
+AS_IF([test "x$enable_plugin_ip4tcps" '!=' xno], [
+	PKG_CHECK_MODULES([OPENSSL], [openssl],
+			  [AC_DEFINE([HAVE_OPENSSL], [1], [Use openssl])
+			  have_openssl=yes],
+			  [have_openssl=no]
+	)
+])
+
 # Test libnotify version
 AS_IF([test "x$enable_plugin_notify" '!=' xno], [
 	PKG_CHECK_MODULES([LIBNOTIFY4], [libnotify >= 0.7.5],
@@ -318,6 +340,14 @@ AS_IF([test "x$enable_scanner_avahi" '!=' xno], [
 	     ])
        ],
        [have_scanner_avahi=no])
+
+AS_IF([test "x$enable_plugin_ip4tcps" = xyes],
+      [
+       AS_IF([test "x$have_openssl" '!=' xyes],
+	     [AC_MSG_ERROR([You have missing module openssl! Install it or disable.])]
+	     )
+       ]
+      )
 
 AS_IF([test "x$enable_plugin_dbus" = xyes],
 	[
@@ -421,6 +451,7 @@ Widget-gtk:                                                                  $ha
 ------------------------------------Plugins-------------------------------------
 (Communication)
 ip4tcp:                                                                      $have_ip4tcp
+ip4tcps:                                                                     $have_openssl
 ip6tcp:                                                                      $have_ip6tcp
 (Event handlers)
 dbus:                                                                        $have_dbus
