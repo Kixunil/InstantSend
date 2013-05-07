@@ -568,17 +568,21 @@ class instSendWidget : public Window, dialogControl {
 		}
 
 		virtual void sendFiles() {
+#ifndef WINDOWS
 			pid_t pid = fork();
 			if(!pid) {
 				exit(system("zenity --file-selection --multiple --title=InstantSend --separator='\n' | xargs -d '\\n' isend-gtk"));
 			}
+#endif
 		}
 
 		virtual void preferences() {
+#ifndef WINDOWS
 			pid_t pid = fork();
 			if(!pid) {
 				exit(system("instsend-config-wizard --conf-server"));
 			}
+#endif
 		}
 
 		virtual void startServer() {
