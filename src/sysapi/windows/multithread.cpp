@@ -72,6 +72,29 @@ class windowsThreadData_t : public threadData_t {
 		}
 };
 
+class WindowsSemaphoreData : public Semaphore::Data {
+	public:
+		WindowsSemaphoreData(unsigned int initVal = 0) : semaphore(CreateSemaphore(NULL, initVal, 2147483647, 0)) {}
+
+		void operator++() {
+			ReleaseSemaphore(semaphore, 1, 0);
+		}
+
+		void operator--() {
+			WaitForSingleObject(semaphore, INFINITE);
+		}
+
+		~WindowsSemaphoreData() {
+			CloseHandle(semaphore);
+		}
+
+	private:
+		HANDLE semaphore;
+};
+
+Semaphore::Semaphore(unsigned int initVal) : mSemData(new WindowsSemaphoreData(initVal))  {}
+Semaphore::Data::~Data() {}
+
 void delThread(void *thread) {
 	windowsThreadData_t *t = (windowsThreadData_t *)thread;
 	t->mutex->get();
