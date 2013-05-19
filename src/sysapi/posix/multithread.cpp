@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <string.h>
 #include <signal.h>
+#include <semaphore.h>
+#include <errno.h>
 
 #include "multithread.h"
 #include "posix-appcontrol.h"
@@ -62,6 +64,60 @@ class linuxThreadData_t : public threadData_t {
 			mutex->release();
 		}
 };
+
+class PosixSemaphoreData : public Semaphore::Data {
+	public:
+		PosixSemaphoreData(unsigned int initVal = 0) {
+			if(sem_init(&mSemaphore, 0, initVal) < 0) throw runtime_error(string("sem_init: ") + strerror(errno));
+		}
+
+		void operator++() {
+			sem_post(&mSemaphore);
+		}
+
+		void operator--() {
+			sem_wait(&mSemaphore);
+		}
+
+		~PosixSemaphoreData() {
+			sem_destroy(&mSemaphore);
+		}
+	private:
+		sem_t mSemaphore;
+};
+
+Semaphore::Semaphore(unsigned int initVal) : mSemData(new PosixSemaphoreData(initVal))  {}
+Semaphore::Data::~Data() {}
+
+class PosixCondVarData : public CondVar::Data {
+	public:
+		PosixCondVarData() {
+			pthread_cond_init(&mCondition, NULL);
+			pthread_mutex_init(&mCondmutex, NULL);
+		}
+		void lock() {
+			pthread_mutex_lock(&mCondmutex);
+		}
+		void unlock() {
+			pthread_mutex_unlock(&mCondmutex);
+		}
+		void wait() {
+			pthread_cond_wait(&mCondition, &mCondmutex);
+		}
+		void signal() {
+			pthread_cond_signal(&mCondition);
+		}
+		~PosixCondVarData() {
+			pthread_cond_destroy(&mCondition);
+			pthread_mutex_destroy(&mCondmutex);
+		}
+	private:
+		pthread_cond_t mCondition;
+		pthread_mutex_t mCondmutex;
+};
+
+CondVar::CondVar() : mCVData(new PosixCondVarData()) {}
+CondVar::Data::~Data() {}
 
 void delThread(void *thread) {
 	linuxThreadData_t *t = (linuxThreadData_t *)thread;

@@ -13,6 +13,52 @@ class mutex_t {
 		virtual ~mutex_t();
 };
 
+class Semaphore {
+	public:
+		Semaphore(unsigned int initVal = 0);
+
+		inline void operator++() { ++*mSemData; }
+		inline void operator--() { --*mSemData; }
+
+		class Data {
+			public:
+				virtual void operator++() = 0;
+				virtual void operator--() = 0;
+				virtual ~Data();
+		};
+
+	private:
+		auto_ptr<Semaphore::Data> mSemData;
+		// copying disabled
+		Semaphore(const Semaphore &);
+		Semaphore &operator=(const Semaphore&);
+};
+
+class CondVar {
+	public:
+		CondVar();
+
+		inline void lock() { mCVData->lock(); }
+		inline void unlock() { mCVData->unlock(); }
+		inline void wait() { mCVData->wait(); }
+		inline void signal() { mCVData->signal(); }
+
+		class Data {
+			public:
+				virtual void lock() = 0;
+				virtual void unlock() = 0;
+				virtual void wait() = 0;
+				virtual void signal() = 0;
+				virtual ~Data();
+		};
+
+	private:
+		auto_ptr<CondVar::Data> mCVData;
+
+		CondVar(const CondVar &);
+		CondVar &operator=(const CondVar&);
+};
+
 class threadData_t {
 	public:
 		virtual ~threadData_t();
