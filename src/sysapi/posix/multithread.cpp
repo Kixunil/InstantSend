@@ -89,6 +89,7 @@ class PosixSemaphoreData : public Semaphore::Data {
 Semaphore::Semaphore(unsigned int initVal) : mSemData(new PosixSemaphoreData(initVal))  {}
 Semaphore::Data::~Data() {}
 
+#ifdef ENABLE_CONDVAR
 class PosixCondVarData : public CondVar::Data {
 	public:
 		PosixCondVarData() {
@@ -118,6 +119,7 @@ class PosixCondVarData : public CondVar::Data {
 
 CondVar::CondVar() : mCVData(new PosixCondVarData()) {}
 CondVar::Data::~Data() {}
+#endif //ENABLE_CONDVAR
 
 void delThread(void *thread) {
 	linuxThreadData_t *t = (linuxThreadData_t *)thread;

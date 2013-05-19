@@ -34,6 +34,7 @@ class Semaphore {
 		Semaphore &operator=(const Semaphore&);
 };
 
+#ifdef ENABLE_CONDVAR
 class CondVar {
 	public:
 		CondVar();
@@ -58,6 +59,7 @@ class CondVar {
 		CondVar(const CondVar &);
 		CondVar &operator=(const CondVar&);
 };
+#endif //ENABLE_CONDVAR
 
 class threadData_t {
 	public:
