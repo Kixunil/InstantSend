@@ -30,7 +30,7 @@ bool dataFragment_t::writeData(FILE *file) const {
 	return success;
 }
 
-fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId) : fileController_t(id) {
+fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT) {
 	mutex = mutex_t::getNew();
 	fName = fileName;
 	fSize = fileSize;
@@ -38,7 +38,6 @@ fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, cons
 	lastpos = 0;
 	lastBatch = 0;
 	bytes = 0;
-	bufsiz = 0;
 	stop = false;
 	hardPause = false;
 	zr = true;
@@ -97,42 +96,29 @@ bool fileWriter_t::empty() {
 }
 
 void fileWriter_t::writeBuffer() {
-	while(!empty()) {
-		DMG;
-		mutex->get();
-		if(!queue.top().writeData(f)) {
-			mutex->release();
-			pause();
-			pausePoint();
-		} else {
-			bytes += queue.top().size();
-			bufsiz -= queue.top().size();
-			queue.top().freeData();
-			queue.pop();
-			for(set<thread_t *>::iterator it = waitingThreads.begin(); it != waitingThreads.end(); ++it) {
-				(*it)->resume();
-				waitingThreads.erase(it);
-			}
-			mutex->release();
-			if(!(lastUpdate = (lastUpdate + 1) % updateInterval)) bcastProgressUpdate(*this);
-		}
-	}
-}
+	--outputSem;
+	if(stop) return;
 
-bool fileWriter_t::shouldRun() {
 	mutex->get();
-	bool result = bytes < fSize && !stop;
+	dataFragment_t fragment(queue.top());
+	queue.pop();
 	mutex->release();
-	return result;
+
+	++inputSem;
+	while(!fragment.writeData(f) && !stop) {
+		pause();
+		pausePoint();
+	}
+	if(stop) return;
+	bytes += fragment.size();
+	fragment.freeData();
+	if(!(lastUpdate = (lastUpdate + 1) % updateInterval)) bcastProgressUpdate(*this);
 }
 
 void fileWriter_t::run() {
 	zr = false;
-	while(shouldRun()) {
+	while(bytes < fSize && !stop) {
 		writeBuffer();
-
-		if(empty()) pause();
-		pausePoint();
 	}
 
 	writeBuffer(); // try write remaining data
@@ -142,20 +128,18 @@ void fileWriter_t::run() {
 	fflush(stderr);
 #endif
 
-	mutex->get();
 	if(tStatus == IS_TRANSFER_IN_PROGRESS) {
 		if(bytes == fSize) tStatus = IS_TRANSFER_FINISHED;
 		else tStatus = IS_TRANSFER_ERROR;
 	}
 
 	stop = true;
-	mutex->release();
 	bcastProgressUpdate(*this);
 	cleanupCheck(true);
 	
 }
 
-bool fileWriter_t::writeData(long position, auto_ptr<anyData> &data, thread_t &caller) {
+bool fileWriter_t::writeData(long position, auto_ptr<anyData> &data) {
 	DMG;
 	// Just in case, so we don't insert empty data
 	if(!data->size) {
@@ -163,19 +147,15 @@ bool fileWriter_t::writeData(long position, auto_ptr<anyData> &data, thread_t &c
 		return true;
 	}
 
-	mutex->get();
-	if(hardPause || data->size + bufsiz > MAXBUFSIZE) {
-		caller.pause();
-		waitingThreads.insert(&caller);
-		mutex->release();
-		return false;
-	}
+	--inputSem;
 
+	mutex->get();
 	if(lastpos > position) ++lastBatch;
-	bufsiz += data->size;
 	queue.push(dataFragment_t(data, position, lastBatch));
-	if(!running()) resume();
 	mutex->release();
+
+	++outputSem;
+
 	return true;
 }
 
@@ -226,6 +206,7 @@ void fileWriter_t::zeroReferences() {
 		mutex->get();
 		stop = true;
 		resume();
+		++outputSem;
 		mutex->release();
 	}
 }

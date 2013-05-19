@@ -6,7 +6,7 @@
 #include "multithread.h"
 #include "filelist.h"
 
-#define MAXBUFSIZE 65536
+#define MAX_BUF_FRAGMENT_COUNT 32
 
 using namespace std;
 
@@ -35,6 +35,7 @@ class fileWriter_t : public fileController_t, thread_t {
 
 		FILE *f;
 		auto_ptr<mutex_t> mutex;
+		Semaphore inputSem, outputSem;
 		priority_queue<dataFragment_t> queue;
 		bool empty();
 
@@ -42,8 +43,6 @@ class fileWriter_t : public fileController_t, thread_t {
 		int lastBatch;
 
 		size_t bytes;
-		size_t bufsiz;
-		set<thread_t *> waitingThreads;
 
 		bool hardPause;
 		bool stop;
@@ -56,14 +55,13 @@ class fileWriter_t : public fileController_t, thread_t {
 		void zeroReferences();
 		bool cleanupCheck(bool calledByThisThread = false);
 		void writeBuffer();
-		bool shouldRun();
 	public:
 		fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId);
 		string getFileName();
 		size_t getFileSize();
 		string getMachineId();
 
-		bool writeData(long position, auto_ptr<anyData> &data, thread_t &caller);
+		bool writeData(long position, auto_ptr<anyData> &data);
 		void run();
 		bool autoDelete();
 		size_t getTransferredBytes();

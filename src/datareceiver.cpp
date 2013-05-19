@@ -99,7 +99,7 @@ void dataReceiver_t::run() {
 				auto_ptr<anyData> rawData = allocData(data->size - hlen - 1);
 				memcpy(rawData->data, data->data + hlen + 1, data->size - hlen - 1);
 				rawData->size = data->size - hlen - 1;
-				while(!writer->writeData(position, rawData, *this)) pausePoint();
+				writer->writeData(position, rawData);
 			}
 			catch(const char *msg) {
 				sendErrMsg(cptr, msg);
