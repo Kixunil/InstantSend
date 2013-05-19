@@ -101,8 +101,10 @@ Inheritance diagram for eventHandlerCreator_t:</div>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventHandlerCreator__t.html#a89472cf383359bbfd86595050a277263">regEvents</a> (<a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;reg, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *config)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventHandlerCreator__t.html#a89472cf383359bbfd86595050a277263">regEvents</a> (<a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;reg, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *config)=0  throw ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Tells plugin to register its' events.  <a href="#a89472cf383359bbfd86595050a277263"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventHandlerCreator__t.html#a22a42761d7142d1f52732864ae4e0b85">unregEvents</a> (<a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;reg)=0  throw ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Tells plugin to unregister all its' registered events.  <a href="#a22a42761d7142d1f52732864ae4e0b85"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>brief Interface for registering events </p>
@@ -126,7 +128,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [pure virtual]</code></td>
+          <td></td><td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
@@ -141,6 +143,26 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a class="anchor" id="a22a42761d7142d1f52732864ae4e0b85"></a><!-- doxytag: member="eventHandlerCreator_t::unregEvents" ref="a22a42761d7142d1f52732864ae4e0b85" args="(eventRegister_t &amp;reg)=0" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void <a class="el" href="classeventHandlerCreator__t.html#a22a42761d7142d1f52732864ae4e0b85">eventHandlerCreator_t::unregEvents</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classeventRegister__t.html">eventRegister_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>reg</em></td><td>)</td>
+          <td>  throw ()<code> [pure virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Tells plugin to unregister all its' registered events. </p>
+<p>This method is called before plugin is unloaded. </p>
 
 </div>
 </div>
@@ -165,7 +187,7 @@ Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 19 2013 15:15:12 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

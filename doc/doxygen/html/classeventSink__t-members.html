@@ -85,21 +85,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 This is the complete list of members for <a class="el" href="classeventSink__t.html">eventSink_t</a>, including all inherited members.<table>
   <tr bgcolor="#f0f0f0"><td><b>autoLoad</b>(jsonObj_t &amp;plugins) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>eventSink_t</b>() (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [inline]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>instance</b>() (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [static]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>regConnections</b>(eventConnections_t &amp;connectionEvent) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
-  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a7339c49521260767b8fe4f916b537530">regProgress</a>(eventProgress_t &amp;progressEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a23bbd3acc81245047d7e75befdb0b828">regReceive</a>(eventReceive_t &amp;receiveEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#aba491c989268123534c707dc9abdd2aa">regSend</a>(eventSend_t &amp;sendEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#aaa85e2bdc99f02bb0b84bf51b189073f">regServer</a>(eventServer_t &amp;serverEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>sendConnection</b>(eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [inline]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>sendEvent</b>(set&lt; event_t * &gt; &amp;handlers, eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>sendProgress</b>(eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [inline]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>sendServer</b>(eventData_t &amp;eventData) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [inline]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>unregConnections</b>(eventConnections_t &amp;connectionEvent) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
-  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a6c4ed33c87f8f6d928d4e6dcbeb0da71">unregProgress</a>(eventProgress_t &amp;progressEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a3b7740dda2630928752f0acf7281394b">unregReceive</a>(eventReceive_t &amp;receiveEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#a511378eb9b71424cc767e8622bb03d19">unregSend</a>(eventSend_t &amp;sendEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classeventSink__t.html#ab6119c05c032362c9d42e83dc037760e">unregServer</a>(eventServer_t &amp;serverEvent)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td><code> [virtual]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>loadEventPlugin</b>(const string &amp;name, jsonComponent_t &amp;config) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventRegister__t.html#a807110b926e683f81a880ddfd897823a">regProgress</a>(eventProgress_t &amp;progressEvent)=0</td><td><a class="el" href="classeventRegister__t.html">eventRegister_t</a></td><td><code> [pure virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventRegister__t.html#a1aac317213afabb70d939c91b7ea2848">regReceive</a>(eventReceive_t &amp;receiveEvent)=0</td><td><a class="el" href="classeventRegister__t.html">eventRegister_t</a></td><td><code> [pure virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventRegister__t.html#ab918520e178622864c7cff50336ac70e">regSend</a>(eventSend_t &amp;sendEvent)=0</td><td><a class="el" href="classeventRegister__t.html">eventRegister_t</a></td><td><code> [pure virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventRegister__t.html#aeaa37c755f0354084f95497264330af3">regServer</a>(eventServer_t &amp;serverEvent)=0</td><td><a class="el" href="classeventRegister__t.html">eventRegister_t</a></td><td><code> [pure virtual]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>unloadAllEventPlugins</b>() (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>unloadEventPlugin</b>(const string &amp;name) (defined in <a class="el" href="classeventSink__t.html">eventSink_t</a>)</td><td><a class="el" href="classeventSink__t.html">eventSink_t</a></td><td></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventRegister__t.html#a012b0ad336a3cf14b5e5f0beb36b5dbb">unregProgress</a>(eventProgress_t &amp;progressEvent)=0</td><td><a class="el" href="classeventRegister__t.html">eventRegister_t</a></td><td><code> [pure virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventRegister__t.html#ab81811e8ced1c67a9ec2078b2893fcde">unregReceive</a>(eventReceive_t &amp;receiveEvent)=0</td><td><a class="el" href="classeventRegister__t.html">eventRegister_t</a></td><td><code> [pure virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventRegister__t.html#a4294db89d43e8b9a013833c54690d890">unregSend</a>(eventSend_t &amp;sendEvent)=0</td><td><a class="el" href="classeventRegister__t.html">eventRegister_t</a></td><td><code> [pure virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classeventRegister__t.html#aaf50f2c51a2c2731ad01cee6397de7dc">unregServer</a>(eventServer_t &amp;serverEvent)=0</td><td><a class="el" href="classeventRegister__t.html">eventRegister_t</a></td><td><code> [pure virtual]</code></td></tr>
 </table></div><!-- contents -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
@@ -118,7 +116,7 @@ This is the complete list of members for <a class="el" href="classeventSink__t.h
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 19 2013 15:15:12 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

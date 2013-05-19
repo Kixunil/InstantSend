@@ -85,7 +85,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">securityCreator_t Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<!-- doxytag: class="securityCreator_t" --><!-- doxytag: inherits="pluginInstanceCreator_t" -->
+<!-- doxytag: class="securityCreator_t" --><!-- doxytag: inherits="pluginMultiInstanceCreator_t" -->
 <p>Creates encryption instances.  
  <a href="classsecurityCreator__t.html#details">More...</a></p>
 
@@ -96,7 +96,8 @@ Inheritance diagram for securityCreator_t:</div>
  <div class="center">
   <img src="classsecurityCreator__t.png" usemap="#securityCreator_t_map" alt=""/>
   <map id="securityCreator_t_map" name="securityCreator_t_map">
-<area href="classpluginInstanceCreator__t.html" title="Base for creator of plugin instances." alt="pluginInstanceCreator_t" shape="rect" coords="0,0,146,24"/>
+<area href="classpluginMultiInstanceCreator__t.html" alt="pluginMultiInstanceCreator_t" shape="rect" coords="0,56,173,80"/>
+<area href="classpluginInstanceCreator__t.html" title="Base for creator of plugin instances." alt="pluginInstanceCreator_t" shape="rect" coords="0,0,173,24"/>
 </map>
  </div></div>
 
@@ -104,36 +105,38 @@ Inheritance diagram for securityCreator_t:</div>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsecurityCreator__t.html#a9e204dba6dd07275ed250640835c5821">getSupportedSettings</a> (<a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;config)=0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Publishes supported encryption settings.  <a href="#a9e204dba6dd07275ed250640835c5821"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsecurityCreator__t.html#abe5307cfc49e85f4efae194aaa32e0a8">chooseSettings</a> (<a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;config)=0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Publishes supported encryption settings.  <a href="#abe5307cfc49e85f4efae194aaa32e0a8"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classpeer__t.html">peer_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsecurityCreator__t.html#a034aee313d01680b4cd7538a427ffdfe">seconnect</a> (<a class="el" href="classpeer__t.html">peer_t</a> &amp;peer, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;config, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;chosenSettings)=0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Initiates secure connection from client side.  <a href="#a034aee313d01680b4cd7538a427ffdfe"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classpeer__t.html">peer_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsecurityCreator__t.html#a3ae98b0d1f4812023d62abf7f03c569f">seaccept</a> (<a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;config, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;requestedConfig)=0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits for client to initiate secure connection.  <a href="#a3ae98b0d1f4812023d62abf7f03c569f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1db88ecbe786f194d83ed3dfc8baa7cf"></a><!-- doxytag: member="securityCreator_t::securityCreator_t" ref="a1db88ecbe786f194d83ed3dfc8baa7cf" args="(pluginDestrCallback_t &amp;callback)" -->
+&#160;</td><td class="memItemRight" valign="bottom"><b>securityCreator_t</b> (<a class="el" href="classpluginDestrCallback__t.html">pluginDestrCallback_t</a> &amp;callback)  throw ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual auto_ptr&lt; <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsecurityCreator__t.html#a92a83982c25875f49e006d3f1e95b4de">getSupportedSettings</a> (<a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;config)=0  throw ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Publishes supported encryption settings.  <a href="#a92a83982c25875f49e006d3f1e95b4de"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual auto_ptr&lt; <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsecurityCreator__t.html#a12d63cef370f4a6c37b832097c6d86ba">chooseSettings</a> (<a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;config)=0  throw ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Publishes supported encryption settings.  <a href="#a12d63cef370f4a6c37b832097c6d86ba"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual auto_ptr&lt; <a class="el" href="classpeer__t.html">peer_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsecurityCreator__t.html#a6a5468e42c8c872712e00ed9af1abed9">seconnect</a> (<a class="el" href="classpeer__t.html">peer_t</a> &amp;peer, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;config, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;chosenSettings)=0  throw ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Initiates secure connection from client side.  <a href="#a6a5468e42c8c872712e00ed9af1abed9"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual auto_ptr&lt; <a class="el" href="classpeer__t.html">peer_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsecurityCreator__t.html#a68fb4c91f10206f574f4a7498eee046a">seaccept</a> (<a class="el" href="classpeer__t.html">peer_t</a> &amp;peer, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;config, <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;requestedConfig)=0  throw ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits for client to initiate secure connection.  <a href="#a68fb4c91f10206f574f4a7498eee046a"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Creates encryption instances. </p>
 </div><hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="abe5307cfc49e85f4efae194aaa32e0a8"></a><!-- doxytag: member="securityCreator_t::chooseSettings" ref="abe5307cfc49e85f4efae194aaa32e0a8" args="(jsonComponent_t &amp;config)=0" -->
+<a class="anchor" id="a12d63cef370f4a6c37b832097c6d86ba"></a><!-- doxytag: member="securityCreator_t::chooseSettings" ref="a12d63cef370f4a6c37b832097c6d86ba" args="(jsonComponent_t &amp;config)=0" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a>* <a class="el" href="classsecurityCreator__t.html#abe5307cfc49e85f4efae194aaa32e0a8">securityCreator_t::chooseSettings</a> </td>
+          <td class="memname">virtual auto_ptr&lt;<a class="el" href="classjsonComponent__t.html">jsonComponent_t</a>&gt; <a class="el" href="classsecurityCreator__t.html#a12d63cef370f4a6c37b832097c6d86ba">securityCreator_t::chooseSettings</a> </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;&#160;</td>
           <td class="paramname"><em>config</em></td><td>)</td>
-          <td><code> [pure virtual]</code></td>
+          <td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
 <p>Publishes supported encryption settings. </p>
-<p>Encryption plugins can support multiple settings. Return value of <a class="el" href="classsecurityCreator__t.html#a9e204dba6dd07275ed250640835c5821" title="Publishes supported encryption settings.">getSupportedSettings()</a> is delivered to client, where this method is called, to choose settings. Reply is sent to server. </p>
-<dl class="see"><dt><b>See also:</b></dt><dd><a class="el" href="classsecurityCreator__t.html#a9e204dba6dd07275ed250640835c5821" title="Publishes supported encryption settings.">getSupportedSettings()</a> </dd></dl>
+<p>Encryption plugins can support multiple settings. Return value of <a class="el" href="classsecurityCreator__t.html#a92a83982c25875f49e006d3f1e95b4de" title="Publishes supported encryption settings.">getSupportedSettings()</a> is delivered to client, where this method is called, to choose settings. Reply is sent to server. </p>
+<dl class="see"><dt><b>See also:</b></dt><dd><a class="el" href="classsecurityCreator__t.html#a92a83982c25875f49e006d3f1e95b4de" title="Publishes supported encryption settings.">getSupportedSettings()</a> </dd></dl>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">config</td><td>Supported configurations sent by server </td></tr>
@@ -144,16 +147,16 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9e204dba6dd07275ed250640835c5821"></a><!-- doxytag: member="securityCreator_t::getSupportedSettings" ref="a9e204dba6dd07275ed250640835c5821" args="(jsonComponent_t &amp;config)=0" -->
+<a class="anchor" id="a92a83982c25875f49e006d3f1e95b4de"></a><!-- doxytag: member="securityCreator_t::getSupportedSettings" ref="a92a83982c25875f49e006d3f1e95b4de" args="(jsonComponent_t &amp;config)=0" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="classjsonComponent__t.html">jsonComponent_t</a>* <a class="el" href="classsecurityCreator__t.html#a9e204dba6dd07275ed250640835c5821">securityCreator_t::getSupportedSettings</a> </td>
+          <td class="memname">virtual auto_ptr&lt;<a class="el" href="classjsonComponent__t.html">jsonComponent_t</a>&gt; <a class="el" href="classsecurityCreator__t.html#a92a83982c25875f49e006d3f1e95b4de">securityCreator_t::getSupportedSettings</a> </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;&#160;</td>
           <td class="paramname"><em>config</em></td><td>)</td>
-          <td><code> [pure virtual]</code></td>
+          <td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
@@ -161,7 +164,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Publishes supported encryption settings. </p>
 <p>Encryption plugins can support multiple settings. Return value of this function is delivered to client, during handshake. Client can choose settings (method chooseSettings(() is called) and reply is sent back to server. </p>
-<dl class="see"><dt><b>See also:</b></dt><dd><a class="el" href="classsecurityCreator__t.html#abe5307cfc49e85f4efae194aaa32e0a8" title="Publishes supported encryption settings.">chooseSettings()</a> </dd></dl>
+<dl class="see"><dt><b>See also:</b></dt><dd><a class="el" href="classsecurityCreator__t.html#a12d63cef370f4a6c37b832097c6d86ba" title="Publishes supported encryption settings.">chooseSettings()</a> </dd></dl>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">config</td><td>User defined configuration </td></tr>
@@ -172,13 +175,19 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3ae98b0d1f4812023d62abf7f03c569f"></a><!-- doxytag: member="securityCreator_t::seaccept" ref="a3ae98b0d1f4812023d62abf7f03c569f" args="(jsonComponent_t &amp;config, jsonComponent_t &amp;requestedConfig)=0" -->
+<a class="anchor" id="a68fb4c91f10206f574f4a7498eee046a"></a><!-- doxytag: member="securityCreator_t::seaccept" ref="a68fb4c91f10206f574f4a7498eee046a" args="(peer_t &amp;peer, jsonComponent_t &amp;config, jsonComponent_t &amp;requestedConfig)=0" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="classpeer__t.html">peer_t</a>* <a class="el" href="classsecurityCreator__t.html#a3ae98b0d1f4812023d62abf7f03c569f">securityCreator_t::seaccept</a> </td>
+          <td class="memname">virtual auto_ptr&lt;<a class="el" href="classpeer__t.html">peer_t</a>&gt; <a class="el" href="classsecurityCreator__t.html#a68fb4c91f10206f574f4a7498eee046a">securityCreator_t::seaccept</a> </td>
           <td>(</td>
+          <td class="paramtype"><a class="el" href="classpeer__t.html">peer_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>peer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> &amp;&#160;</td>
           <td class="paramname"><em>config</em>, </td>
         </tr>
@@ -191,7 +200,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [pure virtual]</code></td>
+          <td></td><td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
@@ -205,16 +214,16 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>instance of <a class="el" href="classpeer__t.html" title="Interface used fo communication with remote machines.">peer_t</a>, which encrypts communication between server and client </dd></dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>instance of <a class="el" href="classpeer__t.html" title="Interface used for communication with remote machines.">peer_t</a>, which encrypts communication between server and client </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a034aee313d01680b4cd7538a427ffdfe"></a><!-- doxytag: member="securityCreator_t::seconnect" ref="a034aee313d01680b4cd7538a427ffdfe" args="(peer_t &amp;peer, jsonComponent_t &amp;config, jsonComponent_t &amp;chosenSettings)=0" -->
+<a class="anchor" id="a6a5468e42c8c872712e00ed9af1abed9"></a><!-- doxytag: member="securityCreator_t::seconnect" ref="a6a5468e42c8c872712e00ed9af1abed9" args="(peer_t &amp;peer, jsonComponent_t &amp;config, jsonComponent_t &amp;chosenSettings)=0" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="classpeer__t.html">peer_t</a>* <a class="el" href="classsecurityCreator__t.html#a034aee313d01680b4cd7538a427ffdfe">securityCreator_t::seconnect</a> </td>
+          <td class="memname">virtual auto_ptr&lt;<a class="el" href="classpeer__t.html">peer_t</a>&gt; <a class="el" href="classsecurityCreator__t.html#a6a5468e42c8c872712e00ed9af1abed9">securityCreator_t::seconnect</a> </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classpeer__t.html">peer_t</a> &amp;&#160;</td>
           <td class="paramname"><em>peer</em>, </td>
@@ -234,7 +243,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [pure virtual]</code></td>
+          <td></td><td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
@@ -243,13 +252,13 @@ Public Member Functions</h2></td></tr>
 <p>Initiates secure connection from client side. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
-    <tr><td class="paramname">peer</td><td>Instance of <a class="el" href="classpeer__t.html" title="Interface used fo communication with remote machines.">peer_t</a> connected to server. </td></tr>
+    <tr><td class="paramname">peer</td><td>Instance of <a class="el" href="classpeer__t.html" title="Interface used for communication with remote machines.">peer_t</a> connected to server. </td></tr>
     <tr><td class="paramname">config</td><td>User defined configuration </td></tr>
-    <tr><td class="paramname">chosenSettings</td><td>Settings required by <a class="el" href="classsecurityCreator__t.html#abe5307cfc49e85f4efae194aaa32e0a8" title="Publishes supported encryption settings.">chooseSettings()</a> call </td></tr>
+    <tr><td class="paramname">chosenSettings</td><td>Settings required by <a class="el" href="classsecurityCreator__t.html#a12d63cef370f4a6c37b832097c6d86ba" title="Publishes supported encryption settings.">chooseSettings()</a> call </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>instance of <a class="el" href="classpeer__t.html" title="Interface used fo communication with remote machines.">peer_t</a>, which encrypts communication between server and client </dd></dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>instance of <a class="el" href="classpeer__t.html" title="Interface used for communication with remote machines.">peer_t</a>, which encrypts communication between server and client </dd></dl>
 
 </div>
 </div>
@@ -274,7 +283,7 @@ Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 19 2013 15:15:12 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

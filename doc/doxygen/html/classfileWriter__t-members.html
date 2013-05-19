@@ -85,7 +85,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 This is the complete list of members for <a class="el" href="classfileWriter__t.html">fileWriter_t</a>, including all inherited members.<table>
   <tr bgcolor="#f0f0f0"><td><b>autoDelete</b>() (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [virtual]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>bufsiz</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>bytes</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>cleanupCheck</b>(bool calledByThisThread=false) (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>decRC</b>() (defined in <a class="el" href="classfileController__t.html">fileController_t</a>)</td><td><a class="el" href="classfileController__t.html">fileController_t</a></td><td></td></tr>
@@ -104,11 +103,13 @@ This is the complete list of members for <a class="el" href="classfileWriter__t.
   <tr class="memlist"><td><a class="el" href="classfileWriter__t.html#a4a43f1a19bc87050178c619384676c78">getTransferStatus</a>()</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [virtual]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>hardPause</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>incRC</b>() (defined in <a class="el" href="classfileController__t.html">fileController_t</a>)</td><td><a class="el" href="classfileController__t.html">fileController_t</a></td><td></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>inputSem</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>lastBatch</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>lastpos</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>lastUpdate</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>mId</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>mutex</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>outputSem</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>pause</b>() (defined in <a class="el" href="classthread__t.html">thread_t</a>)</td><td><a class="el" href="classthread__t.html">thread_t</a></td><td><code> [private]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>pausePoint</b>() (defined in <a class="el" href="classthread__t.html">thread_t</a>)</td><td><a class="el" href="classthread__t.html">thread_t</a></td><td><code> [private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classfileWriter__t.html#aa3e4622fd057a15cac60617dbfc1339e">pauseTransfer</a>()</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [virtual]</code></td></tr>
@@ -117,14 +118,12 @@ This is the complete list of members for <a class="el" href="classfileWriter__t.
   <tr class="memlist"><td><a class="el" href="classfileWriter__t.html#abe0fb3ee157f227488ec70c4f6b716d2">resumeTransfer</a>()</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [virtual]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>run</b>() (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [virtual]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>running</b>() (defined in <a class="el" href="classthread__t.html">thread_t</a>)</td><td><a class="el" href="classthread__t.html">thread_t</a></td><td><code> [private]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>shouldRun</b>() (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>start</b>() (defined in <a class="el" href="classthread__t.html">thread_t</a>)</td><td><a class="el" href="classthread__t.html">thread_t</a></td><td><code> [private]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>stop</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>tStatus</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>updateInterval</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>waitingThreads</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>writeBuffer</b>() (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>writeData</b>(long position, auto_ptr&lt; anyData &gt; &amp;data, thread_t &amp;caller) (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>writeData</b>(long position, auto_ptr&lt; anyData &gt; &amp;data) (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>zeroReferences</b>() (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected, virtual]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>zr</b> (defined in <a class="el" href="classfileWriter__t.html">fileWriter_t</a>)</td><td><a class="el" href="classfileWriter__t.html">fileWriter_t</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>~fileController_t</b>() (defined in <a class="el" href="classfileController__t.html">fileController_t</a>)</td><td><a class="el" href="classfileController__t.html">fileController_t</a></td><td><code> [virtual]</code></td></tr>
@@ -149,7 +148,7 @@ This is the complete list of members for <a class="el" href="classfileWriter__t.
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 19 2013 15:15:12 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

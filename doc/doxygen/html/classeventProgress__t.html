@@ -85,34 +85,25 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">eventProgress_t Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<!-- doxytag: class="eventProgress_t" --><!-- doxytag: inherits="event_t" -->
+<!-- doxytag: class="eventProgress_t" -->
 <p>Interface for progress event handlers.  
  <a href="classeventProgress__t.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="pluginapi_8h_source.html">pluginapi.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for eventProgress_t:</div>
-<div class="dyncontent">
- <div class="center">
-  <img src="classeventProgress__t.png" usemap="#eventProgress_t_map" alt=""/>
-  <map id="eventProgress_t_map" name="eventProgress_t_map">
-<area href="classevent__t.html" title="Base class for events." alt="event_t" shape="rect" coords="0,0,104,24"/>
-</map>
- </div></div>
 
 <p><a href="classeventProgress__t-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#ad53c56ef512c3097bb8bb562b3f5f4e7">onBegin</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#ad53c56ef512c3097bb8bb562b3f5f4e7">onBegin</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0  throw ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called every time, when transfer started.  <a href="#ad53c56ef512c3097bb8bb562b3f5f4e7"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#a45cd93449caa60707382aadbcb92fb38">onUpdate</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#a45cd93449caa60707382aadbcb92fb38">onUpdate</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0  throw ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called periodically, during transfer, if status of file was updated.  <a href="#a45cd93449caa60707382aadbcb92fb38"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#a5388f17e70d3e850a2eb1a8964f5e6b6">onPause</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#a5388f17e70d3e850a2eb1a8964f5e6b6">onPause</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0  throw ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called, when transfer was paused.  <a href="#a5388f17e70d3e850a2eb1a8964f5e6b6"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#a8c92bb6b39128cc9561b699650fbbcf1">onResume</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#a8c92bb6b39128cc9561b699650fbbcf1">onResume</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0  throw ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called, when (previously paused) transfer was resumed.  <a href="#a8c92bb6b39128cc9561b699650fbbcf1"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#a1d6b642128f364fd964fc16f855187cf">onEnd</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classeventProgress__t.html#a1d6b642128f364fd964fc16f855187cf">onEnd</a> (<a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;fStatus)=0  throw ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">This event is called every time, when transfer ended.  <a href="#a1d6b642128f364fd964fc16f855187cf"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
@@ -127,7 +118,7 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;&#160;</td>
           <td class="paramname"><em>fStatus</em></td><td>)</td>
-          <td><code> [pure virtual]</code></td>
+          <td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
@@ -152,7 +143,7 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;&#160;</td>
           <td class="paramname"><em>fStatus</em></td><td>)</td>
-          <td><code> [pure virtual]</code></td>
+          <td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
@@ -177,7 +168,7 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;&#160;</td>
           <td class="paramname"><em>fStatus</em></td><td>)</td>
-          <td><code> [pure virtual]</code></td>
+          <td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
@@ -202,7 +193,7 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;&#160;</td>
           <td class="paramname"><em>fStatus</em></td><td>)</td>
-          <td><code> [pure virtual]</code></td>
+          <td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
@@ -227,13 +218,14 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classfileStatus__t.html">fileStatus_t</a> &amp;&#160;</td>
           <td class="paramname"><em>fStatus</em></td><td>)</td>
-          <td><code> [pure virtual]</code></td>
+          <td>  throw ()<code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
 <p>This event is called periodically, during transfer, if status of file was updated. </p>
+<dl class="note"><dt><b>Note:</b></dt><dd>It's not guaranteed, that this will be called after each update (write to file). It may be called less often, so plugins won't be spammed. In case of small files, it may bo not called. </dd></dl>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">fStatus</td><td>Reference to file controller assigned to file </td></tr>
@@ -264,7 +256,7 @@ Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 19 2013 15:15:12 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

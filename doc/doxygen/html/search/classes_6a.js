@@ -10,6 +10,5 @@ var searchData=
   ['jsonnull_5ft',['jsonNull_t',['../classjsonNull__t.html',1,'']]],
   ['jsonobj_5ft',['jsonObj_t',['../classjsonObj__t.html',1,'']]],
   ['jsonstr_5ft',['jsonStr_t',['../classjsonStr__t.html',1,'']]],
-  ['jsonstructuredcomponent_5ft',['jsonStructuredComponent_t',['../classjsonStructuredComponent__t.html',1,'']]],
   ['jsonsyntaxerr',['jsonSyntaxErr',['../classjsonSyntaxErr.html',1,'']]]
 ];

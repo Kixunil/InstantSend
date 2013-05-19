@@ -84,13 +84,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 This is the complete list of members for <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>, including all inherited members.<table>
-  <tr bgcolor="#f0f0f0"><td><b>addInstance</b>(pluginInstance_t *instance) (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>assignLibrary</b>(auto_ptr&lt; LibraryHandle &gt; library) (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>creator</b>() (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>decRC</b>() (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>incRC</b>() (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classpluginHandle__t.html#a1cd9add6bd5f697243cb182cbfa95d4d">decRC</a>()</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classpluginHandle__t.html#a6c0f72c56e2834cbb394de2a76acd0d6">getRC</a>()</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classpluginHandle__t.html#a4113d33e3f90f972bd21aa76a237cd18">incRC</a>()</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>isUnloadable</b>() (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>loaded</b>() (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>pluginHandle_t</b>(void *handle, pluginInstanceCreator_t *pluginInstanceCreator, void(*handleDestructor)(void *)) (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>removeInstance</b>(pluginInstance_t *instance) (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>onUnload</b>() (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classpluginHandle__t.html#ad71bbf8bc058bd30c487e0957136b5cf">pluginHandle_t</a>()</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td><code> [inline]</code></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>pluginHandle_t</b>(auto_ptr&lt; LibraryHandle &gt; library) (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td></td></tr>
+  <tr bgcolor="#f0f0f0"><td><b>pluginHandle_t</b>(const pluginHandle_t &amp;other) (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>~pluginHandle_t</b>() (defined in <a class="el" href="classpluginHandle__t.html">pluginHandle_t</a>)</td><td><a class="el" href="classpluginHandle__t.html">pluginHandle_t</a></td><td></td></tr>
 </table></div><!-- contents -->
 <!-- window showing the filter options -->
@@ -110,7 +114,7 @@ This is the complete list of members for <a class="el" href="classpluginHandle__
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 19 2013 15:15:12 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

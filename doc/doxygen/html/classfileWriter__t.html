@@ -108,8 +108,8 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfileWriter__t.html#a6e8580403cffb11f8fbae166120d4024">getFileName</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfileWriter__t.html#a09cc5b7982c3ab50f9c4eab808477c9d">getFileSize</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfileWriter__t.html#af18ff82e245cab0d97a1a09a7cf8b500">getMachineId</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae5734df5f07c686733cf37b95fbdcb08"></a><!-- doxytag: member="fileWriter_t::writeData" ref="ae5734df5f07c686733cf37b95fbdcb08" args="(long position, auto_ptr&lt; anyData &gt; &amp;data, thread_t &amp;caller)" -->
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>writeData</b> (long position, auto_ptr&lt; <a class="el" href="structanyData.html">anyData</a> &gt; &amp;data, <a class="el" href="classthread__t.html">thread_t</a> &amp;caller)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae7d054422febdbf585b35f2c2f188ed6"></a><!-- doxytag: member="fileWriter_t::writeData" ref="ae7d054422febdbf585b35f2c2f188ed6" args="(long position, auto_ptr&lt; anyData &gt; &amp;data)" -->
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>writeData</b> (long position, auto_ptr&lt; <a class="el" href="structanyData.html">anyData</a> &gt; &amp;data)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5473a9595c6ae4b50c6a317cb053c864"></a><!-- doxytag: member="fileWriter_t::run" ref="a5473a9595c6ae4b50c6a317cb053c864" args="()" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>run</b> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1859ec7df424f3b125833f02a85ab3c3"></a><!-- doxytag: member="fileWriter_t::autoDelete" ref="a1859ec7df424f3b125833f02a85ab3c3" args="()" -->
@@ -133,8 +133,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>zeroReferences</b> ()
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>cleanupCheck</b> (bool calledByThisThread=false)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a008087209a8f315475d08ed0c722d5bf"></a><!-- doxytag: member="fileWriter_t::writeBuffer" ref="a008087209a8f315475d08ed0c722d5bf" args="()" -->
 void&#160;</td><td class="memItemRight" valign="bottom"><b>writeBuffer</b> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a84a0fad8ab588424778f34fe89b1c039"></a><!-- doxytag: member="fileWriter_t::shouldRun" ref="a84a0fad8ab588424778f34fe89b1c039" args="()" -->
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>shouldRun</b> ()</td></tr>
 <tr><td colspan="2"><h2><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abe2c0644ae3e4d369e7935abc76774ea"></a><!-- doxytag: member="fileWriter_t::fName" ref="abe2c0644ae3e4d369e7935abc76774ea" args="" -->
@@ -147,6 +145,10 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>mId</b></td></tr>
 FILE *&#160;</td><td class="memItemRight" valign="bottom"><b>f</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af67039fdd5cd9dd81bd5d45a4e29f0fd"></a><!-- doxytag: member="fileWriter_t::mutex" ref="af67039fdd5cd9dd81bd5d45a4e29f0fd" args="" -->
 auto_ptr&lt; <a class="el" href="classmutex__t.html">mutex_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>mutex</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7493d73c763d517072f7ec02f33579e3"></a><!-- doxytag: member="fileWriter_t::inputSem" ref="a7493d73c763d517072f7ec02f33579e3" args="" -->
+<a class="el" href="classSemaphore.html">Semaphore</a>&#160;</td><td class="memItemRight" valign="bottom"><b>inputSem</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac3e66d670c0df11cf07bb04a5af53efe"></a><!-- doxytag: member="fileWriter_t::outputSem" ref="ac3e66d670c0df11cf07bb04a5af53efe" args="" -->
+<a class="el" href="classSemaphore.html">Semaphore</a>&#160;</td><td class="memItemRight" valign="bottom"><b>outputSem</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac3ecb5b52d8bee0957402354c6c45b19"></a><!-- doxytag: member="fileWriter_t::queue" ref="ac3ecb5b52d8bee0957402354c6c45b19" args="" -->
 priority_queue&lt; <a class="el" href="classdataFragment__t.html">dataFragment_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>queue</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="add3b29663cd94c5c0199a2031144b0c9"></a><!-- doxytag: member="fileWriter_t::lastpos" ref="add3b29663cd94c5c0199a2031144b0c9" args="" -->
@@ -155,10 +157,6 @@ long&#160;</td><td class="memItemRight" valign="bottom"><b>lastpos</b></td></tr>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>lastBatch</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acd212002853baf898126011fe29247c3"></a><!-- doxytag: member="fileWriter_t::bytes" ref="acd212002853baf898126011fe29247c3" args="" -->
 size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bytes</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9c8d80d7491dd4d7d1883b2ec089baac"></a><!-- doxytag: member="fileWriter_t::bufsiz" ref="a9c8d80d7491dd4d7d1883b2ec089baac" args="" -->
-size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bufsiz</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a8f234f884ba225e855d58edf78c645"></a><!-- doxytag: member="fileWriter_t::waitingThreads" ref="a3a8f234f884ba225e855d58edf78c645" args="" -->
-set&lt; <a class="el" href="classthread__t.html">thread_t</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>waitingThreads</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a61becd3e5af70be802834d43a97c2efd"></a><!-- doxytag: member="fileWriter_t::hardPause" ref="a61becd3e5af70be802834d43a97c2efd" args="" -->
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>hardPause</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad974f9e127fe8020be0cec54990f6637"></a><!-- doxytag: member="fileWriter_t::stop" ref="ad974f9e127fe8020be0cec54990f6637" args="" -->
@@ -319,7 +317,7 @@ IS_TRANSFER_ERROR, if file transfer was cancelled due to error (mainly lost conn
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 19 2013 15:15:12 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

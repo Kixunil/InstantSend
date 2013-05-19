@@ -96,7 +96,7 @@ Inheritance diagram for pluginInstance_t:</div>
  <div class="center">
   <img src="classpluginInstance__t.png" usemap="#pluginInstance_t_map" alt=""/>
   <map id="pluginInstance_t_map" name="pluginInstance_t_map">
-<area href="classpeer__t.html" title="Interface used fo communication with remote machines." alt="peer_t" shape="rect" coords="0,56,131,80"/>
+<area href="classpeer__t.html" title="Interface used for communication with remote machines." alt="peer_t" shape="rect" coords="0,56,131,80"/>
 <area href="classserverPlugin__t.html" title="Server interface." alt="serverPlugin_t" shape="rect" coords="141,56,272,80"/>
 <area href="classasyncDataCallback__t.html" title="Interface for processing data." alt="asyncDataCallback_t" shape="rect" coords="0,112,131,136"/>
 </map>
@@ -106,13 +106,13 @@ Inheritance diagram for pluginInstance_t:</div>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4e74ae8a2a9b9655d9de35f423d49152"></a><!-- doxytag: member="pluginInstance_t::pluginInstance_t" ref="a4e74ae8a2a9b9655d9de35f423d49152" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpluginInstance__t.html#a4e74ae8a2a9b9655d9de35f423d49152">pluginInstance_t</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af9cf9bea22802b36b3e80b65641b292d"></a><!-- doxytag: member="pluginInstance_t::pluginInstance_t" ref="af9cf9bea22802b36b3e80b65641b292d" args="(pluginMultiInstanceCreator_t &amp;instanceCreator)" -->
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpluginInstance__t.html#af9cf9bea22802b36b3e80b65641b292d">pluginInstance_t</a> (<a class="el" href="classpluginMultiInstanceCreator__t.html">pluginMultiInstanceCreator_t</a> &amp;instanceCreator)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpluginInstance__t.html#a81df28e84fba35ab9d2c2dacc94dfebb">reconfigure</a> (<a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *config)=0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">change configuration during run-time.  <a href="#a81df28e84fba35ab9d2c2dacc94dfebb"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpluginInstance__t.html#a92a1080a37261387f4b823ef6fadea38">~pluginInstance_t</a> ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor made virtual.  <a href="#a92a1080a37261387f4b823ef6fadea38"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="add5c4deae3b0c2a8f63974db70f25bbc"></a><!-- doxytag: member="pluginInstance_t::getCreator" ref="add5c4deae3b0c2a8f63974db70f25bbc" args="()" -->
+<a class="el" href="classpluginMultiInstanceCreator__t.html">pluginMultiInstanceCreator_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getCreator</b> ()</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Ancestor of all plugin instances. All plugin instances should inherit from this class. </p>
@@ -133,33 +133,6 @@ Public Member Functions</h2></td></tr>
 
 <p>Destructor made virtual. </p>
 <p>Purpose is, instance can be easily deleted anywhere in the code. </p>
-
-</div>
-</div>
-<hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a81df28e84fba35ab9d2c2dacc94dfebb"></a><!-- doxytag: member="pluginInstance_t::reconfigure" ref="a81df28e84fba35ab9d2c2dacc94dfebb" args="(jsonComponent_t *config)=0" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void <a class="el" href="classpluginInstance__t.html#a81df28e84fba35ab9d2c2dacc94dfebb">pluginInstance_t::reconfigure</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classjsonComponent__t.html">jsonComponent_t</a> *&#160;</td>
-          <td class="paramname"><em>config</em></td><td>)</td>
-          <td><code> [pure virtual]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>change configuration during run-time. </p>
-<p>This function has no purpose now and I'm unsure, if it'll have. It may be removed in the future. </p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramname">config</td><td>New configuration of plugin instance. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -185,7 +158,7 @@ Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 4 2013 14:50:38 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 19 2013 15:15:12 for InstantSend by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>
