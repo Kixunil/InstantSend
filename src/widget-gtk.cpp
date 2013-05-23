@@ -28,7 +28,7 @@
 
 #include "json.h"
 #include "sysapi.h"
-#include "multithread.h"
+//#include "multithread.h"
 
 #define _(str) gettext(str)
 
@@ -438,7 +438,7 @@ class instSendWidget : public Window, dialogControl {
 		instSendWidget();
 
 		void addFile(unsigned int id, const ustring &fileName, const ustring &machineId, uint64_t fileSize, char direction) {
-			mutex->get();
+			mutex.lock();
 			FileInfoItem &finfo = *new FileInfoItem();
 			auto_ptr<SimpleFileInfoRenderer> finfoRenderer;
 
@@ -471,11 +471,11 @@ class instSendWidget : public Window, dialogControl {
 			}
 			show_all_children();
 			trIcon.statusChanged();
-			mutex->release();
+			mutex.unlock();
 		}
 
 		inline void updateBytes(unsigned int id, uint64_t bytes) {
-			mutex->get();
+			mutex.lock();
 
 			std::map<unsigned int, FileInfoItem *>::iterator fileit = files.find(id);
 			if(fileit != files.end()) {
@@ -483,22 +483,22 @@ class instSendWidget : public Window, dialogControl {
 				file->setBytes(bytes);
 			}
 
-			mutex->release();
+			mutex.unlock();
 		}
 
 		void fileEnded(uint32_t id, uint32_t status) {
-			mutex->get();
+			mutex.lock();
 			std::map<unsigned int, FileInfoItem *>::iterator fileit = files.find(id);
 			// Ignore unknown files
 			if(fileit == files.end()) {
-				mutex->release();
+				mutex.unlock();
 				return;
 			}
 
 			FileInfoItem &file = *fileit->second;
 
 			if(status != 1) { // File finished TODO dont't ignore errors/cancel
-				mutex->release();
+				mutex.unlock();
 				return;
 			}
 			file.setStatus(6);
@@ -546,7 +546,7 @@ class instSendWidget : public Window, dialogControl {
 			show_all_children();
 			trIcon.statusChanged();
 
-			mutex->release();
+			mutex.unlock();
 		}
 
 		virtual ~instSendWidget() {}
@@ -618,7 +618,7 @@ class instSendWidget : public Window, dialogControl {
 		}
 
 	protected:
-		auto_ptr<mutex_t> mutex;
+		Mutex mutex;
 
 		ScrolledWindow scrollWindowAll, scrollWindowRecv, scrollWindowSend, scrollWindowPending, scrollWindowRecved;
 		VBox allBox, pendingBox, recvBox, sendBox, recvedBox;
@@ -708,7 +708,7 @@ filter_func (DBusConnection *connection,
 	return (handled ? DBUS_HANDLER_RESULT_HANDLED : DBUS_HANDLER_RESULT_NOT_YET_HANDLED);
 }
 
-instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendFileCount(0), recvFileCount(0) {
+instSendWidget::instSendWidget() : trIcon(this), sendFileCount(0), recvFileCount(0) {
 	try {
 		auto_ptr<jsonComponent_t> cfgptr;
 		try {
@@ -764,7 +764,7 @@ instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendF
 		return;
 	}
 
-	mutex->get();
+	mutex.lock();
 
 	add(notebook);
 	notebook.append_page(scrollWindowPending, _("Pending files"));
@@ -787,7 +787,7 @@ instSendWidget::instSendWidget() : mutex(mutex_t::getNew()), trIcon(this), sendF
 
 	show_all_children();
 
-	mutex->release();
+	mutex.unlock();
 
 	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_timeout), 100);
 	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_icon_timeout), 200);

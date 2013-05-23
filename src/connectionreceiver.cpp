@@ -9,25 +9,25 @@
 #include "appcontrol.h"
 
 int runningServers;
-auto_ptr<mutex_t> mRunningServers = mutex_t::getNew();
+Mutex mRunningServers;
 
-connectionReceiver_t::connectionReceiver_t(const string &plugin, const jsonComponent_t &config) : runningmutex(mutex_t::getNew()), running(true), pluginName(plugin), pluginConfig(config.clone()), pref(pluginList_t::instance()[pluginName]), server(pref.as<connectionCreator_t>()->newServer(*pluginConfig)) {
+connectionReceiver_t::connectionReceiver_t(const string &plugin, const jsonComponent_t &config) : running(true), pluginName(plugin), pluginConfig(config.clone()), pref(pluginList_t::instance()[pluginName]), server(pref.as<connectionCreator_t>()->newServer(*pluginConfig)) {
 	if(!server.valid()) throw runtime_error("Plugin instance creation failed");
 }
 
 bool connectionReceiver_t::checkRunning() {
-	runningmutex->get();
+	runningmutex.lock();
 	bool tmp = running;
-	runningmutex->release();
+	runningmutex.unlock();
 	return tmp;
 }
 
 void connectionReceiver_t::run() {
 	pluginInstanceAutoPtr<peer_t> client;
 
-	mRunningServers->get();
+	mRunningServers.lock();
 	++runningServers;
-	mRunningServers->release();
+	mRunningServers.unlock();
 
 	bcastServerStarted(*this);
 
@@ -36,19 +36,19 @@ void connectionReceiver_t::run() {
 		(new dataReceiver_t(client))->start();
 	}
 
-	runningmutex->get(); // synchronization trick
-	runningmutex->release();
+	runningmutex.lock(); // synchronization trick
+	runningmutex.unlock();
 
-	mRunningServers->get();
+	mRunningServers.lock();
 	--runningServers;
-	mRunningServers->release();
+	mRunningServers.unlock();
 
 	bcastServerStopped(*this);
 	unfreezeMainThread();
 }
 
 void connectionReceiver_t::stop() throw() {
-	runningmutex->get();
+	runningmutex.lock();
 
 	fprintf(stderr, "Stopping server.\n");
 
@@ -63,7 +63,7 @@ void connectionReceiver_t::stop() throw() {
 		fprintf(stderr, "Sorry, you must wait for server to stop\n");
 	}
 
-	runningmutex->release();
+	runningmutex.unlock();
 }
 
 const string &connectionReceiver_t::getPluginName() throw() {

@@ -31,7 +31,6 @@ bool dataFragment_t::writeData(FILE *file) const {
 }
 
 fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT) {
-	mutex = mutex_t::getNew();
 	fName = fileName;
 	fSize = fileSize;
 	mId = machineId;
@@ -39,6 +38,7 @@ fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, cons
 	lastBatch = 0;
 	bytes = 0;
 	stop = false;
+	hasStopped = false;
 	hardPause = false;
 	zr = true;
 	lastUpdate = 0;
@@ -53,33 +53,33 @@ fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, cons
 
 string fileWriter_t::getFileName() {
 	DMG;
-	mutex->get();        
+	mutex.lock();        
 	string fn = fName;
-	mutex->release();    
+	mutex.unlock();    
 	return fn;           
 }
 
 size_t fileWriter_t::getFileSize() {
 	DMG;
-	mutex->get();
+	mutex.lock();
 	size_t fs = fSize;
-	mutex->release();
+	mutex.unlock();
 	return fs;
 }
 
 string fileWriter_t::getMachineId() {
 	DMG;
-	mutex->get();
+	mutex.lock();
 	string mi = mId;
-	mutex->release();
+	mutex.unlock();
 	return mi;
 }
 
 int fileWriter_t::getTransferStatus() {
 	DMG;
-	mutex->get();
+	mutex.lock();
 	int ts = tStatus;
-	mutex->release();
+	mutex.unlock();
 	return ts;
 }
 
@@ -89,9 +89,9 @@ char fileWriter_t::getDirection() {
 
 bool fileWriter_t::empty() {
 	DMG;
-	mutex->get();
+	mutex.lock();
 	bool e = queue.empty();
-	mutex->release();
+	mutex.unlock();
 	return e;
 }
 
@@ -99,10 +99,10 @@ void fileWriter_t::writeBuffer() {
 	--outputSem;
 	if(stop) return;
 
-	mutex->get();
+	mutex.lock();
 	dataFragment_t fragment(queue.top());
 	queue.pop();
-	mutex->release();
+	mutex.unlock();
 
 	++inputSem;
 	while(!fragment.writeData(f) && !stop) {
@@ -121,7 +121,16 @@ void fileWriter_t::run() {
 		writeBuffer();
 	}
 
-	writeBuffer(); // try write remaining data
+	// try write remaining data (aborts on failure)
+	mutex.lock();
+	while(queue.size() && queue.top().writeData(f)) {
+		const dataFragment_t &fragment(queue.top());
+
+		bytes += fragment.size();
+		fragment.freeData();
+		queue.pop();
+	}
+	mutex.unlock();
 
 #ifdef DEBUG
 	fprintf(stderr, "Transferred %zu bytes out of %zu\n", bytes, fSize);
@@ -135,8 +144,10 @@ void fileWriter_t::run() {
 
 	stop = true;
 	bcastProgressUpdate(*this);
+	bcastProgressEnd(*this);
+	waitZR();
 	cleanupCheck(true);
-	
+	hasStopped = true;
 }
 
 bool fileWriter_t::writeData(long position, auto_ptr<anyData> &data) {
@@ -149,10 +160,10 @@ bool fileWriter_t::writeData(long position, auto_ptr<anyData> &data) {
 
 	--inputSem;
 
-	mutex->get();
+	mutex.lock();
 	if(lastpos > position) ++lastBatch;
 	queue.push(dataFragment_t(data, position, lastBatch));
-	mutex->release();
+	mutex.unlock();
 
 	++outputSem;
 
@@ -160,7 +171,7 @@ bool fileWriter_t::writeData(long position, auto_ptr<anyData> &data) {
 }
 
 bool fileWriter_t::autoDelete() {
-	return zr;
+	return zr && hasStopped;
 }
 
 size_t fileWriter_t::getTransferredBytes() {
@@ -169,51 +180,50 @@ size_t fileWriter_t::getTransferredBytes() {
 
 void fileWriter_t::pauseTransfer() {
 	DMG;
-	mutex->get();
+	mutex.lock();
 	hardPause = true;
 	pause();
-	mutex->release();
+	mutex.unlock();
 }
 
 void fileWriter_t::resumeTransfer() {
 	DMG;
-	mutex->get();
+	mutex.lock();
 	hardPause = false;
 	resume();
-	mutex->release();
+	mutex.unlock();
 }
 
 bool fileWriter_t::cleanupCheck(bool calledByThisThread) {
 	DMG;
-	mutex->get();
-	if(zr && stop) {
-		mutex->release();
-		bcastProgressEnd(*this);
+	mutex.lock();
+	if(zr && hasStopped) {
+		mutex.unlock();
 		fileList_t::getList().removeController(getId(), !calledByThisThread);
 		return true;
 	}
-	mutex->release();
+	mutex.unlock();
 	return false;
 }
 
 void fileWriter_t::zeroReferences() {
 	DMG;
-	mutex->get();
+	mutex.lock();
 	zr = true;
-	mutex->release();
+	mutex.unlock();
 	if(!cleanupCheck()) {
 		DMG;
-		mutex->get();
+		mutex.lock();
 		stop = true;
 		resume();
 		++outputSem;
-		mutex->release();
+		mutex.unlock();
 	}
 }
 
 fileWriter_t::~fileWriter_t() {
 	D("Destroying writer")
-	mutex->get();
+	mutex.lock();
 	D("Got mutex")
 	if(f) fclose(f);
 	D("File closed")
@@ -222,7 +232,7 @@ fileWriter_t::~fileWriter_t() {
 		queue.pop();
 	}
 	D("Data deleted")
-	mutex->release();
+	mutex.unlock();
 	D("Mutex released")
 }
 

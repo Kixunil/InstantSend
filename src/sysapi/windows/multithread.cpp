@@ -8,30 +8,29 @@
 #include "multithread.h"
 #include "windows-appcontrol.h"
 
-class windowsCriticalSection_t : public mutex_t {
+class WindowsMutexData : public Mutex::Data {
 	private:
 		CRITICAL_SECTION critical;
 	public:
-		windowsCriticalSection_t() {
+		WindowsMutexData() {
 			InitializeCriticalSection(&critical);
 		}
 
-		void get() {
+		void lock() {
 			EnterCriticalSection(&critical);
 		}
 
-		void release() {
+		void unlock() {
 			LeaveCriticalSection(&critical);
 		}
 
-		~windowsCriticalSection_t() {
+		~WindowsMutexData() {
 			DeleteCriticalSection(&critical);
 		}
 };
 
-auto_ptr<mutex_t> mutex_t::getNew() {
-	return auto_ptr<mutex_t>(new windowsCriticalSection_t());
-}
+Mutex::Mutex() : mData(new WindowsMutexData()) {}
+Mutex::Data::~Data() {}
 
 class windowsThreadData_t : public threadData_t {
 	private:
@@ -41,34 +40,16 @@ class windowsThreadData_t : public threadData_t {
 	public:
 		HANDLE threadHandle;
 		unsigned threadID;
-		auto_ptr<mutex_t> mutex, pausemutex, pausectrlmutex;
+		Mutex mutex, pausemutex, pausectrlmutex;
 /*		CONDITION_VARIABLE condition;
 		CRITICAL_SECTION condmutex;*/
 		thread_t *parent;
 		bool running;
 		bool paused;
 		windowsThreadData_t() {
-			mutex = mutex_t::getNew();
-			/*InitializeCriticalSection(condmutex);
-			InitializeConditionVariable(condition);*/
-			pausemutex = mutex_t::getNew();
-			pausemutex->get();
-			pausectrlmutex = mutex_t::getNew();
 		}
 
 		~windowsThreadData_t() {
-			pausectrlmutex->get();
-			/*if(paused) {
-				pausemutex->release();
-			}*/
-			pausemutex->release();
-			pausectrlmutex->release();
-			mutex->get();
-
-			//if(running) pthread_exit(&thread);
-			/*DeleteCriticalSection(&condmutex);
-			DeleteConditionVariable(&condition);*/
-			mutex->release();
 		}
 };
 
@@ -97,9 +78,9 @@ Semaphore::Data::~Data() {}
 
 void delThread(void *thread) {
 	windowsThreadData_t *t = (windowsThreadData_t *)thread;
-	t->mutex->get();
+	t->mutex.lock();
 	t->running = false;
-	t->mutex->release();
+	t->mutex.unlock();
 	if(t->parent->autoDelete()) delete t->parent;
 }
 
@@ -107,9 +88,7 @@ unsigned WINAPI startThread(LPVOID thread) {
 	windowsThreadData_t *td = (windowsThreadData_t *)thread;
 	td->running = true;
 	td->paused = false;
-	//pthread_cleanup_push(&delThread, thread); // TODO: find windows equivalent
 	td->parent->run();
-	//pthread_cleanup_pop(1);
 	return 0;
 }
 
@@ -117,7 +96,7 @@ void thread_t::start() {
 
 	threadData = auto_ptr<threadData_t>(new windowsThreadData_t());
 	windowsThreadData_t &tdata = dynamic_cast<windowsThreadData_t &>(*threadData.get());
-	tdata.mutex->get();
+	tdata.mutex.lock();
 	tdata.parent = this;
 	EnterCriticalSection(&threadCountMutex);
 	tdata.threadHandle = (HANDLE)_beginthreadex(NULL, 0, startThread, (void *)&tdata, 0, &tdata.threadID);
@@ -128,16 +107,16 @@ void thread_t::start() {
 	++threadCount;
 	LeaveCriticalSection(&threadCountMutex);
 	//if(autoDelete()) pthread_detach(tdata.thread);
-	tdata.mutex->release();
+	tdata.mutex.unlock();
 }
 
 void thread_t::pause() {
 	windowsThreadData_t &tdata = dynamic_cast<windowsThreadData_t &>(*threadData.get());
 	SuspendThread(tdata.threadHandle);
 	//EnterCriticalSection(&tdata.condmutex);
-	/*tdata.pausectrlmutex->get();
+	/*tdata.pausectrlmutex.lock();
 	tdata.paused = true;
-	tdata.pausectrlmutex->release();
+	tdata.pausectrlmutex.unlock();
 	*/
 	//LeaveCriticalSection(&tdata.condmutex);
 }
@@ -146,38 +125,36 @@ void thread_t::resume() {
 	windowsThreadData_t &tdata = dynamic_cast<windowsThreadData_t &>(*(threadData.get()));
 	ResumeThread(tdata.threadHandle);
 //	EnterCriticalSection(&tdata.condmutex);
-	/*tdata.pausectrlmutex->get();
+	/*tdata.pausectrlmutex.lock();
 	if(tdata.paused) {
 		tdata.paused = false;
-		tdata.pausemutex->release();
+		tdata.pausemutex.unlock();
 	}
-	tdata.pausectrlmutex->release();*/
+	tdata.pausectrlmutex.unlock();*/
 /*	LeaveCriticalSection(&tdata.condmutex);
 	WakeConditionVariable(&tdata.condition);*/
 }
 
 bool thread_t::running() {
 	windowsThreadData_t &tdata = dynamic_cast<windowsThreadData_t &>(*threadData.get());
-	tdata.pausectrlmutex->get();
+	tdata.pausectrlmutex.lock();
 	bool paused = tdata.paused;
-	tdata.pausectrlmutex->release();
+	tdata.pausectrlmutex.unlock();
 	return !paused;
 }
 
 void thread_t::pausePoint() {
 	windowsThreadData_t &tdata = dynamic_cast<windowsThreadData_t &>(*threadData.get());
 	//EnterCriticalSection(&tdata.condmutex);
-	tdata.pausectrlmutex->get();
+	tdata.pausectrlmutex.lock();
 	while(tdata.paused) {
 		//SleepConditionVariableCS(&tdata.condition, &tdata.condmutex, INFINITE);
-		tdata.pausectrlmutex->release();
-		tdata.pausemutex->get(); // This will cause intentional deadlock until thread is resumed
-		tdata.pausectrlmutex->get();
+		tdata.pausectrlmutex.unlock();
+		tdata.pausemutex.lock(); // This will cause intentional deadlock until thread is resumed
+		tdata.pausectrlmutex.lock();
 	}
 	//LeaveCriticalSection(&tdata.condmutex);
 }
-
-mutex_t::~mutex_t() {;}
 
 threadData_t::~threadData_t() {;}
 

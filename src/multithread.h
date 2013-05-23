@@ -5,12 +5,34 @@
 
 using namespace std;
 
-class mutex_t {
+class Mutex {
 	public:
-		virtual void get() = 0;
-		virtual void release() = 0;
-		static auto_ptr<mutex_t> getNew();
-		virtual ~mutex_t();
+		Mutex();
+
+		inline void lock() { mData->lock(); }
+		inline void unlock() { mData->unlock(); }
+
+		class Data {
+			public:
+				virtual void lock() = 0;
+				virtual void unlock() = 0;
+				virtual ~Data();
+		};
+
+	private:
+		auto_ptr<Mutex::Data> mData;
+
+		// copying disabled
+		Mutex(const Mutex &);
+		Mutex &operator=(const Mutex &);
+};
+
+class MutexHolder {
+	public:
+		inline MutexHolder(Mutex &mutex) : mMutex(mutex) { mMutex.lock(); }
+		inline ~MutexHolder() { mMutex.unlock(); }
+	private:
+		Mutex &mMutex;
 };
 
 class Semaphore {

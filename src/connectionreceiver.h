@@ -2,7 +2,7 @@
 #include "multithread.h"
 
 extern int runningServers;
-extern auto_ptr<mutex_t> mRunningServers;
+extern Mutex mRunningServers;
 
 class connectionReceiver_t: public thread_t, serverController_t {
 	public:
@@ -15,7 +15,7 @@ class connectionReceiver_t: public thread_t, serverController_t {
 		bool autoDelete();
 
 	private:
-		auto_ptr<mutex_t> runningmutex;
+		Mutex runningmutex;
 		volatile bool running;
 		string pluginName;
 		auto_ptr<jsonComponent_t> pluginConfig;

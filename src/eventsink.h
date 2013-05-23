@@ -51,15 +51,13 @@ class eventSink_t : public eventRegister_t {
 	SENDEVDECL(Plugin, Unload, const string);
 	private:
 		template <class TEvent, class TData> void sendEvent(set<TEvent *> &evSet, void (TEvent::*event)(TData &), TData &eventData) {
-			mMutex->get();
+			MutexHolder mh(mMutex);
 			for(typename set<TEvent *>::iterator it = evSet.begin(); it != evSet.end(); ++it) ((*it)->*event)(eventData);
-			mMutex->release();
 		}
 
 		map<string, PluginPtr<eventHandlerCreator_t> > eventPlugins;
-		auto_ptr<mutex_t> mMutex;
+		Mutex mMutex;
 	public:
-		inline eventSink_t() : mMutex(mutex_t::getNew()) {}
 		static eventSink_t &instance();
 		void autoLoad(jsonObj_t &plugins);
 		void loadEventPlugin(const string &name, jsonComponent_t &config);

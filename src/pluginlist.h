@@ -15,10 +15,10 @@ class pluginList_t { // Singleton DP
 	private:
 		map<string, pluginHandle_t> storage;
 		pluginLoader_t loader;
-		auto_ptr<mutex_t> modifyMutex;
+		Mutex modifyMutex;
 		eventSink_t *mSink;
 	public:
-		inline pluginList_t() : modifyMutex(mutex_t::getNew()), mSink(NULL) {}
+		inline pluginList_t() : mSink(NULL) {}
 		BPluginRef operator[](const string &name);
 		/*inline BPluginRef &operator[](const char *name) {
 			return (*this)[string(name)];
@@ -33,24 +33,16 @@ class pluginList_t { // Singleton DP
 		unsigned int count();
 
 		inline void modifyLock() {
-			modifyMutex->get();
+			modifyMutex.lock();
 		}
 
 		inline void modifyUnlock() {
-			modifyMutex->release();
+			modifyMutex.unlock();
 		}
 
 		inline void setSink(eventSink_t &sink) {
 			mSink = &sink;
 		}
-
-		/*inline void accessLock() {
-			modifyMutex->get();
-		}
-
-		inline void accessUnlock() {
-			modifyMutex->release();
-		}*/
 };
 
 #endif

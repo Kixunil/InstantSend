@@ -50,20 +50,17 @@ pluginInstanceCreator_t &getPluginInstanceCreator(const string &name) { // Inter
 */
 
 void pluginList_t::checkUnload(const map<string, pluginHandle_t>::iterator plugin) {
-	modifyLock();
+	MutexHolder mh(modifyMutex);
 	if(plugin->second.isUnloadable()) {
 		string pname(plugin->first);
 		storage.erase(plugin);
 		if(mSink) mSink->sendPluginUnload(pname);
 	}
-	modifyUnlock();
 }
 
 unsigned int pluginList_t::count() {
-	modifyMutex->get();
-	unsigned int count = storage.size();
-	modifyMutex->release();
-	return count;
+	MutexHolder mh(modifyMutex);
+	return storage.size();
 }
 
 /*

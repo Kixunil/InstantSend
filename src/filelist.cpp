@@ -12,25 +12,31 @@
 fileController_t::fileController_t(int id) {
 	identifier = id;
 	refcount = 0;
-	refmutex = mutex_t::getNew();
 }
 
 void fileController_t::incRC() {
-	refmutex->get();
+	refmutex.lock();
 	++refcount;
-	refmutex->release();
+	fprintf(stderr, "Controller RC: %d\n", refcount);
+	refmutex.unlock();
 }
 
 void fileController_t::decRC() {
-	refmutex->get();
+	refmutex.lock();
+	fprintf(stderr, "Controller RC: %d\n", refcount - 1);
 	if(!--refcount) {
-		refmutex->release();
+		refmutex.unlock();
 		zeroReferences();
-	} else refmutex->release();
+	} else refmutex.unlock();
+	++refSem;
 }
 
 int fileController_t::getId() {
 	return identifier;
+}
+
+void fileController_t::waitZR() {
+	while(refcount) --refSem;
 }
 
 fileController_t::~fileController_t() {
@@ -43,47 +49,45 @@ fileList_t &fileList_t::getList() {
 
 fileController_t &fileList_t::getController(int id, const string &fileName, size_t fileSize, const string &machineID) {
 	fileController_t *controller;
-	D("getController")
+	D("getController");
 	if(id) {
-		listmutex->get();
+		listmutex.lock();
 		map<int, fileController_t *>::iterator it = identifiers.find(id);
 		if(it == identifiers.end()) {
 			controller = insertController(id, fileName, fileSize, machineID);
 		} else controller = it->second;
-		listmutex->release();
+		listmutex.unlock();
 	} else {
-		D("Create new with random id")
-		listmutex->get();
-		D("Got mutex")
+		D("Create new with random id");
+		listmutex.lock();
+		D("Got mutex");
 		do {
 			id = random();
 			fprintf(stderr, "Trying id = %d\n", id);
 			fflush(stderr);
 		} while(identifiers.count(id));
-		D("inserting controller")
+		D("inserting controller");
 		controller = insertController(id, fileName, fileSize, machineID);
-		D("Releasing mutex")
-		listmutex->release();
+		D("Releasing mutex");
+		listmutex.unlock();
 	}
 
 	return *controller;
 }
 
 void fileList_t::removeController(int id, bool del) {
-	listmutex->get();
-	D("Removing controller")
+	MutexHolder mh(listmutex)
+	D("Removing controller");
 	map<int, fileController_t *>::iterator it;
 	it = identifiers.find(id);
 	if(it == identifiers.end()) {
-		D("Not found")
-		listmutex->release();
+		D("Not found");
 		return;
 	}
-	D("Found")
+	D("Found");
 	fileController_t *garbage = it->second;
 	identifiers.erase(it);
-	listmutex->release();
-	D("Controller removed")
+	D("Controller removed");
 	if(del) delete garbage;
-	D("Deleted")
+	D("Deleted");
 }

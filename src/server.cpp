@@ -26,9 +26,9 @@ string savedir;
 extern unsigned int threadCount;
 
 bool checkRunningServers() {
-	mRunningServers->get();
+	mRunningServers.lock();
 	bool result = runningServers;
-	mRunningServers->release();
+	mRunningServers.unlock();
 	return result;
 }
 

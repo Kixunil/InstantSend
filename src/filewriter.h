@@ -34,7 +34,7 @@ class fileWriter_t : public fileController_t, thread_t {
 		string mId;
 
 		FILE *f;
-		auto_ptr<mutex_t> mutex;
+		Mutex mutex;
 		Semaphore inputSem, outputSem;
 		priority_queue<dataFragment_t> queue;
 		bool empty();
@@ -45,7 +45,7 @@ class fileWriter_t : public fileController_t, thread_t {
 		size_t bytes;
 
 		bool hardPause;
-		bool stop;
+		bool stop, hasStopped;
 		bool zr;
 
 		int tStatus;

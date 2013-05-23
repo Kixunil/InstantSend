@@ -11,14 +11,12 @@ void eventSink_t::send ## evType ## evName (dataType &eventData) throw() {\
 
 #define EVENTDEF(evType) \
 	void eventSink_t::reg ## evType (event ## evType ## _t &eventHandler) throw() { \
-		mMutex->get(); \
+		MutexHolder mh(mMutex); \
 		evType ## Events.insert(&eventHandler); \
-		mMutex->release(); \
 	} \
 	void eventSink_t::unreg ## evType (event ## evType ## _t &eventHandler) throw() { \
-		mMutex->get(); \
+		MutexHolder mh(mMutex); \
 		evType ## Events.erase(&eventHandler); \
-		mMutex->release(); \
 	}
 
 //eventData_t::~eventData_t() {}
