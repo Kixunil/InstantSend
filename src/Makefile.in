@@ -120,8 +120,8 @@ client$(BINEXTENSION): ../include/pluginapi.h client.cpp libinstantsend-plugin$(
 server$(BINEXTENSION): filewriter.o filelist.o connectionreceiver.o datareceiver.o serverlist.o ../include/pluginapi.h server.cpp libinstantsend-plugin$(LIBEXTENSION) libinstantsend-json$(LIBEXTENSION) libinstantsend-common$(LIBEXTENSION)
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ filewriter.o filelist.o connectionreceiver.o datareceiver.o serverlist.o server.cpp -L. -linstantsend-plugin -linstantsend-json -linstantsend-sysapi -linstantsend-common $(LDFLAGS) $(SERVER_LDFLAGS)
 
-widget-gtk: libinstantsend-json$(LIBEXTENSION) libinstantsend-sysapi$(LIBEXTENSION) widget-gtk.cpp
-	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp -L. -linstantsend-json -linstantsend-sysapi -linstantsend-multithread $(WIDGET_GTK_LIBS)
+widget-gtk: libinstantsend-json$(LIBEXTENSION) libinstantsend-sysapi$(LIBEXTENSION) libinstantsend-common$(LIBEXTENSION) widget-gtk.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp -L. -linstantsend-json -linstantsend-sysapi -linstantsend-common $(WIDGET_GTK_LIBS)
 
 configtool$(BINEXTENSION): configtool.cpp sysapi.o libinstantsend-json$(LIBEXTENSION)
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ sysapi.o configtool.cpp -L. -linstantsend-json $(LDFLAGS)
