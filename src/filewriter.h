@@ -13,11 +13,11 @@ using namespace std;
 class dataFragment_t {
 	private:
 		anyData *dat;
-		long pos;
+		File::Size pos;
 		int batch;
 	public:
 		dataFragment_t(auto_ptr<anyData> &data, long position, int batchNumber);
-		bool writeData(FILE *file) const;
+		bool writeData(WritableFile &file) const;
 		bool operator<(const dataFragment_t &df) const;
 		inline size_t size() const {
 			return dat->size;
@@ -30,19 +30,19 @@ class dataFragment_t {
 class fileWriter_t : public fileController_t, thread_t {
 	protected:
 		string fName; 
-		size_t fSize; 
+		File::Size fSize; 
 		string mId;
 
-		FILE *f;
+		WritableFile file;
 		Mutex mutex;
 		Semaphore inputSem, outputSem;
 		priority_queue<dataFragment_t> queue;
 		bool empty();
 
-		long lastpos;
+		File::Size lastpos;
 		int lastBatch;
 
-		size_t bytes;
+		File::Size bytes;
 
 		bool hardPause;
 		bool stop, hasStopped;
@@ -58,13 +58,13 @@ class fileWriter_t : public fileController_t, thread_t {
 	public:
 		fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId);
 		string getFileName();
-		size_t getFileSize();
+		File::Size getFileSize();
 		string getMachineId();
 
 		bool writeData(long position, auto_ptr<anyData> &data);
 		void run();
 		bool autoDelete();
-		size_t getTransferredBytes();
+		File::Size getTransferredBytes();
 		int getTransferStatus();
 		char getDirection();
 

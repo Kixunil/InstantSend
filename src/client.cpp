@@ -12,18 +12,20 @@
 
 int outputpercentage = 0;
 
-int sendFile(pluginInstanceAutoPtr<peer_t> &client, FILE *file, const char *basename) {
-	long fs, sb;
-	if(fseek(file, 0, SEEK_END) < 0) throw runtime_error("Can't seek");
-	if((fs = ftell(file)) < 0) throw runtime_error("Unknown size");
-	rewind(file);
+int sendFile(pluginInstanceAutoPtr<peer_t> &client, File file, const char *basename) {
+	File::Size fs, sb;
+
+	fs = file.size();
+
+	fprintf(stderr, "File size: %llu\n", (unsigned long long)fs);
+	fflush(stderr);
 
 	auto_ptr<anyData> data(allocData(DMAXSIZE+1));
 
 	jsonObj_t msgobj;
 	msgobj.insertNew("service", new jsonStr_t("filetransfer"));
 	msgobj.insertNew("filename", new jsonStr_t(basename));
-	msgobj.insertNew("filesize", new jsonInt_t(fs));
+	msgobj.insertNew("filesize", new jsonInt_t((intL_t)fs));
 	string msg = msgobj.toString();
 	strcpy(data->data, msg.c_str());
 	data->size = msg.size() + 1;
@@ -47,27 +49,29 @@ int sendFile(pluginInstanceAutoPtr<peer_t> &client, FILE *file, const char *base
 		}
 	}
 
-	auto_ptr<jsonInt_t> fp(new jsonInt_t(0));
+	msgobj.deleteContent();
+
+	auto_ptr<jsonInt_t> fp(new jsonInt_t((intL_t)0));
 	msgobj.insertVal("position", fp.get());
 	sb = 0;
 
+	File::Size fpos = 0;
+	unsigned int fragmentcnt = 0;
 	do {
-		long fpos = ftell(file);
-		if(fpos < 0) throw runtime_error("Unknown position");
 		fp->setVal(fpos);
 		string msg = msgobj.toString();
 		strcpy(data->data, msg.c_str());
-		data->size = fread(data->data + msg.size() + 1, 1, 1022 - msg.size(), file);
-		if(ferror(file)) throw runtime_error("Can't read");
+		data->size = file.read(data->data + msg.size() + 1, DMAXSIZE - 1 - msg.size());
+		fpos += data->size;
 		sb += data->size;
 		data->size += msg.size() + 1;
 
 		if(!client->sendData(data.get())) throw runtime_error("Can't send!");
-		if(outputpercentage) {
+		if(outputpercentage && !(fragmentcnt = (fragmentcnt +1) % 5000)) {
 			printf("%ld\n", 100*sb / fs);
 			fflush(stdout);
 		}
-	} while(!feof(file));
+	} while(fpos < fs);
 	return 1;
 }
 
@@ -149,8 +153,7 @@ int main(int argc, char **argv) {
 					return 1;
 				}
 				// Open file
-				FILE *file = fopen(argv[i], "rb");
-				if(!file) throw runtime_error("Can't open file");
+				File file(argv[i]);
 
 				// Find way to send file
 				pluginInstanceAutoPtr<peer_t> client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));

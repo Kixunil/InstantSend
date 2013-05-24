@@ -23,10 +23,10 @@ class fileController_t : public fileStatus_t {
 class fileList_t {
 	protected:
 		map<int, fileController_t *> identifiers;
-		fileController_t *insertController(int id, const string &fileName, size_t fileSize, const string &machineID);
+		fileController_t *insertController(int id, const string &fileName, File::Size fileSize, const string &machineID);
 		Mutex listmutex;
 	public:
 		static fileList_t &getList();
-		fileController_t &getController(int id, const string &fileName, size_t fileSize, const string &machineID);
+		fileController_t &getController(int id, const string &fileName, File::Size, const string &machineID);
 		void removeController(int id, bool del);
 };

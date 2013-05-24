@@ -18,19 +18,13 @@ bool dataFragment_t::operator<(const dataFragment_t &df) const {
 	return batch < df.batch && pos < df.pos;
 }
 
-bool dataFragment_t::writeData(FILE *file) const {
-	//flockfile(file);
-	fseek(file, pos, SEEK_SET);
-	bool success = fwrite(dat->data, dat->size, 1, file);
-	if(!success) {
-		printf("Error occured: %s\n(tried to write %lu Bytes of data)\n", strerror(ferror(file)), (long)dat->size);
-		fflush(stdout);
-	}
-	//funlockfile(file);
-	return success;
+bool dataFragment_t::writeData(WritableFile &file) const {
+	file.write(dat->data, dat->size, pos);
+	//fprintf(stderr, "Written %zu bytes of data\n", dat->size);
+	return true;
 }
 
-fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT) {
+fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT), file(fileName.c_str()) {
 	fName = fileName;
 	fSize = fileSize;
 	mId = machineId;
@@ -42,10 +36,8 @@ fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, cons
 	hardPause = false;
 	zr = true;
 	lastUpdate = 0;
-	updateInterval = 500;
+	updateInterval = 5000;
 	tStatus = IS_TRANSFER_IN_PROGRESS;
-	f = fopen(fName.c_str(), "wb");
-	if(!f) throw runtime_error("Can't open file \"" + fName + " for writting.");
 	start();
 	bcastProgressBegin(*this);
 	D("broadcasted onBegin event");
@@ -59,7 +51,7 @@ string fileWriter_t::getFileName() {
 	return fn;           
 }
 
-size_t fileWriter_t::getFileSize() {
+File::Size fileWriter_t::getFileSize() {
 	DMG;
 	mutex.lock();
 	size_t fs = fSize;
@@ -105,7 +97,7 @@ void fileWriter_t::writeBuffer() {
 	mutex.unlock();
 
 	++inputSem;
-	while(!fragment.writeData(f) && !stop) {
+	while(!fragment.writeData(file) && !stop) {
 		pause();
 		pausePoint();
 	}
@@ -123,7 +115,7 @@ void fileWriter_t::run() {
 
 	// try write remaining data (aborts on failure)
 	mutex.lock();
-	while(queue.size() && queue.top().writeData(f)) {
+	while(queue.size() && queue.top().writeData(file)) {
 		const dataFragment_t &fragment(queue.top());
 
 		bytes += fragment.size();
@@ -174,7 +166,7 @@ bool fileWriter_t::autoDelete() {
 	return zr && hasStopped;
 }
 
-size_t fileWriter_t::getTransferredBytes() {
+File::Size fileWriter_t::getTransferredBytes() {
 	return bytes;
 }
 
@@ -225,8 +217,6 @@ fileWriter_t::~fileWriter_t() {
 	D("Destroying writer")
 	mutex.lock();
 	D("Got mutex")
-	if(f) fclose(f);
-	D("File closed")
 	while(!queue.empty()) {
 		queue.top().freeData();
 		queue.pop();
@@ -239,8 +229,9 @@ fileWriter_t::~fileWriter_t() {
 fileStatus_t::~fileStatus_t() {
 }
 
-fileController_t *fileList_t::insertController(int id, const string &fileName, size_t fileSize, const string &machineID) {
-	fprintf(stderr, "Creating controller for file %s (%zuB) with id %d\n", fileName.c_str(), fileSize, id);
+fileController_t *fileList_t::insertController(int id, const string &fileName, File::Size fileSize, const string &machineID) {
+	jsonInt_t tmp((intL_t)fileSize);
+	fprintf(stderr, "Creating controller for file %s (%sB) with id %d\n", fileName.c_str(), tmp.toString().c_str(), id);
 	fflush(stderr);
 	fileController_t *writer = new fileWriter_t(id, fileName, fileSize, machineID);
 	identifiers.insert(pair<int, fileController_t *>(id, writer));

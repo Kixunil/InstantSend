@@ -47,7 +47,7 @@ fileList_t &fileList_t::getList() {
 	return list;
 }
 
-fileController_t &fileList_t::getController(int id, const string &fileName, size_t fileSize, const string &machineID) {
+fileController_t &fileList_t::getController(int id, const string &fileName, File::Size fileSize, const string &machineID) {
 	fileController_t *controller;
 	D("getController");
 	if(id) {

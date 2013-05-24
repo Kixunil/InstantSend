@@ -38,7 +38,7 @@ void dataReceiver_t::run() {
 
 	data->size = DMAXSIZE;
 	received = cptr->recvData(data.get());
-	uint32_t fsize;
+	File::Size fsize;
 	if(received) {
 		data->data[data->size] = 0; // make sure it won't overflow
 		string header(data->data); // extract header
@@ -50,7 +50,7 @@ void dataReceiver_t::run() {
 
 			for(unsigned int i = 0; i < fname.size(); ++i) if(fname[i] == '/') fname[i] = '-'; //strip slashes TODO: use OS independent function
 #ifdef DEBUG
-			fprintf(stderr, "Receiving file %s (%d bytes)\n", fname.c_str(), fsize);
+			fprintf(stderr, "Receiving file %s (%zu bytes)\n", fname.c_str(), (size_t)fsize);
 			fflush(stderr);
 #endif
 
@@ -91,6 +91,7 @@ void dataReceiver_t::run() {
 		if(received) {
 			data->data[data->size] = 0;
 			header = string(data->data);
+			//fprintf(stderr, "Header: %s\n", header.c_str());
 			hlen = strlen(data->data);
 			try {
 				jsonObj_t h = jsonObj_t(&header);
