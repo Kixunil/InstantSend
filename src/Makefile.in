@@ -171,6 +171,12 @@ connectionreceiver.o: connectionreceiver.cpp
 serverlist.o: serverlist.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) -c -o $@ serverlist.cpp
 
+file-common.o: file-common.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ file-common.cpp
+
+file.o: sysapi/$(PLATFORM)/file.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(PLATFORM)/file.cpp
+
 appcontrol-platformdependent.o: sysapi/$(PLATFORM)/appcontrol-platformdependent.cpp
 	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ sysapi/$(PLATFORM)/appcontrol-platformdependent.cpp
 
@@ -189,8 +195,8 @@ libinstantsend-sysapi$(LIBEXTENSION): sysapi.o
 #libinstantsend-multithread$(LIBEXTENSION): multithread.o libinstantsend-common$(LIBEXTENSION)
 #	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ multithread.o $(LIBLDFLAGS) libinstantsend-common$(LIBEXTENSION) $(LDFLAGS)
 
-libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o libinstantsend-json$(LIBEXTENSION)
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ -I./sysapi/$(PLATFORM)/ appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o -L. -linstantsend-json $(LIBLDFLAGS) $(LDFLAGS)
+libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o file.o file-common.o libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ -I./sysapi/$(PLATFORM)/ appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o file.o file-common.o -L. -linstantsend-json $(LIBLDFLAGS) $(LDFLAGS)
 
 check:
 
