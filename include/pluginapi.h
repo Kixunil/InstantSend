@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "file.h"
 #include "json.h"
 
 #define DMAXSIZE 1024
@@ -156,7 +157,7 @@ class fileStatus_t {
 
 		/*! \return File size in bytes
 		 */
-		virtual size_t getFileSize() = 0;
+		virtual File::Size getFileSize() = 0;
 
 		/*! \return Human readable string, which identifies remote machine
 		 */
@@ -164,7 +165,7 @@ class fileStatus_t {
 
 		/*! \return Number of received/sent bytes of file (NOT inluding communication headers)
 		 */
-		virtual size_t getTransferredBytes() = 0;
+		virtual File::Size getTransferredBytes() = 0;
 
 		/*! \return IS_TRANSFER_IN_PROGRESS, if file hasn't been transferred yet;
 		 * \return IS_TRANSFER_FINISHED, if file has been transferred (fileStatus will be deleted soon);
