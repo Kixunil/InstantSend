@@ -110,10 +110,25 @@ jsonInt_t::jsonInt_t(string *str) {
 }
 
 string jsonInt_t::toString() {
-	char buf[10];
+	if(val == 0) return string("0");
+	char buf[3*sizeof(intL_t) + 2];
+	char *bptr = buf + 3*sizeof(intL_t) + 1;
+	*bptr-- = 0;
 
-	snprintf(buf, 10, "%d", getVal());
-	return string(buf);
+	bool negative = false;
+	intL_t tmp = val;
+	if(tmp < 0) {
+		tmp *= -1;
+		negative = true;
+	}
+
+	while(tmp) {
+		*bptr = '0' + (tmp % 10);
+		--bptr;
+		tmp /= 10;
+	}
+	if(negative) *bptr = '-'; else ++bptr;
+	return string(bptr);
 }
 
 jsonComponent_t *jsonInt_t::clone() const {

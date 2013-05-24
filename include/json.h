@@ -6,6 +6,8 @@
 #include <map>
 #include <memory>
 
+#include <stdint.h>
+
 // For debugging
 #define NOPURE
 
@@ -17,7 +19,7 @@
 
 using namespace std;
 
-typedef int intL_t;
+typedef int64_t intL_t;
 typedef double floatL_t;
 
 /*! Exception thrown on attempt to access not existing item in json object */
