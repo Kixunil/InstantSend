@@ -8,7 +8,7 @@
 
 #define DMG // fprintf(stderr, "Getting mutex at %d\n", __LINE__); fflush(stderr);
 
-dataFragment_t::dataFragment_t(auto_ptr<anyData> &data, long position, int batchNumber) {
+dataFragment_t::dataFragment_t(auto_ptr<anyData> &data, File::Size position, int batchNumber) {
 	dat = data.release();
 	pos = position;
 	batch = batchNumber;
@@ -24,7 +24,7 @@ bool dataFragment_t::writeData(WritableFile &file) const {
 	return true;
 }
 
-fileWriter_t::fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT), file(fileName.c_str()) {
+fileWriter_t::fileWriter_t(int id, const string &fileName, File::Size fileSize, const string &machineId) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT), file(fileName.c_str()) {
 	fName = fileName;
 	fSize = fileSize;
 	mId = machineId;
@@ -54,7 +54,7 @@ string fileWriter_t::getFileName() {
 File::Size fileWriter_t::getFileSize() {
 	DMG;
 	mutex.lock();
-	size_t fs = fSize;
+	File::Size fs = fSize;
 	mutex.unlock();
 	return fs;
 }
@@ -142,7 +142,7 @@ void fileWriter_t::run() {
 	hasStopped = true;
 }
 
-bool fileWriter_t::writeData(long position, auto_ptr<anyData> &data) {
+bool fileWriter_t::writeData(File::Size position, auto_ptr<anyData> &data) {
 	DMG;
 	// Just in case, so we don't insert empty data
 	if(!data->size) {

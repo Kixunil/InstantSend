@@ -1,3 +1,7 @@
+#ifdef WINDOWS
+#include <windows.h>
+#endif
+
 #include <string>
 
 class ENoSpace : public std::exception {
@@ -29,7 +33,12 @@ class EFileError : public std::exception {
 
 class File {
 	public:
+		// These should be practically same but just in case...
+#ifdef WINDOWS
+		typedef __int64 Size;
+#else
 		typedef off64_t Size;
+#endif
 
 		class Data {
 			public:

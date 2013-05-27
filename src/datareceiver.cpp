@@ -42,6 +42,7 @@ void dataReceiver_t::run() {
 	if(received) {
 		data->data[data->size] = 0; // make sure it won't overflow
 		string header(data->data); // extract header
+		fprintf(stderr, "Header: %s\n", header.c_str());
 		try {
 			jsonObj_t h(&header);
 			if(dynamic_cast<jsonStr_t &>(h.gie("service")) != "filetransfer") throw runtime_error("Service not supported");
@@ -54,7 +55,7 @@ void dataReceiver_t::run() {
 			fflush(stderr);
 #endif
 
-			writer = dynamic_cast<fileWriter_t *>(&flist.getController(0, combinePath(savedir, fname), (size_t)fsize, cptr->getMachineIdentifier()));
+			writer = dynamic_cast<fileWriter_t *>(&flist.getController(0, combinePath(savedir, fname), (File::Size)fsize, cptr->getMachineIdentifier()));
 			writer->incRC();
 			D("Writer created");
 
@@ -96,7 +97,7 @@ void dataReceiver_t::run() {
 			try {
 				jsonObj_t h = jsonObj_t(&header);
 
-				long position = dynamic_cast<jsonInt_t &>(h.gie("position")).getVal();
+				File::Size position = dynamic_cast<jsonInt_t &>(h.gie("position")).getVal();
 				auto_ptr<anyData> rawData = allocData(data->size - hlen - 1);
 				memcpy(rawData->data, data->data + hlen + 1, data->size - hlen - 1);
 				rawData->size = data->size - hlen - 1;

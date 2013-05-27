@@ -16,7 +16,7 @@ class dataFragment_t {
 		File::Size pos;
 		int batch;
 	public:
-		dataFragment_t(auto_ptr<anyData> &data, long position, int batchNumber);
+		dataFragment_t(auto_ptr<anyData> &data, File::Size position, int batchNumber);
 		bool writeData(WritableFile &file) const;
 		bool operator<(const dataFragment_t &df) const;
 		inline size_t size() const {
@@ -56,12 +56,12 @@ class fileWriter_t : public fileController_t, thread_t {
 		bool cleanupCheck(bool calledByThisThread = false);
 		void writeBuffer();
 	public:
-		fileWriter_t(int id, const string &fileName, size_t fileSize, const string &machineId);
+		fileWriter_t(int id, const string &fileName, File::Size fileSize, const string &machineId);
 		string getFileName();
 		File::Size getFileSize();
 		string getMachineId();
 
-		bool writeData(long position, auto_ptr<anyData> &data);
+		bool writeData(File::Size position, auto_ptr<anyData> &data);
 		void run();
 		bool autoDelete();
 		File::Size getTransferredBytes();
