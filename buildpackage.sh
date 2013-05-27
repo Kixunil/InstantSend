@@ -2,6 +2,16 @@
 
 # Builds debian package for your distribution
 
+if [ "$1" = "--keep-build-dir" ];
+then
+	KEEP_BUILD_DIR=1
+	shift
+else
+	KEEP_BUILD_DIR=0
+fi
+
+BINARY=""
+
 INSTANTSEND_VERSION=`grep '^AC_INIT' configure.ac | sed -re 's/^.*\[.*\].*\[([0-9.]*)\].*\[.*\].*$/\1/'`
 REVISION=0
 
@@ -94,24 +104,43 @@ echo Version: $INSTANTSEND_VERSION
 echo Revision: $REVISION
 echo Distribution: $DISTRIBUTION
 
-cp debian/control.$DISTRIBUTION debian/control
-cp debian/instantsend-filemanager-nautilus.install.$DISTRIBUTION cp debian/instantsend-filemanager-nautilus.install
-sed -e 's/###DISTRIBUTION###/'$DISTRIBUTION'/g' debian/changelog.in > debian/changelog
-
-if [ '!' -f "Makefile.in" ];
+if [ '!' -d build_package ];
 then
-	automake || exit 1
+	./make_upstream_tarball.sh "$INSTANTSEND_VERSION.$REVISION" -k
 fi
 
-BINARY=-b
+PACKAGE_NAME="$(sed -e 's/###DISTRIBUTION###/'$DISTRIBUTION'/g' debian/changelog.in | tee debian/changelog | sed -nre '1,1s/([^ ]*) \(([^\)]*)\).*$/\1_\2/p' debian/changelog)"
+
+# Upstream package is same for all distros
+ln ../instantsend_"$INSTANTSEND_VERSION.$REVISION".tar.bz2 "$PACKAGE_NAME.orig.tar.bz2" || BINARY="-B" # binary only, if source exists
+
+cd build_package || exit 1 # Prevent serious errors
+
+rm -rf debian
+cp -r ../debian ./
+
+cp debian/control.$DISTRIBUTION debian/control
+cp debian/instantsend-filemanager-nautilus.install.$DISTRIBUTION debian/instantsend-filemanager-nautilus.install
+
+#remove garbage
+rm debian/control.*
+rm debian/instantsend-filemanager-nautilus.install.*
+rm debian/changelog.in
+
 
 for ARG in "$@";
 do
-	if [ "$ARG" = "-B" -o "$ARG" = "-b" -o "$ARG" = "-A" ];
+	if [ "$ARG" = "-B" -o "$ARG" = "-b" -o "$ARG" = "-A" -o "$ARG" = "-F" ];
 	then
 		BINARY=""
 	fi
-
 done
 
+echo "------------------Building package------------------"
 dpkg-buildpackage $BINARY "$@" || exit 1
+
+cd ..
+if [ $KEEP_BUILD_DIR -eq 0 ];
+then
+	rm -r build_package
+fi
