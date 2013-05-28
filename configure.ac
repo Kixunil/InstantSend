@@ -217,10 +217,20 @@ AC_ARG_ENABLE([filemanager-nautilus],
 		]
 		)
 
+AC_ARG_ENABLE([doc-html],
+	      [AS_HELP_STRING([--enable-doc-html@<:@=yes|no|auto@:>@],
+			      [define whether HTML documentation should be built @<:@default=yes@:>@]
+			      )],
+			      [],
+			      [enable_doc_html=yes])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL # Do we need this?
+AS_IF([test "x$enable_doc_html" '!=' xno], [
+	AC_CHECK_PROGS([DOXYGEN], [doxygen])
+	])
 
 # Checks for libraries.
 
@@ -395,6 +405,10 @@ AS_IF([test "x$enable_widget_gtk" = xauto],
 	    )
 	])
 
+AS_IF([test "x$DOXYGEN" = "x"],
+      [have_doc_html=no],
+      [have_doc_html=yes])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_INLINE
@@ -426,6 +440,7 @@ AC_SUBST([have_scanner_avahi])
 AC_SUBST([have_caja_extension])
 AC_SUBST([have_nautilus_extension])
 AC_SUBST([nautilus_extension_version])
+AC_SUBST([have_doc_html])
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
@@ -436,7 +451,9 @@ AC_CONFIG_FILES([Makefile
 		 filemanagers/nautilus/Makefile
 		 po/Makefile
 		 po/widget-gtk/Makefile
-		 include/Makefile])
+		 include/Makefile
+		 doc/doxygen.conf
+		 doc/Makefile])
 
 AC_OUTPUT
 
@@ -474,5 +491,9 @@ AS_IF([test "x$have_nautilus_extension" = xyes], [
        info_msg="$info_msg
  - libnautilus-extension version: $nautilus_extension_version"
 ])
+
+info_msg="$info_msg
+----------------------------------Documentation---------------------------------
+HTML (Doxygen):                                                              $have_doc_html"
 
 AC_MSG_NOTICE([$info_msg])

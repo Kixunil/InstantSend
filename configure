@@ -606,6 +606,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+have_doc_html
 nautilus_extension_version
 have_nautilus_extension
 have_caja_extension
@@ -648,6 +649,7 @@ PKG_CONFIG
 EGREP
 GREP
 CPP
+DOXYGEN
 am__fastdepCC_FALSE
 am__fastdepCC_TRUE
 CCDEPMODE
@@ -750,6 +752,7 @@ enable_scanner_avahi
 enable_plugin_notify
 enable_filemanager_caja
 enable_filemanager_nautilus
+enable_doc_html
 enable_dependency_tracking
 '
       ac_precious_vars='build_alias
@@ -1454,6 +1457,9 @@ Optional Features:
                           define whether extension for nautilus file manager
                           should be compiled
                           [default=$default_filemanager_nautilus]
+  --enable-doc-html[=yes|no|auto]
+                          define whether HTML documentation should be built
+                          [default=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
 
@@ -3284,6 +3290,14 @@ fi
 fi
 
 
+# Check whether --enable-doc-html was given.
+if test "${enable_doc_html+set}" = set; then :
+  enableval=$enable_doc_html;
+else
+  enable_doc_html=yes
+fi
+
+
 # Checks for programs.
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -4652,6 +4666,52 @@ fi
 
 
  # Do we need this?
+if test "x$enable_doc_html" '!=' xno; then :
+
+	for ac_prog in doxygen
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_DOXYGEN+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$DOXYGEN"; then
+  ac_cv_prog_DOXYGEN="$DOXYGEN" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_DOXYGEN="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+DOXYGEN=$ac_cv_prog_DOXYGEN
+if test -n "$DOXYGEN"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $DOXYGEN" >&5
+$as_echo "$DOXYGEN" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$DOXYGEN" && break
+done
+
+
+fi
 
 # Checks for libraries.
 
@@ -6294,6 +6354,12 @@ fi
 
 fi
 
+if test "x$DOXYGEN" = "x"; then :
+  have_doc_html=no
+else
+  have_doc_html=yes
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
 $as_echo_n "checking for stdbool.h that conforms to C99... " >&6; }
@@ -6760,7 +6826,8 @@ done
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile scripts/Makefile data/Makefile plugins/Makefile filemanagers/caja/Makefile filemanagers/nautilus/Makefile po/Makefile po/widget-gtk/Makefile include/Makefile"
+
+ac_config_files="$ac_config_files Makefile src/Makefile scripts/Makefile data/Makefile plugins/Makefile filemanagers/caja/Makefile filemanagers/nautilus/Makefile po/Makefile po/widget-gtk/Makefile include/Makefile doc/doxygen.conf doc/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -7508,6 +7575,8 @@ do
     "po/Makefile") CONFIG_FILES="$CONFIG_FILES po/Makefile" ;;
     "po/widget-gtk/Makefile") CONFIG_FILES="$CONFIG_FILES po/widget-gtk/Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
+    "doc/doxygen.conf") CONFIG_FILES="$CONFIG_FILES doc/doxygen.conf" ;;
+    "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -8275,6 +8344,10 @@ if test "x$have_nautilus_extension" = xyes; then :
  - libnautilus-extension version: $nautilus_extension_version"
 
 fi
+
+info_msg="$info_msg
+----------------------------------Documentation---------------------------------
+HTML (Doxygen):                                                              $have_doc_html"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: $info_msg" >&5
 $as_echo "$as_me: $info_msg" >&6;}

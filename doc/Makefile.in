@@ -1,0 +1,35 @@
+DOXYGEN=@DOXYGEN@
+prefix=@prefix@
+PREFIX=$(prefix)
+exec_prefix=@exec_prefix@
+BINDIR=@bindir@
+LIBDIR=@libdir@
+datarootdir=@datarootdir@
+DATADIR=@datadir@
+SYSCONFDIR=@sysconfdir@
+ENABLE_HTML=@have_doc_html@
+top_srcdir=@top_srcdir@
+
+ALL=
+
+ifeq ($(ENABLE_HTML),yes)
+	ALL+=doxygen.stamp
+endif
+
+all: $(ALL)
+
+check:
+
+clean:
+	rm -rf "$(top_srcdir)" doxygen.stamp
+
+distclean: clean
+	rm -f Makefile
+
+doxygen.stamp: doxygen.conf
+	$(DOXYGEN) doxygen.conf
+	touch doxygen.stamp
+
+install:
+
+.PHONY: all check clean distclean install
