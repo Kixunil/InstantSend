@@ -42,7 +42,7 @@ void dataReceiver_t::run() {
 	if(received) {
 		data->data[data->size] = 0; // make sure it won't overflow
 		string header(data->data); // extract header
-		fprintf(stderr, "Header: %s\n", header.c_str());
+		//fprintf(stderr, "Header: %s\n", header.c_str());
 		try {
 			jsonObj_t h(&header);
 			if(dynamic_cast<jsonStr_t &>(h.gie("service")) != "filetransfer") throw runtime_error("Service not supported");
@@ -79,6 +79,7 @@ void dataReceiver_t::run() {
 		}
 	} else {
 		fprintf(stderr, "No data received - connection problem?\n");
+		if(writer) writer->decRC();
 		return;
 	}
 
