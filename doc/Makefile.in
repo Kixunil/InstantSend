@@ -21,7 +21,7 @@ all: $(ALL)
 check:
 
 clean:
-	rm -rf "$(top_srcdir)" doxygen.stamp
+	rm -rf doxygen doxygen.stamp
 
 distclean: clean
 	rm -f Makefile
