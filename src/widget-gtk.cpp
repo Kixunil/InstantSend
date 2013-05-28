@@ -49,24 +49,26 @@ class observer_t {
 		virtual void updateData() = 0;
 };
 
+class FileInfoContainer {
+	public:
+		virtual void removeFile(uint32_t id) = 0;
+};
+
 class FileInfoItem {
 	private:
+		uint32_t id;
 		ustring fileName;
 		ustring peerName;
 		char status;
 		char direction;
 		uint64_t fileSize, bytes;
 		set <observer_t *> observers;
+		FileInfoContainer &finfcont;
 
 	public:
 		typedef set<observer_t *>::iterator obsiterator;
 
-		inline FileInfoItem() {
-			direction = 0;
-			bytes = 0;
-		}
-		inline FileInfoItem(char dir) {
-			direction = dir;
+		inline FileInfoItem(FileInfoContainer &fcont, uint32_t fileId, char dir = 0) : id(fileId), finfcont(fcont), direction(dir), bytes(0) {
 		}
 
 		inline void setDirection(char d) {
@@ -150,6 +152,18 @@ class FileInfoItem {
 			for(set<observer_t *>::iterator it = observers.begin(); it != observers.end(); ++it) {
 				(*it)->updateData();
 			}
+		}
+
+		void selfRemove() {
+			finfcont.removeFile(id);
+		}
+
+		void openFile() {
+			system((ustring("if zenity --question --title=\"") + _("InstantSend") + "\" --text=\"" + _("Opening received files could be dangerous. Do you want to continue?") + "\"; then xdg-open \"" + fileName + "\"; fi &").c_str());
+		}
+
+		void deleteFile() {
+			system((ustring("if zenity --question --title=\"") + _("InstantSend") + "\" --text=\"" + _("Do you really want to delete this file?") + "\"; then rm \"" + fileName + "\"; fi &").c_str());
 		}
 };
 
@@ -346,33 +360,45 @@ class SimpleFileInfoRenderer : public observer_t {
 		int lastStatus;
 
 	public:
-		Label fileName, peerName;
+		Label fileName, peerName, errorlabel;
 		ProgressBar progress;
 		VBox mainBox;
 		VBox textInfo;
 		HBox info;
 		HBox progressContainer, buttonContainer;
-		Button pause, cancel, open, opendir, remove, deletedata;
-		Image icon, iconpause, iconcancel, iconopen, icondir, icondelete, iconremove;
-		SimpleFileInfoRenderer(FileInfoItem *fileInfo) : finfo(fileInfo), lastStatus(0), pause(_("Pause")), cancel(_("Cancel")), open(_("Open file")), opendir(_("Open directory")), remove(_("Remove from list")), deletedata(_("Delete file")), icon(fileInfo->getDirection()?Stock::GOTO_TOP:Stock::GOTO_BOTTOM, IconSize(ICON_SIZE_DND)), iconpause(Stock::MEDIA_PAUSE, IconSize(ICON_SIZE_BUTTON)), iconcancel(Stock::CANCEL, IconSize(ICON_SIZE_BUTTON)), iconopen(Stock::OPEN, IconSize(ICON_SIZE_BUTTON)), icondir(Stock::DIRECTORY, IconSize(ICON_SIZE_BUTTON)), icondelete(Stock::DELETE, IconSize(ICON_SIZE_BUTTON)), iconremove(Stock::REMOVE, IconSize(ICON_SIZE_BUTTON)) {
+		Button pause, cancel, open, remove, deletedata;
+		Image icon, iconpause, iconcancel, iconopen, icondelete, iconremove;
+		SimpleFileInfoRenderer(FileInfoItem *fileInfo) :
+			finfo(fileInfo),
+			lastStatus(0),
+			pause(_("Pause")),
+			cancel(_("Cancel")),
+			open(_("Open file")),
+			remove(_("Remove from list")),
+			deletedata(_("Delete file")),
+			icon(fileInfo->getDirection()?Stock::GOTO_TOP:Stock::GOTO_BOTTOM, IconSize(ICON_SIZE_DND)),
+			iconpause(Stock::MEDIA_PAUSE, IconSize(ICON_SIZE_BUTTON)),
+			iconcancel(Stock::CANCEL, IconSize(ICON_SIZE_BUTTON)),
+			iconopen(Stock::OPEN, IconSize(ICON_SIZE_BUTTON)),
+			icondelete(Stock::DELETE, IconSize(ICON_SIZE_BUTTON)),
+			iconremove(Stock::REMOVE, IconSize(ICON_SIZE_BUTTON)) {
+
 			textInfo.pack_start(fileName, PACK_EXPAND_WIDGET);
 			textInfo.pack_start(peerName, PACK_EXPAND_WIDGET);
 			progressContainer.pack_start(progress, PACK_EXPAND_WIDGET);
-			progressContainer.pack_start(pause, PACK_SHRINK);
-			progressContainer.pack_start(cancel, PACK_SHRINK);
+			//progressContainer.pack_start(pause, PACK_SHRINK);
+			//progressContainer.pack_start(cancel, PACK_SHRINK);
 			info.pack_start(textInfo, PACK_EXPAND_WIDGET);
 			info.pack_start(icon, PACK_SHRINK);
 			mainBox.pack_start(info, PACK_SHRINK);
 			pause.set_image(iconpause);
 			cancel.set_image(iconcancel);
 			open.set_image(iconopen);
-			opendir.set_image(icondir);
 			remove.set_image(iconremove);
 			deletedata.set_image(icondelete);
-			buttonContainer.pack_start(open, PACK_SHRINK);
-			buttonContainer.pack_start(opendir, PACK_SHRINK);
-			buttonContainer.pack_start(remove, PACK_SHRINK);
-			buttonContainer.pack_start(deletedata, PACK_SHRINK);
+			open.signal_clicked().connect( sigc::mem_fun(*finfo, &FileInfoItem::openFile));
+			remove.signal_clicked().connect( sigc::mem_fun(*finfo, &FileInfoItem::selfRemove));
+			deletedata.signal_clicked().connect( sigc::mem_fun(*finfo, &FileInfoItem::deleteFile));
 		mainBox.pack_start(progressContainer, PACK_SHRINK);
 			updateData();
 		}
@@ -400,10 +426,12 @@ class SimpleFileInfoRenderer : public observer_t {
 				case 3:
 					progress.set_text(ustring(_("Sending")) + " (" + intToStr(finfo->getProgress()) + "%)");
 					progress.set_fraction((float)finfo->getProgress() / 100);
+					lastStatus = 3;
 					break;
 				case 4:
 					progress.set_text(ustring(_("Receiving")) + " (" + intToStr(finfo->getProgress()) + "%)");
 					progress.set_fraction((float)finfo->getProgress() / 100);
+					lastStatus = 4;
 					break;
 				case 5:
 					if(lastStatus != 5) {
@@ -415,9 +443,18 @@ class SimpleFileInfoRenderer : public observer_t {
 				case 6:
 					if(lastStatus != 6) {
 						progressContainer.remove(progress);
-						progressContainer.remove(pause);
-						progressContainer.remove(cancel);
-						progressContainer.pack_start(buttonContainer, PACK_EXPAND_PADDING);
+						/*progressContainer.remove(pause);
+						progressContainer.remove(cancel);*/
+						if(finfo->getProgress() == 100)
+							buttonContainer.pack_start(open, PACK_SHRINK);
+						else {
+							errorlabel.set_markup("<span foreground=\"red\">" + Markup::escape_text(_("Error")) + "</span>");
+							progressContainer.pack_start(errorlabel, PACK_EXPAND_PADDING);
+						}
+						buttonContainer.pack_start(remove, PACK_SHRINK);
+						buttonContainer.pack_start(deletedata, PACK_SHRINK);
+						progressContainer.pack_start(buttonContainer, finfo->getProgress() == 100?PACK_EXPAND_PADDING:PACK_SHRINK);
+						progressContainer.show_all_children();
 						lastStatus = 6;
 					}
 					break;
@@ -433,13 +470,13 @@ class SimpleFileInfoRenderer : public observer_t {
 
 Main *appPtr;
 
-class instSendWidget : public Window, dialogControl {
+class instSendWidget : public Window, public dialogControl, public FileInfoContainer {
 	public:
 		instSendWidget();
 
 		void addFile(unsigned int id, const ustring &fileName, const ustring &machineId, uint64_t fileSize, char direction) {
 			mutex.lock();
-			FileInfoItem &finfo = *new FileInfoItem();
+			FileInfoItem &finfo = *new FileInfoItem(*this, id);
 			auto_ptr<SimpleFileInfoRenderer> finfoRenderer;
 
 			finfo.setDirection(direction);
@@ -451,6 +488,9 @@ class instSendWidget : public Window, dialogControl {
 
 			finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&finfo));
 			allBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
+
+			int lastpage = notebook.get_current_page();
+			notebook.set_current_page(0);
 			finfo.addObserver(*finfoRenderer.get());
 			finfoRenderer.release();
 			allBox.queue_draw();
@@ -470,6 +510,7 @@ class instSendWidget : public Window, dialogControl {
 				recvBox.queue_draw();
 			}
 			show_all_children();
+			notebook.set_current_page(lastpage);
 			trIcon.statusChanged();
 			mutex.unlock();
 		}
@@ -497,14 +538,12 @@ class instSendWidget : public Window, dialogControl {
 
 			FileInfoItem &file = *fileit->second;
 
-			if(status != 1) { // File finished TODO dont't ignore errors/cancel
-				mutex.unlock();
-				return;
-			}
-			file.setStatus(6);
-
+			if(status == 1) {
 			// In case we didn't receive update bytes
-			file.setBytes(file.getSize());
+				file.setBytes(file.getSize());
+			}
+
+			file.setStatus(6);
 
 			for(FileInfoItem::obsiterator it = file.firstObserver(); it != file.lastObserver(); ++it) {
 				SimpleFileInfoRenderer *fiRenderer = dynamic_cast<SimpleFileInfoRenderer *>(*it);
@@ -535,6 +574,8 @@ class instSendWidget : public Window, dialogControl {
 			recvedBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
 			finfoRenderer->getWidget().show_now();
 
+			int lastpage = notebook.get_current_page();
+			notebook.set_current_page(1);
 			file.addObserver(*finfoRenderer);
 			finfoRenderer->updateData();
 			finfoRenderer.release();
@@ -544,9 +585,58 @@ class instSendWidget : public Window, dialogControl {
 			scrollWindowRecved.show_all();
 
 			show_all_children();
+			notebook.set_current_page(lastpage);
 			trIcon.statusChanged();
 
 			mutex.unlock();
+		}
+
+		void removeFile(uint32_t id) {
+			mutex.lock();
+			std::map<unsigned int, FileInfoItem *>::iterator fileit = files.find(id);
+			std::map<unsigned int, FileInfoItem *> *srcmap = &files;
+			// Ignore unknown files
+			if(fileit == files.end()) {
+				fileit = received.find(id);
+				srcmap = &received;
+				if(fileit == received.end()) {
+					mutex.unlock();
+					return;
+				}
+			}
+
+			FileInfoItem &file = *fileit->second;
+			for(FileInfoItem::obsiterator it = file.firstObserver(); it != file.lastObserver(); ++it) {
+				SimpleFileInfoRenderer *fiRenderer = dynamic_cast<SimpleFileInfoRenderer *>(*it);
+				if(!fiRenderer) continue;
+
+				Widget & itemwidget = fiRenderer->getWidget();
+				allBox.remove(itemwidget);
+				if(file.getDirection()) {
+					sendBox.remove(itemwidget);
+				} else {
+					recvBox.remove(itemwidget);
+				}
+
+				delete fiRenderer;
+			}
+
+			srcmap->erase(fileit);
+			mutex.unlock();
+			delete &file;
+		}
+
+		/*void onswitch(GtkNotebookPage *, guint) {
+			show_all_children();
+		}*/
+
+		void openDir(){
+#ifndef WINDOWS
+			pid_t pid = fork();
+			if(!pid) {
+				exit(system("xdg-open \"$HOME/.instantsend/files\""));
+			}
+#endif
 		}
 
 		virtual ~instSendWidget() {}
@@ -621,7 +711,11 @@ class instSendWidget : public Window, dialogControl {
 		Mutex mutex;
 
 		ScrolledWindow scrollWindowAll, scrollWindowRecv, scrollWindowSend, scrollWindowPending, scrollWindowRecved;
-		VBox allBox, pendingBox, recvBox, sendBox, recvedBox;
+		VBox allBox, pendingBox, recvBox, sendBox, recvedBox, mainVBox;
+		HBox buttonBar;
+		Button btnSendFiles, btnOpenDir, btnQuit;
+
+		Image iconsend, icondir, iconquit;
 
 		std::map<unsigned int, FileInfoItem *> files, pending, received;
 
@@ -708,8 +802,26 @@ filter_func (DBusConnection *connection,
 	return (handled ? DBUS_HANDLER_RESULT_HANDLED : DBUS_HANDLER_RESULT_NOT_YET_HANDLED);
 }
 
-instSendWidget::instSendWidget() : trIcon(this), sendFileCount(0), recvFileCount(0) {
+instSendWidget::instSendWidget() :
+	trIcon(this),
+	sendFileCount(0),
+	recvFileCount(0),
+	btnSendFiles(_("Send files")),
+	btnOpenDir(_("Open directory")),
+	btnQuit(_("Quit")),
+	iconsend(),
+	icondir(Stock::DIRECTORY, IconSize(ICON_SIZE_BUTTON)),
+	iconquit(Stock::QUIT, IconSize(ICON_SIZE_BUTTON)) {
+	
 	try {
+		iconsend.set_from_icon_name(ustring("document-send"), ICON_SIZE_BUTTON);
+		btnSendFiles.set_image(iconsend);
+		btnOpenDir.set_image(icondir);
+		btnQuit.set_image(iconquit);
+		btnSendFiles.signal_clicked().connect( sigc::mem_fun(*this, &instSendWidget::sendFiles));
+		btnOpenDir.signal_clicked().connect( sigc::mem_fun(*this, &instSendWidget::openDir));
+		btnQuit.signal_clicked().connect( sigc::mem_fun(*this, &instSendWidget::quit));
+
 		auto_ptr<jsonComponent_t> cfgptr;
 		try {
 			string cfgfile = combinePath(getUserDir(), "widget-gtk.cfg");
@@ -766,11 +878,19 @@ instSendWidget::instSendWidget() : trIcon(this), sendFileCount(0), recvFileCount
 
 	mutex.lock();
 
-	add(notebook);
-	notebook.append_page(scrollWindowPending, _("Pending files"));
-	notebook.append_page(scrollWindowAll, _("Files in progress"));
+	add(mainVBox);
+	
+	buttonBar.pack_start(btnSendFiles, PACK_SHRINK);
+	buttonBar.pack_start(btnOpenDir, PACK_SHRINK);
+	buttonBar.pack_start(btnQuit, PACK_SHRINK);
+
+	mainVBox.pack_start(buttonBar, PACK_SHRINK);
+	mainVBox.pack_start(notebook, PACK_EXPAND_WIDGET);
+
+	//notebook.append_page(scrollWindowPending, _("Pending files"));
+	//notebook.append_page(scrollWindowAll, _("Files in progress"));
 	notebook.append_page(scrollWindowRecv, _("Incoming files"));
-	notebook.append_page(scrollWindowSend, _("Outgoing files"));
+	//notebook.append_page(scrollWindowSend, _("Outgoing files"));
 	notebook.append_page(scrollWindowRecved, _("Received files"));
 
 	scrollWindowPending.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -779,10 +899,10 @@ instSendWidget::instSendWidget() : trIcon(this), sendFileCount(0), recvFileCount
 	scrollWindowSend.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	scrollWindowRecved.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	scrollWindowAll.add(allBox);
+	//scrollWindowAll.add(allBox);
 	scrollWindowRecv.add(recvBox);
-	scrollWindowSend.add(sendBox);
-	scrollWindowPending.add(pendingBox);
+	//scrollWindowSend.add(sendBox);
+	//scrollWindowPending.add(pendingBox);
 	scrollWindowRecved.add(recvedBox);
 
 	show_all_children();
@@ -791,6 +911,7 @@ instSendWidget::instSendWidget() : trIcon(this), sendFileCount(0), recvFileCount
 
 	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_timeout), 100);
 	signal_timeout().connect(sigc::mem_fun(*this, &instSendWidget::on_icon_timeout), 200);
+	//notebook.signal_switch_page().connect(sigc::mem_fun(*this, &instSendWidget::onswitch));
 }
 
 int main(int argc, char *argv[]) {
