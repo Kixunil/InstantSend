@@ -176,7 +176,11 @@ void jsonFloat_t::fromString(string *str) {
 
 	str->erase(0, 1);
 	expval = parseInt(str);
+#ifdef __APPLE__
+	res *= pow((double)10, (int)expval);
+#else
 	res *= pow((double)10, expval);
+#endif
 	setVal(res);
 }
 

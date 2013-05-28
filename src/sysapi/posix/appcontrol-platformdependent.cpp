@@ -12,11 +12,15 @@
 #include <unistd.h>
 #include <cstdio>
 #include <queue>
+#include <signal.h>
 
 #include "posix-appcontrol.h"
 
 #ifndef UNIX_PATH_MAX
 #define UNIX_PATH_MAX    108
+#endif
+#ifdef __APPLE__
+	#define O_CLOEXEC 0
 #endif
 
 using namespace std;
@@ -102,6 +106,7 @@ void onAppStart(int argc, char **argv) {
 	struct sigaction sa;
 	sa.sa_handler = &sighandler;
 	sigemptyset(&sa.sa_mask);
+
 	// Ignore SIGCHLD, when child receives SIGSTOP
 	sa.sa_flags = SA_NOCLDSTOP;
 	sigaction(SIGCHLD, &sa, NULL);

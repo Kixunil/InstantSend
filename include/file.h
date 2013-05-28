@@ -2,6 +2,10 @@
 #include <windows.h>
 #endif
 
+#ifdef __APPLE__
+	#define off64_t off_t
+#endif
+
 #include <string>
 
 class ENoSpace : public std::exception {
