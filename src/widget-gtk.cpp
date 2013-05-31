@@ -159,11 +159,11 @@ class FileInfoItem {
 		}
 
 		void openFile() {
-			system((ustring("if zenity --question --title=\"") + _("InstantSend") + "\" --text=\"" + _("Opening received files could be dangerous. Do you want to continue?") + "\"; then xdg-open \"" + fileName + "\"; fi &").c_str());
+			system((ustring("if zenity --question --title=\"InstantSend\" --text=\"") + _("Opening received files could be dangerous. Do you want to continue?") + "\"; then xdg-open \"" + fileName + "\"; fi &").c_str());
 		}
 
 		void deleteFile() {
-			system((ustring("if zenity --question --title=\"") + _("InstantSend") + "\" --text=\"" + _("Do you really want to delete this file?") + "\"; then rm \"" + fileName + "\"; fi &").c_str());
+			system((ustring("if zenity --question --title=\"InstantSend\" --text=\"") + _("Do you really want to delete this file?") + "\"; then rm \"" + fileName + "\" && zenity --info --title=\"InstantSend\" --text=\"" + _("File deleted") + "\"; fi &").c_str());
 		}
 };
 
@@ -440,12 +440,14 @@ class SimpleFileInfoRenderer : public observer_t {
 					}
 					progress.set_fraction((float)finfo->getProgress() / 100);
 					break;
-				case 6:
-					if(lastStatus != 6) {
+					
+				case 6: // Finished  	    	  		    	 		  	    	      	 	 			 		 				 		 		   		  		 
+				case 7: // Error
+					if(lastStatus != 6 && lastStatus != 7) {
 						progressContainer.remove(progress);
 						/*progressContainer.remove(pause);
 						progressContainer.remove(cancel);*/
-						if(finfo->getProgress() == 100)
+						if(finfo->getStatus() == 6)
 							buttonContainer.pack_start(open, PACK_SHRINK);
 						else {
 							errorlabel.set_markup("<span foreground=\"red\">" + Markup::escape_text(_("Error")) + "</span>");
@@ -453,9 +455,9 @@ class SimpleFileInfoRenderer : public observer_t {
 						}
 						buttonContainer.pack_start(remove, PACK_SHRINK);
 						buttonContainer.pack_start(deletedata, PACK_SHRINK);
-						progressContainer.pack_start(buttonContainer, finfo->getProgress() == 100?PACK_EXPAND_PADDING:PACK_SHRINK);
+						progressContainer.pack_start(buttonContainer, finfo->getStatus() == 6?PACK_EXPAND_PADDING:PACK_SHRINK);
 						progressContainer.show_all_children();
-						lastStatus = 6;
+						lastStatus = finfo->getStatus();
 					}
 					break;
 				
@@ -541,9 +543,9 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 			if(status == 1) {
 			// In case we didn't receive update bytes
 				file.setBytes(file.getSize());
-			}
+				file.setStatus(6); // Success
+			} else file.setStatus(7);  // Error
 
-			file.setStatus(6);
 
 			for(FileInfoItem::obsiterator it = file.firstObserver(); it != file.lastObserver(); ++it) {
 				SimpleFileInfoRenderer *fiRenderer = dynamic_cast<SimpleFileInfoRenderer *>(*it);
