@@ -7,6 +7,7 @@
 #include "eventsink.h"
 
 #define DMG // fprintf(stderr, "Getting mutex at %d\n", __LINE__); fflush(stderr);
+#define DEBUG
 
 dataFragment_t::dataFragment_t(auto_ptr<anyData> &data, File::Size position, int batchNumber) {
 	dat = data.release();
@@ -97,12 +98,12 @@ void fileWriter_t::writeBuffer() {
 	mutex.unlock();
 
 	++inputSem;
-	while(!fragment.writeData(file) && !stop) {
+	bool written;
+	while(!(written = fragment.writeData(file)) && !stop) {
 		pause();
 		pausePoint();
 	}
-	if(stop) return;
-	bytes += fragment.size();
+	if(written) bytes += fragment.size();
 	fragment.freeData();
 	if(!(lastUpdate = (lastUpdate + 1) % updateInterval)) bcastProgressUpdate(*this);
 }
@@ -115,6 +116,7 @@ void fileWriter_t::run() {
 
 	// try write remaining data (aborts on failure)
 	mutex.lock();
+
 	while(queue.size() && queue.top().writeData(file)) {
 		const dataFragment_t &fragment(queue.top());
 
@@ -130,8 +132,11 @@ void fileWriter_t::run() {
 #endif
 
 	if(tStatus == IS_TRANSFER_IN_PROGRESS) {
-		if(bytes == fSize) tStatus = IS_TRANSFER_FINISHED;
-		else tStatus = IS_TRANSFER_ERROR;
+		if(bytes == fSize) {
+			tStatus = IS_TRANSFER_FINISHED;
+		} else {
+			tStatus = IS_TRANSFER_ERROR;
+		}
 	}
 
 	stop = true;
