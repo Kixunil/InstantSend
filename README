@@ -1,5 +1,5 @@
 Instant Send - simplified
-Version: 0.7
+Version: 0.8
 Author: Martin Habovštiak
 
 Features:
@@ -14,12 +14,8 @@ Features:
 	Caja and Nautilus modules provides comfortable sending from file manager
 
 Issues:
-	Several things are hard coded
-	No authentication is used
 	No integrity checking
 	Resuming of sending is not implemented
-	Only POSIX systems (maybe only Linux) are supported
-	GUI is highly experimental
 
 Plugins:
 	ip4tcp		- as name suggests, it uses TCP/IP with IPv4
