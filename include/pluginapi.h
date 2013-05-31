@@ -10,7 +10,9 @@
 #include "file.h"
 #include "json.h"
 
-#define DMAXSIZE 1024
+#ifndef DMAXSIZE
+	#define DMAXSIZE 1024
+#endif
 
 /*! \brief Struct defining chunk of binary data
  */
