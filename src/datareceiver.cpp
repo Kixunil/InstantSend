@@ -104,12 +104,11 @@ void dataReceiver_t::run() {
 				rawData->size = data->size - hlen - 1;
 				writer->writeData(position, rawData);
 			}
-			catch(const char *msg) {
-				sendErrMsg(cptr, msg);
-				//return;
-			}
 			catch(exception &e) {
 				sendErrMsg(cptr, e.what());
+				if(writer) writer->decRC();
+				fprintf(stderr, "Exception while receiving: %s\n", e.what());
+				return;
 			}
 
 			/*fprintf(stderr, "Received %u bytes of data.\n", data->size);
