@@ -1,9 +1,11 @@
 #ifdef WINDOWS
 #include <windows.h>
-#endif
-
-#ifdef __APPLE__
-	#define off64_t off_t
+#else
+	#ifdef __APPLE__
+		#define off64_t off_t
+	#else
+		#include <sys/stat.h>
+	#endif
 #endif
 
 #include <string>
