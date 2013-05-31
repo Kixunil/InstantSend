@@ -208,7 +208,7 @@ libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o multithread
 check:
 
 clean:
-	rm -f *.o client server configtool widget-gtk *.so *.dylib *.exe *.dll *-install-lib
+	rm -f *.o client server configtool fifolock widget-gtk *.so *.dylib *.exe *.dll *-install-lib
 
 distclean: clean
 	rm -f Makefile
