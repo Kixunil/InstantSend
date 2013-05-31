@@ -4,6 +4,7 @@ usr/bin/instsend-config
 usr/bin/instsend-config-defaults
 usr/bin/instsend-config-wizard
 usr/bin/instsend-gtk-wrapper
+usr/bin/instsend-fifolocker
 usr/share/instantsend/data/icon_*.png
 usr/share/instantsend/config-wizard
 usr/share/applications/instsend-dialog-gtk.desktop
