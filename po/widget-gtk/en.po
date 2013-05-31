@@ -55,6 +55,15 @@ msgstr "Open file"
 msgid "Open directory"
 msgstr "Open directory"
 
+msgid "Opening received files could be dangerous. Do you want to continue?"
+msgstr "Opening received files could be dangerous. Do you want to continue?"
+
+msgid "Do you really want to delete this file?"
+msgstr "Do you really want to delete this file?"
+
+msgid "File deleted"
+msgstr "File deleted"
+
 msgid "Remove from list"
 msgstr "Remove from list"
 

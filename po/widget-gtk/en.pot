@@ -55,6 +55,15 @@ msgstr ""
 msgid "Open directory"
 msgstr ""
 
+msgid "Opening received files could be dangerous. Do you want to continue?"
+msgstr ""
+
+msgid "Do you really want to delete this file?"
+msgstr ""
+
+msgid "File deleted"
+msgstr ""
+
 msgid "Remove from list"
 msgstr ""
 
@@ -79,6 +88,9 @@ msgstr ""
 
 #: src/widget-gtk.cpp:385
 msgid "Paused ("
+msgstr ""
+
+msgid "Error"
 msgstr ""
 
 #: src/widget-gtk.cpp:606 src/widget-gtk.cpp:619

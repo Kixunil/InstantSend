@@ -55,6 +55,15 @@ msgstr "Otvoriť súbor"
 msgid "Open directory"
 msgstr "Otvoriť adresár"
 
+msgid "Opening received files could be dangerous. Do you want to continue?"
+msgstr "Otváranie prijatých súborov môže byť nebezpečné. Chcete pokračovať?"                                                                  
+
+msgid "Do you really want to delete this file?"
+msgstr "Naozaj chcete vymazať tento súbor?"
+
+msgid "File deleted"                           
+msgstr "Súbor vymazaný"
+
 msgid "Remove from list"
 msgstr "Odstrániť zo zoznamu"
 
