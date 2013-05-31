@@ -1,6 +1,7 @@
 CXX=@CXX@
 CXXFLAGS=@CXXFLAGS@
 CXXFLAGS+=-I../include -I. -I../
+CC=@CC@
 DEFS=@DEFS@
 LDFLAGS=@LDFLAGS@ @LIBS@
 LDFLAGS+=-shared-libgcc
@@ -30,6 +31,7 @@ CLIENT_BIN=$(DESTDIR)$(BINDIR)/isend # Short name for better user experience
 SERVER_BIN=$(DESTDIR)$(BINDIR)/instsendd
 CONFIGTOOL_BIN=$(DESTDIR)$(BINDIR)/instsend-config
 WIDGET_GTK_BIN=$(DESTDIR)$(BINDIR)/instsend-dialog-gtk
+FIFOLOCK_BIN=$(DESTDIR)$(BINDIR)/instsend-fifolocker
 
 DEFS+=-DLIBRARY_EXTENSION=\"$(LIBEXTENSION)\"
 
@@ -70,6 +72,8 @@ endif
 ifeq ($(OS),linux)
 	PLATFORM=posix
 	LIBEXTENSION=.so
+	ALL += fifolock$(BINEXTENSION)
+	INSTALL+=install-fifolocker
 endif
 
 ifeq ($(OS),macosx)
@@ -120,11 +124,14 @@ client$(BINEXTENSION): ../include/pluginapi.h client.cpp libinstantsend-plugin$(
 server$(BINEXTENSION): filewriter.o filelist.o connectionreceiver.o datareceiver.o serverlist.o ../include/pluginapi.h server.cpp libinstantsend-plugin$(LIBEXTENSION) libinstantsend-json$(LIBEXTENSION) libinstantsend-common$(LIBEXTENSION)
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ filewriter.o filelist.o connectionreceiver.o datareceiver.o serverlist.o server.cpp -L. -linstantsend-plugin -linstantsend-json -linstantsend-sysapi -linstantsend-common $(LDFLAGS) $(SERVER_LDFLAGS)
 
-widget-gtk: libinstantsend-json$(LIBEXTENSION) libinstantsend-sysapi$(LIBEXTENSION) libinstantsend-common$(LIBEXTENSION) widget-gtk.cpp
+widget-gtk$(BINEXTENSION): libinstantsend-json$(LIBEXTENSION) libinstantsend-sysapi$(LIBEXTENSION) libinstantsend-common$(LIBEXTENSION) widget-gtk.cpp
 	$(CXX) $(CXXFLAGS) $(DEFS) $(WIDGET_GTK_CFLAGS) -o $@ widget-gtk.cpp -L. -linstantsend-json -linstantsend-sysapi -linstantsend-common $(WIDGET_GTK_LIBS)
 
 configtool$(BINEXTENSION): configtool.cpp sysapi.o libinstantsend-json$(LIBEXTENSION)
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ sysapi.o configtool.cpp -L. -linstantsend-json $(LDFLAGS)
+
+fifolock: fifolock.c
+	$(CC) $(DEFS) -o $@ fifolock.c
 
 json.o: json.cpp
 	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ json.cpp
@@ -219,8 +226,11 @@ install-server: server sysapi-install-lib plugin-install-lib json-install-lib co
 install-configtool: configtool sysapi-install-lib json-install-lib
 	install -D configtool$(BINEXTENSION) $(CONFIGTOOL_BIN)
 
-install-widget-gtk: widget-gtk common-install-lib sysapi-install-lib json-install-lib common-install-lib
+install-widget-gtk: widget-gtk$(BINEXTENSION) common-install-lib sysapi-install-lib json-install-lib common-install-lib
 	install -D widget-gtk$(BINEXTENSION) $(WIDGET_GTK_BIN)
+
+install-fifolocker: fifolock$(BINEXTENSION)
+	install -D fifolock$(BINEXTENSION) $(FIFOLOCK_BIN)
 
 install: $(INSTALL)
 	rm -f *-install-lib

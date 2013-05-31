@@ -25,6 +25,10 @@ ifeq ($(HAVE_SERVER),yes)
 	endif
 endif
 
+ifeq ($(HAVE_CLIENT),yes)
+	INSTALL+=install-cli
+endif
+
 ifeq ($(HAVE_WIDGET_GTK),yes)
 	ALL+=instsend-gtk-wrapper.sh
 	INSTALL+=install-widget-gtk
@@ -75,7 +79,6 @@ distclean: clean
 install-server:
 	install -D instsendd-wrapper.sh $(DESTDIR)$(BINDIR)/instsendd-wrapper
 
-
 install-widget-gtk:
 	install -D instsend-gtk-wrapper.sh $(DESTDIR)$(BINDIR)/instsend-gtk-wrapper
 
@@ -93,6 +96,9 @@ install-scanner-avahi:
 
 install-config-defaults:
 	install -D instsend-config-defaults.sh $(DESTDIR)$(BINDIR)/instsend-config-defaults
+
+install-cli:
+	install -D isend-cli.sh $(DESTDIR)$(BINDIR)/isend-cli
 
 install: $(INSTALL)
 
