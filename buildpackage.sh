@@ -104,15 +104,15 @@ echo Version: $INSTANTSEND_VERSION
 echo Revision: $REVISION
 echo Distribution: $DISTRIBUTION
 
+PACKAGE_NAME="$(sed -e 's/###DISTRIBUTION###/'$DISTRIBUTION'/g' debian/changelog.in | tee debian/changelog | sed -nre '1,1s/([^ ]*) \(([^\)]*)\).*$/\1_\2/p')"
+
 if [ '!' -d build_package ];
 then
 	./make_upstream_tarball.sh "$INSTANTSEND_VERSION.$REVISION" -k
 fi
 
-PACKAGE_NAME="$(sed -e 's/###DISTRIBUTION###/'$DISTRIBUTION'/g' debian/changelog.in | tee debian/changelog | sed -nre '1,1s/([^ ]*) \(([^\)]*)\).*$/\1_\2/p' debian/changelog)"
-
 # Upstream package is same for all distros
-ln ../instantsend_"$INSTANTSEND_VERSION.$REVISION".tar.bz2 "$PACKAGE_NAME.orig.tar.bz2" || BINARY="-B" # binary only, if source exists
+ln instantsend_"$INSTANTSEND_VERSION.$REVISION".tar.bz2 "$PACKAGE_NAME.orig.tar.bz2" 2>/dev/null || BINARY="-B" # binary only, if source exists
 
 cd build_package || exit 1 # Prevent serious errors
 
