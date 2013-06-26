@@ -287,6 +287,7 @@ class securityCreator_t : public pluginMultiInstanceCreator_t {
 #define IS_TRANSFER_CANCELED_CLIENT 2
 #define IS_TRANSFER_CANCELED_SERVER 3
 #define IS_TRANSFER_ERROR 4
+#define IS_TRANSFER_CONNECTING 5
 
 /*! \brief Interface for progress event handlers
  */
