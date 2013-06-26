@@ -4,6 +4,11 @@
 #include <memory>
 #include <stdexcept>
 
+#ifndef WINDOWS
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 #include "pluginapi.h"
 #include "pluginlist.h"
 #include "sysapi.h"
@@ -12,68 +17,143 @@
 
 int outputpercentage = 0;
 
-int sendFile(pluginInstanceAutoPtr<peer_t> &client, File file, const char *basename) {
-	File::Size fs, sb;
-
-	fs = file.size();
-
-	fprintf(stderr, "File size: %llu\n", (unsigned long long)fs);
-	fflush(stderr);
-
-	auto_ptr<anyData> data(allocData(DMAXSIZE+1));
-
-	jsonObj_t msgobj;
-	msgobj.insertNew("service", new jsonStr_t("filetransfer"));
-	msgobj.insertNew("filename", new jsonStr_t(basename));
-	msgobj.insertNew("filesize", new jsonInt_t((intL_t)fs));
-	string msg = msgobj.toString();
-	strcpy(data->data, msg.c_str());
-	data->size = msg.size() + 1;
-	//msgobj.deleteContent();
-
-	if(!client->sendData(data.get())) throw runtime_error("Can't send!");
-	data->size = DMAXSIZE;
-	if(!client->recvData(data.get())) throw runtime_error("No response");
-	data->data[data->size] = 0;
-
-	msg = string(data->data);
-	msgobj = jsonObj_t(&msg);
-	if(dynamic_cast<jsonStr_t &>(msgobj.gie("service")) != "filetransfer") throw runtime_error("Unknown protocol");
-	jsonStr_t &action = dynamic_cast<jsonStr_t &>(msgobj.gie("action"));
-	if(action.getVal() != string("accept")) {
-		try {
-			jsonStr_t &reason = dynamic_cast<jsonStr_t &>(msgobj.gie("reason"));
-			throw (string("File rejected: ") + reason.getVal()).c_str();
-		} catch(jsonNotExist) {
-			throw "File rejected: unknown reason";
-		}
-	}
-
-	msgobj.deleteContent();
-
-	auto_ptr<jsonInt_t> fp(new jsonInt_t((intL_t)0));
-	msgobj.insertVal("position", fp.get());
-	sb = 0;
-
-	File::Size fpos = 0;
-	unsigned int fragmentcnt = 0;
-	do {
-		fp->setVal(fpos);
-		string msg = msgobj.toString();
-		strcpy(data->data, msg.c_str());
-		data->size = file.read(data->data + msg.size() + 1, DMAXSIZE - 1 - msg.size());
-		fpos += data->size;
-		sb += data->size;
-		data->size += msg.size() + 1;
-
-		if(!client->sendData(data.get())) throw runtime_error("Can't send!");
-		if(outputpercentage && !(fragmentcnt = (fragmentcnt +1) % 5000)) {
-			printf("%ld\n", 100*sb / fs);
-			fflush(stdout);
-		}
-	} while(fpos < fs);
-	return 1;
+inline const char *getBaseFileName(const char *path) {
+	return getFileName(path);
 }
+
+class FileReader : public fileStatus_t {
+	public:
+		FileReader(const string &name, const string &target) : mName(name), mTarget(target), mFile(name), mSize(mFile.size()), mBytes(0),
+#ifndef WINDOWS
+		mId(getpid()),
+#endif
+		mStatus(IS_TRANSFER_CONNECTING) {
+			bcastProgressBegin(*this);
+		}
+
+		string getFileName() {
+			return mName;
+		}
+
+		File::Size getFileSize() {
+			return mSize;
+		}
+
+		string getMachineId() {
+			return mTarget;
+		}
+
+		File::Size getTransferredBytes() {
+			return mBytes;
+		}
+
+		int getTransferStatus() {
+			return mStatus;
+		}
+
+		int getId() {
+			return mId;
+		}
+
+		char getDirection() {
+			return IS_DIRECTION_UPLOAD;
+		}
+
+		void pauseTransfer() {}
+		void resumeTransfer() {}
+
+		int send(pluginInstanceAutoPtr<peer_t> &client) {
+			try {
+				fprintf(stderr, "File size: %llu\n", (unsigned long long)mSize);
+				fflush(stderr);
+
+				mStatus = IS_TRANSFER_IN_PROGRESS;
+
+				bcastProgressUpdate(*this);
+
+				auto_ptr<anyData> data(allocData(DMAXSIZE+1));
+				string basename(getBaseFileName(mName.c_str()));
+
+				jsonObj_t msgobj;
+				msgobj.insertNew("service", new jsonStr_t("filetransfer"));
+				msgobj.insertNew("filename", new jsonStr_t(basename.c_str()));
+				msgobj.insertNew("filesize", new jsonInt_t((intL_t)mSize));
+				string msg = msgobj.toString();
+				strcpy(data->data, msg.c_str());
+				data->size = msg.size() + 1;
+				//msgobj.deleteContent();
+
+				if(!client->sendData(data.get())) throw runtime_error("Can't send!");
+				data->size = DMAXSIZE;
+				if(!client->recvData(data.get())) throw runtime_error("No response");
+				data->data[data->size] = 0;
+
+				msg = string(data->data);
+				msgobj = jsonObj_t(&msg);
+				if(dynamic_cast<jsonStr_t &>(msgobj.gie("service")) != "filetransfer") throw runtime_error("Unknown protocol");
+				jsonStr_t &action = dynamic_cast<jsonStr_t &>(msgobj.gie("action"));
+				if(action.getVal() != string("accept")) {
+					try {
+						jsonStr_t &reason = dynamic_cast<jsonStr_t &>(msgobj.gie("reason"));
+						mStatus = IS_TRANSFER_ERROR;
+						throw runtime_error(string("File rejected: ") + reason.getVal());
+					} catch(jsonNotExist) {
+						mStatus = IS_TRANSFER_ERROR;
+						throw runtime_error("File rejected: unknown reason");
+					}
+				}
+
+				msgobj.deleteContent();
+
+				auto_ptr<jsonInt_t> fp(new jsonInt_t((intL_t)0));
+				msgobj.insertVal("position", fp.get());
+
+				File::Size fpos = 0;
+				unsigned int fragmentcnt = 0;
+				do {
+					fp->setVal(fpos);
+					string msg = msgobj.toString();
+					strcpy(data->data, msg.c_str());
+					data->size = mFile.read(data->data + msg.size() + 1, DMAXSIZE - 1 - msg.size());
+					fpos += data->size;
+					mBytes += data->size;
+					data->size += msg.size() + 1;
+
+					if(!client->sendData(data.get())) throw runtime_error("Can't send!");
+					if(!(fragmentcnt = (fragmentcnt +1) % 5000)) {
+						bcastProgressUpdate(*this);
+						if(outputpercentage) {
+							printf("%ld\n", 100*mBytes / mSize);
+							fflush(stdout);
+						}
+					}
+				} while(fpos < mSize);
+				bcastProgressUpdate(*this);
+				mStatus = IS_TRANSFER_FINISHED;
+				bcastProgressEnd(*this);
+				return 1;
+			} catch(...) {
+				mStatus = IS_TRANSFER_ERROR;
+				bcastProgressEnd(*this);
+				throw;
+			}
+		}
+
+		void fail() {
+			mStatus = IS_TRANSFER_ERROR;
+			bcastProgressEnd(*this);
+		}
+
+		~FileReader() {}
+
+	private:
+		string mName, mTarget;
+		File mFile;
+		File::Size mSize, mBytes;
+		int mId, mStatus;
+};
+
+fileStatus_t::~fileStatus_t() {}
 
 pluginInstanceAutoPtr<peer_t> findWay(jsonArr_t &ways) {
 	pluginList_t &pl = pluginList_t::instance();
@@ -129,13 +209,13 @@ int main(int argc, char **argv) {
 		jsonObj_t &config = dynamic_cast<jsonObj_t &>(*configptr.get());
 		jsonObj_t &targets = dynamic_cast<jsonObj_t &>(config.gie("targets"));
 
-		/*
 		try {
 			eventSink_t::instance().autoLoad(dynamic_cast<jsonObj_t &>(config.gie("eventhandlers")));
 		}
 		catch(...) {
+			fprintf(stderr, "Note: no event handler loaded\n");
 		}           
-*/
+
 		char *tname = NULL;
 		for(int i = 1; i+1 < argc; ++i) {
 			if(string(argv[i]) == string("-t")) {
@@ -153,10 +233,18 @@ int main(int argc, char **argv) {
 					return 1;
 				}
 				// Open file
-				File file(argv[i]);
+				FileReader file(argv[i], tname);
 
 				// Find way to send file
-				pluginInstanceAutoPtr<peer_t> client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
+				pluginInstanceAutoPtr<peer_t> client;
+				try {
+					client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
+				} catch(exception &e) {
+					printf("Failed to connet to %s: %s\n", tname, e.what());
+					file.fail();
+					failuredetected = 1;
+					continue;
+				}
 				if(!client.valid()) {
 					printf("Failed to connet to %s\n", tname);
 					fflush(stdout);
@@ -167,7 +255,7 @@ int main(int argc, char **argv) {
 				const char *fileName = getFileName(argv[i]);
 
 				// Really send file
-				if(sendFile(client, file, fileName)) printf("File \"%s\" sent to \"%s\".\n", argv[i], tname);
+				if(file.send(client)) printf("File \"%s\" sent to \"%s\".\n", argv[i], tname);
 			}
 		}
 
