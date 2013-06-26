@@ -291,7 +291,7 @@ class gtkTrayIcon : public trayIcon {
 				if(excmark) {
 					bool rpe = dlg->recvPending(), rip = dlg->recvInProgress(), spe = dlg->sendPending(), sip = dlg->sendInProgress();
 					if((rpe || rip) && (spe || sip)) {
-						statusIcon->set(ulStaticIcon);
+						statusIcon->set(udStaticIcon);
 						animating = false;
 					} else {
 						if(rip) {
@@ -325,7 +325,7 @@ class gtkTrayIcon : public trayIcon {
 			animem = rpe;
 			excmark = false;
 			if((rpe || rip) && (spe || sip)) {
-				statusIcon->set(ulStaticIcon);
+				statusIcon->set(udStaticIcon);
 				animating = false;
 			} else {
 				if(rip) {
@@ -485,7 +485,7 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 			finfo.setFileName(fileName);
 			finfo.setPeerName(machineId);
 			finfo.setSize(fileSize);
-			finfo.setStatus(4);
+			finfo.setStatus(direction?1:4);
 			files[id] = &finfo;
 
 			finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&finfo));
@@ -499,12 +499,14 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 
 			finfoRenderer = auto_ptr<SimpleFileInfoRenderer>(new SimpleFileInfoRenderer(&finfo));
 			if(direction) {
+				notebook.set_current_page(2);
 				sendBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
 				finfo.addObserver(*finfoRenderer.get());
 				finfoRenderer.release();
 				++sendFileCount;
 				sendBox.queue_draw();
 			} else {
+				notebook.set_current_page(1);
 				recvBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
 				finfo.addObserver(*finfoRenderer.get());
 				finfoRenderer.release();
@@ -523,13 +525,16 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 			std::map<unsigned int, FileInfoItem *>::iterator fileit = files.find(id);
 			if(fileit != files.end()) {
 				FileInfoItem *file = fileit->second;
+				file->setStatus(file->getDirection()?3:4);
 				file->setBytes(bytes);
+				trIcon.statusChanged();
 			}
 
 			mutex.unlock();
 		}
 
 		void fileEnded(uint32_t id, uint32_t status) {
+			fprintf(stderr, "fileEnded()\n");
 			mutex.lock();
 			std::map<unsigned int, FileInfoItem *>::iterator fileit = files.find(id);
 			// Ignore unknown files
@@ -566,9 +571,9 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 				--sendFileCount;
 			} else {
 				--recvFileCount;
+				received[id] = &file;
 			}
 
-			received[id] = &file;
 			files.erase(fileit);
 
 			file.clearObservers();
@@ -576,18 +581,21 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 			recvedBox.pack_start(finfoRenderer->getWidget(), PACK_SHRINK);
 			finfoRenderer->getWidget().show_now();
 
-			int lastpage = notebook.get_current_page();
-			notebook.set_current_page(1);
-			file.addObserver(*finfoRenderer);
-			finfoRenderer->updateData();
-			finfoRenderer.release();
+			if(!file.getDirection()) {
+				int lastpage = notebook.get_current_page();
+				notebook.set_current_page(3);
+				file.addObserver(*finfoRenderer);
+				finfoRenderer->updateData();
+				finfoRenderer.release();
 
-			recvedBox.queue_draw();
-			scrollWindowRecved.queue_draw();
-			scrollWindowRecved.show_all();
+				recvedBox.queue_draw();
+				scrollWindowRecved.queue_draw();
+				scrollWindowRecved.show_all();
 
-			show_all_children();
-			notebook.set_current_page(lastpage);
+				show_all_children();
+				notebook.set_current_page(lastpage);
+			}
+
 			trIcon.statusChanged();
 
 			mutex.unlock();
@@ -890,9 +898,9 @@ instSendWidget::instSendWidget() :
 	mainVBox.pack_start(notebook, PACK_EXPAND_WIDGET);
 
 	//notebook.append_page(scrollWindowPending, _("Pending files"));
-	//notebook.append_page(scrollWindowAll, _("Files in progress"));
+	notebook.append_page(scrollWindowAll, _("Files in progress"));
 	notebook.append_page(scrollWindowRecv, _("Incoming files"));
-	//notebook.append_page(scrollWindowSend, _("Outgoing files"));
+	notebook.append_page(scrollWindowSend, _("Outgoing files"));
 	notebook.append_page(scrollWindowRecved, _("Received files"));
 
 	scrollWindowPending.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -901,9 +909,9 @@ instSendWidget::instSendWidget() :
 	scrollWindowSend.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	scrollWindowRecved.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	//scrollWindowAll.add(allBox);
+	scrollWindowAll.add(allBox);
 	scrollWindowRecv.add(recvBox);
-	//scrollWindowSend.add(sendBox);
+	scrollWindowSend.add(sendBox);
 	//scrollWindowPending.add(pendingBox);
 	scrollWindowRecved.add(recvedBox);
 
