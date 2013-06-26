@@ -1,5 +1,8 @@
 #include <libnotify/notify.h>
 #include <stdexcept>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "pluginapi.h"
 #include "config.h"
@@ -14,15 +17,23 @@ const string &intToStr(int num) {
 	return result;
 }
 
+string getBaseFileName(const string &path) {
+	size_t i = path.size();
+	do {
+		--i;
+	} while(i && path[i] != '/');
+	return path.substr(path[i] != '/'?i:i+1);
+}
+
 class notifyProgressHandler : public eventProgress_t{
 	private:
-		string *icon;
+		auto_ptr<string> icon;
 		void sendNotification(const string &msg) {
 #ifdef HAVE_LIBNOTIFY4
-			NotifyNotification *notify = notify_notification_new("Instant send", msg.c_str(), (icon)?icon->c_str():NULL);
+			NotifyNotification *notify = notify_notification_new("Instant send", msg.c_str(), (icon.get())?icon->c_str():NULL);
 #endif
 #ifdef HAVE_LIBNOTIFY1
-			NotifyNotification *notify = notify_notification_new("Instant send", msg.c_str(), (icon)?icon->c_str():NULL, NULL);
+			NotifyNotification *notify = notify_notification_new("Instant send", msg.c_str(), (icon.get())?icon->c_str():NULL, NULL);
 #endif
 			GError *err = NULL;
 			notify_notification_set_timeout(notify, 3000);
@@ -33,16 +44,16 @@ class notifyProgressHandler : public eventProgress_t{
 		
 		}
 	public:
-		notifyProgressHandler() : eventProgress_t() {
-			icon = NULL;
+		notifyProgressHandler() : eventProgress_t(), icon(NULL) {
 		}
 
 		void setIcon(const string &icon) {
-			this->icon = new string(icon);
+			this->icon.reset(new string(icon));
 		}
 
 		void onBegin(fileStatus_t &fStatus) throw() {
-			sendNotification("Incoming file " + fStatus.getFileName() + " (" + intToStr(fStatus.getFileSize()) + ")");
+			if(fStatus.getDirection() == IS_DIRECTION_DOWNLOAD)
+				sendNotification(string("Incoming file ") + getBaseFileName(fStatus.getFileName()) + " (" + intToStr(fStatus.getFileSize()) + "B)");
 		}
 
 		void onUpdate(fileStatus_t &fStatus) throw() {
@@ -58,14 +69,14 @@ class notifyProgressHandler : public eventProgress_t{
 			string msg = "File transfer ended due to unknown reason.";
 			switch(fStatus.getTransferStatus()) {
 				case IS_TRANSFER_FINISHED:
-					msg = "File " + fStatus.getFileName() + " finished.";
+					msg = "File " + getBaseFileName(fStatus.getFileName()) + (fStatus.getDirection() == IS_DIRECTION_DOWNLOAD?" received.":" sent.");
 					break;
 				case IS_TRANSFER_CANCELED_CLIENT:
 				case IS_TRANSFER_CANCELED_SERVER:
-					 msg = "File " + fStatus.getFileName() + "cancelled";
+					 msg = "File " + getBaseFileName(fStatus.getFileName()) + " cancelled";
 					 break;
 				case IS_TRANSFER_ERROR:
-					 msg = "Transfer of file" + fStatus.getFileName() + " failed";
+					 msg = "Transfer of file" + getBaseFileName(fStatus.getFileName()) + " failed";
 					 break;
 			}
 
@@ -88,6 +99,11 @@ class notifyCreator_t : public eventHandlerCreator_t {
 				jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*config);
 				progress.setIcon(dynamic_cast<jsonStr_t &>(cfg.gie("icon")).getVal());
 			} catch(...) { // ignore any error
+				int iconfd = open("/usr/share/instantsend/data/icon_64.png", O_RDONLY); // try default icon path
+				if(iconfd > -1) {
+					progress.setIcon("/usr/share/instantsend/data/icon_64.png");
+					close(iconfd);
+				}
 			}
 		}
 
