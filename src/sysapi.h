@@ -9,3 +9,5 @@ string getSystemPluginDir();
 string getSystemCfgDir();
 
 char *getFileName(const char *path);
+
+void makePath(const string &path);
