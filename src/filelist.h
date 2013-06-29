@@ -1,3 +1,6 @@
+#ifndef FILELIST
+#define FILELIST
+
 #include <map>
 
 #include "multithread.h"
@@ -30,3 +33,5 @@ class fileList_t {
 		fileController_t &getController(int id, const string &fileName, File::Size, const string &machineID);
 		void removeController(int id, bool del);
 };
+
+#endif

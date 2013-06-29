@@ -1,3 +1,6 @@
+#ifndef FILEWRITER
+#define FILEWRITER
+
 #include <queue>
 #include <set>
 #include <memory>
@@ -73,3 +76,5 @@ class fileWriter_t : public fileController_t, thread_t {
 
 		~fileWriter_t();
 };
+
+#endif
