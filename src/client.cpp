@@ -62,7 +62,7 @@ class FileReader : public fileStatus_t {
 		void pauseTransfer() {}
 		void resumeTransfer() {}
 
-		int send(pluginInstanceAutoPtr<peer_t> &client) {
+		int send(peer_t &client, const string &basename) {
 			try {
 				fprintf(stderr, "File size: %llu\n", (unsigned long long)mSize);
 				fflush(stderr);
@@ -72,7 +72,6 @@ class FileReader : public fileStatus_t {
 				bcastProgressUpdate(*this);
 
 				auto_ptr<anyData> data(allocData(DMAXSIZE+1));
-				string basename(getBaseFileName(mName.c_str()));
 
 				jsonObj_t msgobj;
 				msgobj.insertNew("service", new jsonStr_t("filetransfer"));
@@ -83,9 +82,9 @@ class FileReader : public fileStatus_t {
 				data->size = msg.size() + 1;
 				//msgobj.deleteContent();
 
-				if(!client->sendData(data.get())) throw runtime_error("Can't send!");
+				if(!client.sendData(data.get())) throw runtime_error("Can't send!");
 				data->size = DMAXSIZE;
-				if(!client->recvData(data.get())) throw runtime_error("No response");
+				if(!client.recvData(data.get())) throw runtime_error("No response");
 				data->data[data->size] = 0;
 
 				msg = string(data->data);
@@ -119,7 +118,7 @@ class FileReader : public fileStatus_t {
 					mBytes += data->size;
 					data->size += msg.size() + 1;
 
-					if(!client->sendData(data.get())) throw runtime_error("Can't send!");
+					if(!client.sendData(data.get())) throw runtime_error("Can't send!");
 					if(!(fragmentcnt = (fragmentcnt +1) % 5000)) {
 						bcastProgressUpdate(*this);
 						if(outputpercentage) {
@@ -128,6 +127,17 @@ class FileReader : public fileStatus_t {
 						}
 					}
 				} while(fpos < mSize);
+				strcpy(data->data, "{\"action\":\"finished\"}");
+				data->size = 26;
+				client.sendData(data.get());
+				/*
+				data->size = DMAXSIZE;
+				client.recvData(data.get());
+				data->data[data->size] = 0;
+				string header(data->data);
+				jsonObj_t h(&header);
+				if(dynamic_cast<jsonStr_t &>(h["action"]).getVal() == "finished")
+				*/
 				bcastProgressUpdate(*this);
 				mStatus = IS_TRANSFER_FINISHED;
 				bcastProgressEnd(*this);
@@ -179,6 +189,25 @@ pluginInstanceAutoPtr<peer_t> findWay(jsonArr_t &ways) {
 	throw runtime_error("No usable way found");
 }
 
+void sendEntry(const string &entry, size_t ignored, const string &tname, peer_t &client) {
+	if(entry.size() > 1 && entry.substr(entry.size() - 2) == "/.") return;
+	if(entry.size() > 2 && entry.substr(entry.size() - 3) == "/..") return;
+	try {
+		Directory dir(entry);
+		while(1) {
+			sendEntry(combinePath(entry, dir.next()), ignored, tname, client);
+		}
+	}
+	catch(ENotDir &e) {
+		// Open file
+		FileReader file(entry, tname);
+
+		// Send file
+		if(file.send(client, entry.substr(ignored))) printf("File \"%s\" sent to \"%s\".\n", entry.substr(ignored).c_str(), tname.c_str());
+	}
+	catch(Eod &e) {} // Ignore end of directory
+}
+
 int main(int argc, char **argv) {
 	if(argc < 2) return 1;
 
@@ -217,6 +246,7 @@ int main(int argc, char **argv) {
 		}           
 
 		char *tname = NULL;
+		pluginInstanceAutoPtr<peer_t> client;
 		for(int i = 1; i+1 < argc; ++i) {
 			if(string(argv[i]) == string("-t")) {
 				if(!argv[++i]) {
@@ -224,6 +254,22 @@ int main(int argc, char **argv) {
 					return 1;
 				}
 				tname = argv[i];
+				try {
+					client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
+				} catch(exception &e) {
+					printf("Failed to connet to %s: %s\n", tname, e.what());
+					failuredetected = 1; 
+					while(i + 1 < argc && string(argv[i]) != string("-t")) ++i; // skip unusable target
+					continue;
+				}
+				if(!client.valid()) {
+					printf("Failed to connet to %s\n", tname);
+					fflush(stdout);
+					failuredetected = 1;
+					while(i + 1 < argc && string(argv[i]) != string("-t")) ++i; // skip unusable target
+					continue;
+				}
+
 				continue;
 			}
 
@@ -232,30 +278,11 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "Too few arguments after '-f'\n");
 					return 1;
 				}
-				// Open file
-				FileReader file(argv[i], tname);
-
-				// Find way to send file
-				pluginInstanceAutoPtr<peer_t> client;
-				try {
-					client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
-				} catch(exception &e) {
-					printf("Failed to connet to %s: %s\n", tname, e.what());
-					file.fail();
-					failuredetected = 1;
-					continue;
-				}
-				if(!client.valid()) {
-					printf("Failed to connet to %s\n", tname);
-					fflush(stdout);
-					failuredetected = 1;
-					continue;
-				}
-
+				
 				const char *fileName = getFileName(argv[i]);
 
-				// Really send file
-				if(file.send(client)) printf("File \"%s\" sent to \"%s\".\n", argv[i], tname);
+				fprintf(stderr, "sendEntry(\"%s\", %zu, \"%s\", client);\n", argv[i], (size_t)(fileName - argv[i]), tname);
+				sendEntry(argv[i], fileName - argv[i], tname, *client);
 			}
 		}
 
