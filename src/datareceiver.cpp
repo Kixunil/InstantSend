@@ -3,7 +3,6 @@
 #include <cstdio>
 
 #include "datareceiver.h"
-#include "filewriter.h"
 #include "eventsink.h"
 #include "sysapi.h"
 
@@ -28,98 +27,102 @@ void sendErrMsg(const pluginInstanceAutoPtr<peer_t> &client, const char *msg) {
 	client->sendData(data.get());
 }
 
+void dataReceiver_t::parseHeader(jsonObj_t &h) {
+	if(dynamic_cast<jsonStr_t &>(h["service"]) != "filetransfer") throw runtime_error("Service not supported");
+	string fname(dynamic_cast<jsonStr_t &>(h.gie("filename")).getVal());
+	File::Size fsize = dynamic_cast<jsonInt_t &>(h.gie("filesize")).getVal();
+
+	//for(unsigned int i = 0; i < fname.size(); ++i) if(fname[i] == '/') fname[i] = '-'; //strip slashes TODO: use OS independent function
+	// stripPath(fname);
+
+	string destPath(combinePath(savedir, fname));
+	makePath(destPath);
+
+#ifdef DEBUG
+	fprintf(stderr, "Receiving file %s (%zu bytes)\n", fname.c_str(), (size_t)fsize);
+	fflush(stderr);
+#endif
+
+	fileWriter_t *writer = dynamic_cast<fileWriter_t *>(&fileList_t::getList().getController(0, destPath, (File::Size)fsize, cptr->getMachineIdentifier()));
+	writer->incRC();
+	D("Writer created");
+
+	auto_ptr<anyData> data(allocData(53));
+	strcpy(data->data, "{ \"service\" : \"filetransfer\", \"action\" : \"accept\" }");
+	data->size = 53;
+	cptr->sendData(data.get());
+
+	receiveFileData(*writer);
+}
+
+void dataReceiver_t::receiveFileData(fileWriter_t &writer) {
+	auto_ptr<anyData> data(allocData(DMAXSIZE + 1));
+	while((data->size = DMAXSIZE) && cptr->recvData(data.get())) {
+		data->data[data->size] = 0;
+		string header(string(data->data));
+		//fprintf(stderr, "Header: %s\n", header.c_str());
+		size_t hlen = strlen(data->data);
+		try {
+			jsonObj_t h = jsonObj_t(&header);
+
+			try {
+				File::Size position = dynamic_cast<jsonInt_t &>(h.gie("position")).getVal();
+				auto_ptr<anyData> rawData = allocData(data->size - hlen - 1);
+				memcpy(rawData->data, data->data + hlen + 1, data->size - hlen - 1);
+				rawData->size = data->size - hlen - 1;
+				writer.writeData(position, rawData);
+			}
+			catch(jsonNotExist &e) {
+				if(dynamic_cast<jsonStr_t &>(h["action"]).getVal() == "finished") {
+					writer.decRC();
+					return;
+				} else throw;
+			}
+		}
+		catch(exception &e) {
+			sendErrMsg(cptr, e.what());
+			writer.decRC();
+			fprintf(stderr, "Exception while receiving: %s\n", e.what());
+			return;
+		}
+
+		/*fprintf(stderr, "Received %u bytes of data.\n", data->size);
+		fflush(stderr);*/
+	}
+	D("Connection terminated");
+	writer.decRC();
+}
+
 void dataReceiver_t::run() {
 	D("Client thread started");
 	auto_ptr<anyData> data = allocData(DMAXSIZE + 1);
-	int received, hlen;
-	string fname;
-	fileList_t &flist = fileList_t::getList();
-	fileWriter_t *writer = NULL;
-
-	data->size = DMAXSIZE;
-	received = cptr->recvData(data.get());
-	File::Size fsize;
-	if(received) {
+	while((data->size = DMAXSIZE) && cptr->recvData(data.get())) {
 		data->data[data->size] = 0; // make sure it won't overflow
 		string header(data->data); // extract header
 		//fprintf(stderr, "Header: %s\n", header.c_str());
 		try {
 			jsonObj_t h(&header);
-			if(dynamic_cast<jsonStr_t &>(h.gie("service")) != "filetransfer") throw runtime_error("Service not supported");
-			fname = dynamic_cast<jsonStr_t &>(h.gie("filename")).getVal();
-			fsize = dynamic_cast<jsonInt_t &>(h.gie("filesize")).getVal();
-
-			for(unsigned int i = 0; i < fname.size(); ++i) if(fname[i] == '/') fname[i] = '-'; //strip slashes TODO: use OS independent function
-#ifdef DEBUG
-			fprintf(stderr, "Receiving file %s (%zu bytes)\n", fname.c_str(), (size_t)fsize);
-			fflush(stderr);
-#endif
-
-			writer = dynamic_cast<fileWriter_t *>(&flist.getController(0, combinePath(savedir, fname), (File::Size)fsize, cptr->getMachineIdentifier()));
-			writer->incRC();
-			D("Writer created");
-
-			strcpy(data->data, "{ \"service\" : \"filetransfer\", \"action\" : \"accept\" }");
-			data->size = 52;
-			cptr->sendData(data.get());
+			parseHeader(h);
 		}	
 		catch(const exception &e) {
-			if(writer) writer->decRC();
 			puts(e.what());
 			// reply with information about error
-			jsonObj_t msgobj = jsonObj_t("{ \"service\" : \"filetransfer\", \"action\" : \"reject\" }");
+			jsonObj_t msgobj = jsonObj_t("{ \"service\" : \"filetransfer\", \"action\" : \"error\" }");
 			jsonStr_t tmp;
 			tmp.setVal(e.what());
 			msgobj.insertVal("reason", &tmp);
-			string retmsg = msgobj.toString();
-			strcpy(data->data, retmsg.c_str());
-			data->size = retmsg.size() + 1;
-			cptr->sendData(data.get());
+			sendHeader(msgobj);
 			return;
 		}
-	} else {
-		fprintf(stderr, "No data received - connection problem?\n");
-		if(writer) writer->decRC();
-		return;
 	}
 
-	int fileUncompleted = 1;
-
-	D("Receiving data");
-	do {
-		string header;
-		data->size = DMAXSIZE;
-		received = cptr->recvData(data.get());
-		if(received) {
-			data->data[data->size] = 0;
-			header = string(data->data);
-			//fprintf(stderr, "Header: %s\n", header.c_str());
-			hlen = strlen(data->data);
-			try {
-				jsonObj_t h = jsonObj_t(&header);
-
-				File::Size position = dynamic_cast<jsonInt_t &>(h.gie("position")).getVal();
-				auto_ptr<anyData> rawData = allocData(data->size - hlen - 1);
-				memcpy(rawData->data, data->data + hlen + 1, data->size - hlen - 1);
-				rawData->size = data->size - hlen - 1;
-				writer->writeData(position, rawData);
-			}
-			catch(exception &e) {
-				sendErrMsg(cptr, e.what());
-				if(writer) writer->decRC();
-				fprintf(stderr, "Exception while receiving: %s\n", e.what());
-				return;
-			}
-
-			/*fprintf(stderr, "Received %u bytes of data.\n", data->size);
-			fflush(stderr);*/
-		} else fprintf(stderr, "No data or error.\n");
-	} while(received && fileUncompleted);
-
-	fprintf(stderr, "Receiving finished.\n");
-	//TODO make event
-	writer->decRC();
 	return;
+}
+
+void dataReceiver_t::sendHeader(jsonComponent_t &json) {
+	string msg(json.toString());
+	auto_ptr<anyData> msgdata = allocData(msg.size() + 1);
+	cptr->sendData(msgdata.get());
 }
 
 bool dataReceiver_t::autoDelete() {
