@@ -9,6 +9,7 @@
 #include <cstring>
 
 #include <cstdio>
+#include <dirent.h>
 
 #include "file.h"
 
@@ -84,3 +85,30 @@ class PosixFile : public File::Data {
 File::File(const std::string &fileName) : mData(new PosixFile(fileName, false)) {}
 
 WritableFile::WritableFile(const std::string &fileName) : File(new PosixFile(fileName, true)) {}
+
+class PosixDirectory : public Directory::Data {
+	public:
+		PosixDirectory(const string &path) : Directory::Data(), mDir(opendir(path.c_str())) {
+			if(!mDir) {
+				if(errno == ENOTDIR) throw ENotDir();
+				else throw EFileError(string("opendir: ") + strerror(errno));
+			}
+		}
+		string next() {
+			struct dirent *de = readdir(mDir);
+			if(!de) throw Eod();
+			return string(de->d_name);
+		}
+
+		void rewind() {
+			rewinddir(mDir);
+		}
+
+		~PosixDirectory() {
+			closedir(mDir);
+		}
+	private:
+		DIR *mDir;
+};
+
+Directory::Directory(const string &dir) : mData(new PosixDirectory(dir)) {}

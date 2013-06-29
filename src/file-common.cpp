@@ -20,4 +20,8 @@ const File &File::operator=(const File &file) {
 	return file;
 }
 
+const char *ENotDir::what() const throw() { return "File is not directory"; }
+ENotDir::~ENotDir() throw() {}
+
 File::Data::~Data() {}
+Directory::Data::~Data() {}

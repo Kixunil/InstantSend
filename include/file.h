@@ -22,6 +22,12 @@ class ENotExist : public std::exception {
 		~ENotExist() throw();
 };
 
+class ENotDir : public std::exception {
+	public:
+		const char *what() const throw();
+		~ENotDir() throw();            
+};
+
 class EPerm : public std::exception {
 	public:
 		const char *what() const throw();
@@ -30,12 +36,14 @@ class EPerm : public std::exception {
 
 class EFileError : public std::exception {
 	public:
-		EFileError(std::string description) : mDescription(description) {}
+		inline EFileError(const std::string &description) : mDescription(description) {}
 		const char *what() const throw();
 		~EFileError() throw();
 	private:
 		std::string mDescription;
 };
+
+class Eod {};
 
 class File {
 	public:
@@ -82,4 +90,31 @@ class WritableFile : public File {
 	public:
 		WritableFile(const std::string &fileName);
 		inline void write(const char *data, File::Size size, File::Size position) { static_cast<WritableFile::Data &>(*mData).writeData(data, size, position); }
+};
+
+class Directory {
+	public:
+		class Data {
+			public:
+				inline Data() : mRefs(1) {}
+				virtual std::string next() = 0;
+				virtual void rewind() = 0;
+				virtual ~Data();
+				inline unsigned int operator++() { return ++mRefs; }
+				inline unsigned int operator--() { return --mRefs; }
+			private:
+				volatile unsigned int mRefs;
+		};
+
+		Directory(const std::string &dir);
+		inline Directory(const Directory &directory) : mData(directory.mData) { ++*mData; }
+		Directory &operator=(const Directory &dir);
+		inline ~Directory() { unref(); }
+
+		inline std::string next() { return mData->next(); }
+		inline void rewind() { mData->next(); }
+	protected:
+		inline Directory(Directory::Data *data) : mData(data) {}
+		inline void unref() { if(!--*mData) delete mData; }
+		Directory::Data *mData;
 };
