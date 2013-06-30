@@ -35,6 +35,12 @@ void dataReceiver_t::parseHeader(jsonObj_t &h) {
 	//for(unsigned int i = 0; i < fname.size(); ++i) if(fname[i] == '/') fname[i] = '-'; //strip slashes TODO: use OS independent function
 	// stripPath(fname);
 
+	if(pathIsUnsafe(fname)) {
+		auto_ptr<anyData> data(allocData(75));
+		strcpy(data->data, "{\"service\":\"filetransfer\",\"action\":\"reject\",\"reason\":\"Filename is unsafe\"}");
+		cptr->sendData(data.get());
+		return;
+	}
 	string destPath(combinePath(savedir, fname));
 	makePath(destPath);
 

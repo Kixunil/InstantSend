@@ -64,3 +64,17 @@ void makePath(const string &path) {
 	fprintf(stderr, "mkdir(\"%s\");\n", directory.c_str());
 	if(mkdir(directory.c_str(), S_IRWXU) < 0 && errno != EEXIST) throw runtime_error(string("mkdir: ") + strerror(errno));
 }
+
+bool pathIsUnsafe(const string &path) {
+	char state = 1;
+	size_t i;
+	for(i = 0; i < path.size(); ++i) {
+		if(path[i] == '/') {
+			if(state == 3) return true;
+			state = 1;
+		} else
+		if(path[i] == '.' &&state > 0 && state < 3) ++state; else state = 0;
+	}
+
+	return i == 3;
+}

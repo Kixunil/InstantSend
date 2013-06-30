@@ -11,3 +11,4 @@ string getSystemCfgDir();
 char *getFileName(const char *path);
 
 void makePath(const string &path);
+bool pathIsUnsafe(const string &path);
