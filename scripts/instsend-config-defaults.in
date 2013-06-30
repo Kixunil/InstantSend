@@ -6,10 +6,10 @@ CFGDIR= ###CONFIGDIR###
 add_plugin() {
 	case "$1" in
 		COMMUNICATION)
-			instsend-config -S -Acp '{ "name" : "'"$3"'", "config" : '"$2"'}'
+			instsend-config -$4 -Acp '{ "name" : "'"$3"'", "config" : '"$2"'}'
 			;;
 		EVENTHANDLER)
-			instsend-config -S -Aep '{'" \"${3}\" : $2 "'}'
+			instsend-config -$4 -Aep '{'" \"${3}\" : $2 "'}'
 			;;
 	esac
 }
@@ -29,7 +29,12 @@ add_defaults() {
 			then
 				if [ -r "$PLUGIN/defaultcfg_server" ] && grep -q "$PLUGIN_IMPORTANCE" "$AUTOPLUGINS";
 				then
-					add_plugin "$PLUGIN_TYPE" "$(cat "$PLUGIN/defaultcfg_server")" "$PLUGIN"
+					add_plugin "$PLUGIN_TYPE" "$(cat "$PLUGIN/defaultcfg_server")" "$PLUGIN" S
+				fi
+
+				if [ -r "$PLUGIN/defaultcfg_client" ] && grep -q "$PLUGIN_IMPORTANCE" "$AUTOPLUGINS";
+				then
+					add_plugin "$PLUGIN_TYPE" "$(cat "$PLUGIN/defaultcfg_client")" "$PLUGIN" C
 				fi
 			fi
 		fi
@@ -63,6 +68,11 @@ done
 if [ '!' -f "$HOME/.instantsend/server.cfg" ];
 then
 	instsend-config -is -S
+fi
+
+if [ '!' -f "$HOME/.instantsend/client.cfg" ];
+then
+	instsend-config -ic -C
 fi
 
 add_defaults "$TYPE" "$AUTOPLUGINSCFG"
