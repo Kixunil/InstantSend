@@ -47,17 +47,13 @@ if TARGET="`instsend-config $CFGFLAG "$CFG" -T | zenity --list --title="Instant 
 then
 	while [ $# -gt 0 ];
 	do
-		CURFILE="$(echo $1 | sed 's/^file:\/\///')"
-		if [ -d "$CURFILE" ];
-		then
-			continue # Skip directories
-		fi
+		CURFILE="$(echo $1 | sed -e 's/^file:\/\///' -e 's/\/$//')"
 		if isend "$ISENDFLAG" "$CFG" -p -t "$TARGET" -f "$CURFILE";
 		then
 			notify-send -i ~/.instantsend/icon_32.png "Instant Send" "File $CURFILE sent." 
 		else
 			notify-send -i /usr/share/icons/gnome/32x32/status/dialog-error.png "Instant Send" "Sending of $CURFILE failed!"
-		fi | zenity --progress --title="Instant Send" --text="Sending file $CURFILE" --auto-kill --auto-close
+		fi
 		shift
 	done
 fi
