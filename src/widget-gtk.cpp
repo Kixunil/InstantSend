@@ -174,6 +174,7 @@ class dialogControl {
 		virtual void togle() = 0;
 		virtual void quit() = 0;
 		virtual void sendFiles() = 0;
+		virtual void sendDirectory() = 0;
 		virtual void preferences() = 0;
 		virtual void startServer() = 0;
 		virtual void stopServer() = 0;
@@ -193,6 +194,7 @@ class trayIcon {
 		inline trayIcon(dialogControl *dialog) : dlg(dialog), actions(Gtk::ActionGroup::create()) {
 			actions->add( Gtk::Action::create("Quit", Gtk::Stock::QUIT, _("Quit")), sigc::mem_fun(*dlg, &dialogControl::quit));
 			actions->add( Gtk::Action::create_with_icon_name("SendFiles", ustring("document-send"), ustring(_("Send files")), ustring()), sigc::mem_fun(*dlg, &dialogControl::sendFiles));
+			actions->add( Gtk::Action::create_with_icon_name("SendDirectory", ustring("document-send"), ustring(_("Send directories")), ustring()), sigc::mem_fun(*dlg, &dialogControl::sendDirectory));
 			actions->add( Gtk::Action::create("Preferences", Gtk::Stock::PREFERENCES, _("Preferences")), sigc::mem_fun(*dlg, &dialogControl::preferences));
 			actions->add( Gtk::Action::create_with_icon_name("StartServer", ustring("system-run"), ustring(_("Start server")), ustring()), sigc::mem_fun(*dlg, &dialogControl::startServer));
 			actions->add( Gtk::Action::create_with_icon_name("StopServer", ustring("stop"), ustring(_("Stop server")), ustring()), sigc::mem_fun(*dlg, &dialogControl::stopServer));
@@ -250,12 +252,14 @@ class gtkTrayIcon : public trayIcon {
 					"<ui>"
 					"  <popup name='TrayIconPopup_serverStopped'>"
 					"    <menuitem action='SendFiles'/>"
+					"    <menuitem action='SendDirectory'/>"
 					"    <menuitem action='StartServer'/>"
 					"    <menuitem action='Preferences'/>"
 					"    <menuitem action='Quit'/>"
 					"  </popup>"
 					"  <popup name='TrayIconPopup_serverRunning'>"
 					"    <menuitem action='SendFiles'/>"
+					"    <menuitem action='SendDirectory'/>"
 					"    <menuitem action='StopServer'/>"
 					"    <menuitem action='Preferences'/>"
 					"    <menuitem action='Quit'/>"
@@ -676,6 +680,15 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 #endif
 		}
 
+		virtual void sendDirectory() {
+#ifndef WINDOWS
+			pid_t pid = fork();
+			if(!pid) {
+				exit(system("zenity --file-selection --directory --multiple --title=InstantSend --separator='\n' | xargs -d '\\n' isend-gtk"));
+			}
+#endif
+		}
+
 		virtual void preferences() {
 #ifndef WINDOWS
 			pid_t pid = fork();
@@ -723,7 +736,7 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 		ScrolledWindow scrollWindowAll, scrollWindowRecv, scrollWindowSend, scrollWindowPending, scrollWindowRecved;
 		VBox allBox, pendingBox, recvBox, sendBox, recvedBox, mainVBox;
 		HBox buttonBar;
-		Button btnSendFiles, btnOpenDir, btnQuit;
+		Button btnSendFiles, btnSendDirectory, btnOpenDir, btnQuit;
 
 		Image iconsend, icondir, iconquit;
 
@@ -817,6 +830,7 @@ instSendWidget::instSendWidget() :
 	sendFileCount(0),
 	recvFileCount(0),
 	btnSendFiles(_("Send files")),
+	btnSendDirectory(_("Send directories")),
 	btnOpenDir(_("Open directory")),
 	btnQuit(_("Quit")),
 	iconsend(),
@@ -826,9 +840,11 @@ instSendWidget::instSendWidget() :
 	try {
 		iconsend.set_from_icon_name(ustring("document-send"), ICON_SIZE_BUTTON);
 		btnSendFiles.set_image(iconsend);
+		btnSendDirectory.set_image(iconsend);
 		btnOpenDir.set_image(icondir);
 		btnQuit.set_image(iconquit);
 		btnSendFiles.signal_clicked().connect( sigc::mem_fun(*this, &instSendWidget::sendFiles));
+		btnSendDirectory.signal_clicked().connect( sigc::mem_fun(*this, &instSendWidget::sendDirectory));
 		btnOpenDir.signal_clicked().connect( sigc::mem_fun(*this, &instSendWidget::openDir));
 		btnQuit.signal_clicked().connect( sigc::mem_fun(*this, &instSendWidget::quit));
 
@@ -891,6 +907,7 @@ instSendWidget::instSendWidget() :
 	add(mainVBox);
 	
 	buttonBar.pack_start(btnSendFiles, PACK_SHRINK);
+	buttonBar.pack_start(btnSendDirectory, PACK_SHRINK);
 	buttonBar.pack_start(btnOpenDir, PACK_SHRINK);
 	buttonBar.pack_start(btnQuit, PACK_SHRINK);
 
