@@ -35,6 +35,7 @@ data/plugins/dbus
 data/plugins/dbus/metadata_sk_SK.UTF-8
 data/plugins/dbus/server
 data/plugins/dbus/metadata
+data/plugins/dbus/defaultcfg_client
 data/plugins/dbus/defaultcfg_server
 data/plugins/ip4tcp
 data/plugins/ip4tcp/server_sk_SK.UTF-8
