@@ -25,6 +25,9 @@ msgstr "Ukončiť"
 msgid "Send files"
 msgstr "Poslať súbory"
 
+msgid "Send directories"
+msgstr "Poslať adresáre"
+
 #: src/widget-gtk.cpp:174
 msgid "Preferences"
 msgstr "Nastavenia"

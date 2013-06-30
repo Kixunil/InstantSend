@@ -25,6 +25,9 @@ msgstr "Quit"
 msgid "Send files"
 msgstr "Send files"
 
+msgid "Send directories"
+msgstr "Send directories"
+
 #: src/widget-gtk.cpp:174
 msgid "Preferences"
 msgstr "Preferences"
