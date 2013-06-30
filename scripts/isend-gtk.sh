@@ -47,7 +47,7 @@ if TARGET="`instsend-config $CFGFLAG "$CFG" -T | zenity --list --title="Instant 
 then
 	while [ $# -gt 0 ];
 	do
-		CURFILE="$(echo $1 | sed -e 's/^file:\/\///' -e 's/\/$//')"
+		CURFILE="$(echo -e $(echo $1 | sed -e 's/^file:\/\///' -e 's/\/$//' -e 'y/+/ /; s/%/\\x/g'))"
 		if isend "$ISENDFLAG" "$CFG" -p -t "$TARGET" -f "$CURFILE";
 		then
 			notify-send -i ~/.instantsend/icon_32.png "Instant Send" "File $CURFILE sent." 
