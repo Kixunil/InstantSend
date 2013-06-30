@@ -1,5 +1,10 @@
+instantsend (0.8.1~###DISTRIBUTION###) unstable; urgency=low
+  * Improved GUI now shows uploading files. Ability tosend whole directories.
+
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Sun, 30 Jun 2013 15:57:59 +0200
+
 instantsend (0.8~###DISTRIBUTION###) unstable; urgency=low
-  * Huge improvements. Better GUI, more stable application, new featuress.
+  * Huge improvements. Better GUI, more stable application, new features.
 
  -- Martin Habovštiak <martin.habovstiak@gmail.com>  Fri, 31 May 2013 12:10:30 +0100
 
