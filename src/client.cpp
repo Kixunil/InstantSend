@@ -21,14 +21,47 @@ inline const char *getBaseFileName(const char *path) {
 	return getFileName(path);
 }
 
+class StatusReporter : public thread_t {
+	public:
+		StatusReporter(fileStatus_t &fs) : mFileStatus(fs), mRunning(true), mSem(0) {}
+		void run() {
+			while(mRunning) {
+				usleep(500000);
+				bcastProgressUpdate(mFileStatus);
+				if(outputpercentage) {
+					printf("%ld\n", 100*mFileStatus.getTransferredBytes() / mFileStatus.getFileSize());
+					fflush(stdout);
+				}
+			}
+			++mSem;
+		}
+
+		void join() {
+			mRunning = false;
+			--mSem;
+		}
+
+		bool autoDelete() {
+			return true;
+		}
+	private:
+		fileStatus_t &mFileStatus;
+		volatile bool mRunning;
+		Semaphore mSem;
+
+};
+
 class FileReader : public fileStatus_t {
 	public:
 		FileReader(const string &name, const string &target) : mName(name), mTarget(target), mFile(name), mSize(mFile.size()), mBytes(0),
 #ifndef WINDOWS
 		mId(getpid()),
 #endif
-		mStatus(IS_TRANSFER_CONNECTING) {
+		mStatus(IS_TRANSFER_CONNECTING),
+		mReporter(*new StatusReporter(*this))
+	       	{
 			bcastProgressBegin(*this);
+			mReporter.start();
 		}
 
 		string getFileName() {
@@ -119,13 +152,13 @@ class FileReader : public fileStatus_t {
 					data->size += msg.size() + 1;
 
 					if(!client.sendData(data.get())) throw runtime_error("Can't send!");
-					if(!(fragmentcnt = (fragmentcnt +1) % 5000)) {
+/*					if(!(fragmentcnt = (fragmentcnt +1) % 5000)) {
 						bcastProgressUpdate(*this);
 						if(outputpercentage) {
 							printf("%ld\n", 100*mBytes / mSize);
 							fflush(stdout);
 						}
-					}
+					}*/
 				} while(fpos < mSize);
 				strcpy(data->data, "{\"action\":\"finished\"}");
 				data->size = 26;
@@ -138,7 +171,8 @@ class FileReader : public fileStatus_t {
 				jsonObj_t h(&header);
 				if(dynamic_cast<jsonStr_t &>(h["action"]).getVal() == "finished")
 				*/
-				bcastProgressUpdate(*this);
+				//bcastProgressUpdate(*this);
+				mReporter.join();
 				mStatus = IS_TRANSFER_FINISHED;
 				bcastProgressEnd(*this);
 				return 1;
@@ -161,6 +195,7 @@ class FileReader : public fileStatus_t {
 		File mFile;
 		File::Size mSize, mBytes;
 		int mId, mStatus;
+		StatusReporter &mReporter;
 };
 
 fileStatus_t::~fileStatus_t() {}
