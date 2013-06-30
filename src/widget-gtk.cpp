@@ -338,7 +338,7 @@ class gtkTrayIcon : public trayIcon {
 				} else
 				if(sip) {
 					animating = true;
-					statusIcon->set(dlAnim[animPtr]);
+					statusIcon->set(ulAnim[animPtr]);
 				} else
 				if(rpe) {
 					animating = false;
