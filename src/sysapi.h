@@ -8,7 +8,8 @@ string getSystemDataDir();
 string getSystemPluginDir();
 string getSystemCfgDir();
 
-char *getFileName(const char *path);
+size_t getFileName(const string &path);
+void trimSlashes(string &path);
 
 void makePath(const string &path);
 bool pathIsUnsafe(const string &path);

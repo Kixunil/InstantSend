@@ -17,7 +17,7 @@
 
 int outputpercentage = 0;
 
-inline const char *getBaseFileName(const char *path) {
+inline size_t getBaseFileName(const string &path) {
 	return getFileName(path);
 }
 
@@ -224,13 +224,14 @@ pluginInstanceAutoPtr<peer_t> findWay(jsonArr_t &ways) {
 	throw runtime_error("No usable way found");
 }
 
-void sendEntry(const string &entry, size_t ignored, const string &tname, peer_t &client) {
-	if(entry.size() > 1 && entry.substr(entry.size() - 2) == "/.") return;
-	if(entry.size() > 2 && entry.substr(entry.size() - 3) == "/..") return;
+bool sendEntry(const string &entry, size_t ignored, const string &tname, peer_t &client) {
+	if(entry.size() > 1 && entry.substr(entry.size() - 2) == "/.") return true;
+	if(entry.size() > 2 && entry.substr(entry.size() - 3) == "/..") return true;
+	bool success = true;
 	try {
 		Directory dir(entry);
 		while(1) {
-			sendEntry(combinePath(entry, dir.next()), ignored, tname, client);
+			success = success && sendEntry(combinePath(entry, dir.next()), ignored, tname, client);
 		}
 	}
 	catch(ENotDir &e) {
@@ -238,16 +239,20 @@ void sendEntry(const string &entry, size_t ignored, const string &tname, peer_t 
 		FileReader file(entry, tname);
 
 		// Send file
-		if(file.send(client, entry.substr(ignored))) printf("File \"%s\" sent to \"%s\".\n", entry.substr(ignored).c_str(), tname.c_str());
+		if(file.send(client, entry.substr(ignored))) {
+			printf("File \"%s\" sent to \"%s\".\n", entry.substr(ignored).c_str(), tname.c_str());
+			return true;
+		} else success = false;
 	}
 	catch(Eod &e) {} // Ignore end of directory
+	return success;
 }
 
 int main(int argc, char **argv) {
 	if(argc < 2) return 1;
 
-	string userdir = getUserDir();
-	string cfgfile = combinePath(userdir, string("client.cfg"));
+	string userdir(getUserDir());
+	string cfgfile(combinePath(userdir, string("client.cfg")));
 
 	// Find out if config file was specified
 	for(int i = 1; i+1 < argc; ++i) {
@@ -293,8 +298,10 @@ int main(int argc, char **argv) {
 					client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
 				} catch(exception &e) {
 					printf("Failed to connet to %s: %s\n", tname, e.what());
+					fflush(stdout);
 					failuredetected = 1; 
 					while(i + 1 < argc && string(argv[i]) != string("-t")) ++i; // skip unusable target
+					if(i + 1 < argc) --i;
 					continue;
 				}
 				if(!client.valid()) {
@@ -302,6 +309,7 @@ int main(int argc, char **argv) {
 					fflush(stdout);
 					failuredetected = 1;
 					while(i + 1 < argc && string(argv[i]) != string("-t")) ++i; // skip unusable target
+					if(i + 1 < argc) --i;
 					continue;
 				}
 
@@ -314,10 +322,13 @@ int main(int argc, char **argv) {
 					return 1;
 				}
 				
-				const char *fileName = getFileName(argv[i]);
-
-				fprintf(stderr, "sendEntry(\"%s\", %zu, \"%s\", client);\n", argv[i], (size_t)(fileName - argv[i]), tname);
-				sendEntry(argv[i], fileName - argv[i], tname, *client);
+				string fn(argv[i]);
+				trimSlashes(fn);
+				
+				fprintf(stderr, "Sending data...\n");
+				if(sendEntry(fn, getFileName(fn), tname, *client)) {
+					fprintf(stderr, "Sending successfull.\n");
+				} else failuredetected = 1;
 			}
 		}
 
@@ -328,5 +339,6 @@ int main(int argc, char **argv) {
 		//if(dlerr) fprintf(stderr, "; %s\n", dlerr); else putc('\n', stderr);
 		return 1;
 	}
-	return failuredetected;
+	fprintf(stderr, "Return value: %d\n", failuredetected);
+	_exit(failuredetected);
 }

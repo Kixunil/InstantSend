@@ -42,10 +42,21 @@ string getSystemCfgDir() {
 #endif
 }
 
-const char *getFileName(const char *path) {
-	const char *fileName = path;
-	while(*path) if(*path++ == '/') fileName = path;
-	return fileName;
+size_t getFileName(const string &path) {
+	size_t i = path.size();
+	do {
+		--i;
+	} while(i && path[i] != '/');
+	if(path[i] == '/') ++i;
+	return i;
+}
+
+void trimSlashes(string &path) {
+	size_t i = path.size();
+	do {
+		--i;
+	} while(i && path[i] == '/');
+	if(!i) path = "/"; else if(i + 1 < path.size()) path.erase(i + 1);
 }
 
 void makePath(const string &path) {

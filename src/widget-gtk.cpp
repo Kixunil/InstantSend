@@ -408,7 +408,7 @@ class SimpleFileInfoRenderer : public observer_t {
 		}
 
 		void updateData() {
-			fileName.set_markup("<b>" + Markup::escape_text(getFileName(finfo->getFileName().c_str())) + "</b>");
+			fileName.set_markup("<b>" + Markup::escape_text(finfo->getFileName().substr(getFileName(finfo->getFileName()))) + "</b>");
 			fileName.set_justify(JUSTIFY_LEFT);
 			peerName.set_markup("<small>" + Markup::escape_text(finfo->getPeerName()) + "</small>");
 			peerName.set_justify(JUSTIFY_LEFT);
