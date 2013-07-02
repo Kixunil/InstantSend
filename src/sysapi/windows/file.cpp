@@ -57,3 +57,30 @@ class WindowsFile : public File::Data {
 File::File(const std::string &fileName) : mData(new WindowsFile(fileName, false)) {}
 
 WritableFile::WritableFile(const std::string &fileName) : File(new WindowsFile(fileName, true)) {}
+
+class WindowsDirectory : public Directory::Data {
+	public:
+		WindowsDirectory(const string &path) : Directory::Data(), mDir(opendir(path.c_str())) {
+			if(!mDir) {
+				if(errno == ENOTDIR) throw ENotDir();
+				else throw EFileError(string("opendir: ") + strerror(errno));
+			}
+		}
+		string next() {
+			struct dirent *de = readdir(mDir);
+			if(!de) throw Eod();
+			return string(de->d_name);
+		}
+
+		void rewind() {
+			rewinddir(mDir);
+		}
+
+		~PosixDirectory() {
+			closedir(mDir);
+		}
+	private:
+		DIR *mDir;
+};
+
+Directory::Directory(const string &dir) : mData(new WindowsDirectory(dir)) {}

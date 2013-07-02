@@ -43,11 +43,41 @@ string getSystemCfgDir() {
 #endif
 }
 
-const char *getFileName(const char *path) {
-	const char *fileName = path;
-	while(*path) {
-		if(*path == '/' || *path == '\\') fileName = path + 1;
-		++path;
+void trimSlashes(string &path) {
+	size_t i = path.size();
+	do {
+		--i;
+	} while(i && (path[i] == '/' || path[i] == '\\'));
+	if(!i) throw runtime_error("Invalid path");
+	if(i + 1 < path.size()) path.erase(i + 1);
+}
+
+void makePath(const string &path) {
+	size_t slashPos = path.size();
+	do {
+		--slashPos;
+	} while(slashPos && path[slashPos] != '/' && path[slashPos] != '\\');
+	string directory((path[slashPos] != '/' && path[slashPos] != '\\')?path:path.substr(0, slashPos));
+	
+	for(size_t i = (directory[0] == '/'?1:0); i < directory.size(); ++i)
+	if(directory[i] == '/' || directory[i] == '\\') {
+		directory[i] = 0;
+		if(mkdir(directory.c_str()) < 0 && errno != EEXIST) throw runtime_error(string("mkdir: ") + strerror(errno));
+		directory[i] = '\\';
 	}
-	return fileName;
+	if(mkdir(directory.c_str()) < 0 && errno != EEXIST) throw runtime_error(string("mkdir: ") + strerror(errno));
+}
+
+bool pathIsUnsafe(const string &path) {
+	char state = 1;
+	size_t i;
+	for(i = 0; i < path.size(); ++i) {
+		if(path[i] == '/' || path[i] == '\\') {
+			if(state == 3) return true;
+			state = 1;
+		} else
+		if(path[i] == '.' &&state > 0 && state < 3) ++state; else state = 0;
+	}
+
+	return i == 3;
 }

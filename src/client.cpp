@@ -26,7 +26,11 @@ class StatusReporter : public thread_t {
 		StatusReporter(fileStatus_t &fs) : mFileStatus(fs), mRunning(true), mSem(0) {}
 		void run() {
 			while(mRunning) {
+#ifndef WINDOWS
 				usleep(500000);
+#else
+				_sleep(1);
+#endif
 				bcastProgressUpdate(mFileStatus);
 				if(outputpercentage) {
 					printf("%ld\n", 100*mFileStatus.getTransferredBytes() / mFileStatus.getFileSize());
