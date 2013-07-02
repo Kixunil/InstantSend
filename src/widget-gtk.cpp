@@ -738,7 +738,7 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 		HBox buttonBar;
 		Button btnSendFiles, btnSendDirectory, btnOpenDir, btnQuit;
 
-		Image iconsend, icondir, iconquit;
+		Image iconsend, iconsenddir, icondir, iconquit;
 
 		std::map<unsigned int, FileInfoItem *> files, pending, received;
 
@@ -834,13 +834,15 @@ instSendWidget::instSendWidget() :
 	btnOpenDir(_("Open directory")),
 	btnQuit(_("Quit")),
 	iconsend(),
+	iconsenddir(),
 	icondir(Stock::DIRECTORY, IconSize(ICON_SIZE_BUTTON)),
 	iconquit(Stock::QUIT, IconSize(ICON_SIZE_BUTTON)) {
 	
 	try {
 		iconsend.set_from_icon_name(ustring("document-send"), ICON_SIZE_BUTTON);
+		iconsenddir.set_from_icon_name(ustring("document-send"), ICON_SIZE_BUTTON);
 		btnSendFiles.set_image(iconsend);
-		btnSendDirectory.set_image(iconsend);
+		btnSendDirectory.set_image(iconsenddir);
 		btnOpenDir.set_image(icondir);
 		btnQuit.set_image(iconquit);
 		btnSendFiles.signal_clicked().connect( sigc::mem_fun(*this, &instSendWidget::sendFiles));
