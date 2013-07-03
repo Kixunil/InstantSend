@@ -1,3 +1,8 @@
+instantsend (0.8.2~###DISTRIBUTION###) unstable; urgency=low
+  * Couple bug fixes, improved event sending from client side.
+
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Wed, 03 Jul 2013 09:44:01 +0200
+
 instantsend (0.8.1~###DISTRIBUTION###) unstable; urgency=low
   * Improved GUI now shows uploading files. Ability tosend whole directories.
 

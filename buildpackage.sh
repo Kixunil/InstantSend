@@ -13,7 +13,7 @@ fi
 BINARY=""
 
 INSTANTSEND_VERSION=`grep '^AC_INIT' configure.ac | sed -re 's/^.*\[.*\].*\[([0-9.]*)\].*\[.*\].*$/\1/'`
-REVISION=1
+REVISION=2
 
 # this function was found at http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
 vercomp () {
