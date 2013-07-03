@@ -39,24 +39,6 @@ Description: Header files for InstantSend JSON library
  .
  These header files are neccessary to build plugins.
 
-Package: libinstantsend-multithread
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: instantsend-server, instantsend-gtk
-Description: Multiplatform wrapper library for multithreading from instantsend toolkit
- Instantsend is toolkit for sending files over multiple protocols
- .
- This library provides simple object-oriented multiplatform thread support.
-
-Package: libinstantsend-pluginloading
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: instantsend-server, instantsend-client
-Description: Multiplatform plugin loading library from instantsend toolkit
- Instantsend is toolkit for sending files over multiple protocols.
- .
- This library handles loading and unloading of InstantSend plugings.
-
 Package: libinstantsend-sysapi
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -66,10 +48,19 @@ Description: Wrapper for platform specific functions for instantsend toolkit
  .
  This wrapper library handles communication with OS and defines standard paths.
 
+Package: libinstantsend-common
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: instantsend-server, instantsend-client, instantsend-gtk
+Description: Library with functions used instantsend toolkit
+ Instantsend is toolkit for sending files over multiple protocols.
+ .
+ Common for server, client and GUI
+
 # Server
 Package: instantsend-server
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json, libinstantsend-multithread, libinstantsend-pluginloading, libinstantsend-sysapi
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json, libinstantsend-common, libinstantsend-sysapi
 Recommends: instantsend-plugins-communication
 Suggests: instantsend-client, instantsend-gtk, instantsend-plugins-standard
 Description: Server from instantsend toolkit
@@ -80,7 +71,7 @@ Description: Server from instantsend toolkit
 #Client
 Package: instantsend-client
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json, libinstantsend-pluginloading, libinstantsend-sysapi
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinstantsend-plugin, libinstantsend-json, libinstantsend-common, libinstantsend-sysapi
 Recommends: instantsend-plugins-communication
 Suggests: instantsend-server, instantsend-gtk
 Description: Client from instantsend toolkit
@@ -169,7 +160,7 @@ Description: Avahi scanner from instantsend toolkit
 # GTK
 Package: instantsend-gtk
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libgtkmm-2.4-1c2a, instantsend-plugin-dbus, libdbus-1-3, zenity, libinstantsend-plugin, libinstantsend-json, libinstantsend-multithread, libinstantsend-sysapi
+Depends: ${shlibs:Depends}, ${misc:Depends}, libgtkmm-2.4-1c2a, instantsend-plugin-dbus, libdbus-1-3, zenity, libinstantsend-plugin, libinstantsend-json, libinstantsend-common, libinstantsend-sysapi
 Enhances: instantsend-server, instantsend-client
 Suggests: instantsend-filemanagers
 Description: GTK based GUI from instantsend toolkit
