@@ -60,27 +60,37 @@ WritableFile::WritableFile(const std::string &fileName) : File(new WindowsFile(f
 
 class WindowsDirectory : public Directory::Data {
 	public:
-		WindowsDirectory(const string &path) : Directory::Data(), mDir(opendir(path.c_str())) {
-			if(!mDir) {
-				if(errno == ENOTDIR) throw ENotDir();
-				else throw EFileError(string("opendir: ") + strerror(errno));
+		WindowsDirectory(const string &path) : Directory::Data(), mPath(path + "\\*"), mDirHandle(::FindFirstFile(mPath.c_str(), &mDirPointer)), mEod(false) {
+			if(mDirHandle == INVALID_HANDLE_VALUE) {
+				throw ENotDir();
 			}
 		}
+
 		string next() {
-			struct dirent *de = readdir(mDir);
-			if(!de) throw Eod();
-			return string(de->d_name);
+			if(mEod) throw Eod();
+			string result(mDirPointer.cFileName);
+			mEod = ::FindNextFile(mDirHandle, &mDirPointer) != TRUE;
+			return result;
 		}
 
 		void rewind() {
-			rewinddir(mDir);
+			WIN32_FIND_DATA tmpDir;
+			HANDLE tmpHnd(::FindFirstFile(mPath.c_str(), &tmpDir));
+			if(tmpHnd == INVALID_HANDLE_VALUE) throw EFileError("FindFirstFile"); // Strong exception safety
+			::FindClose(mDirHandle);
+			mDirHandle = tmpHnd;
+			memcpy(&mDirPointer, &tmpDir, sizeof(WIN32_FIND_DATA));
+			mEod = false;
 		}
 
-		~PosixDirectory() {
-			closedir(mDir);
+		~WindowsDirectory() {
+			::FindClose(mDirHandle);
 		}
 	private:
-		DIR *mDir;
+		std::string mPath;
+		HANDLE mDirHandle;
+		WIN32_FIND_DATA mDirPointer;
+		bool mEod;
 };
 
 Directory::Directory(const string &dir) : mData(new WindowsDirectory(dir)) {}

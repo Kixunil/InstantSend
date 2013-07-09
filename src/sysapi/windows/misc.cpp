@@ -43,6 +43,15 @@ string getSystemCfgDir() {
 #endif
 }
 
+size_t getFileName(const string &path) {
+	size_t i = path.size();
+	do {
+		--i;
+	} while(i && path[i] != '/' && path[i] != '\\');
+	if(path[i] == '/' || path[i] == '\\') ++i;
+	return i;
+}
+
 void trimSlashes(string &path) {
 	size_t i = path.size();
 	do {
@@ -59,8 +68,8 @@ void makePath(const string &path) {
 	} while(slashPos && path[slashPos] != '/' && path[slashPos] != '\\');
 	string directory((path[slashPos] != '/' && path[slashPos] != '\\')?path:path.substr(0, slashPos));
 	
-	for(size_t i = (directory[0] == '/'?1:0); i < directory.size(); ++i)
-	if(directory[i] == '/' || directory[i] == '\\') {
+	for(size_t i = 1; i < directory.size(); ++i)
+	if((directory[i] == '/' || directory[i] == '\\') && directory[i - 1] != ':') {
 		directory[i] = 0;
 		if(mkdir(directory.c_str()) < 0 && errno != EEXIST) throw runtime_error(string("mkdir: ") + strerror(errno));
 		directory[i] = '\\';

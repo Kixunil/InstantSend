@@ -61,11 +61,15 @@ class FileReader : public fileStatus_t {
 #ifndef WINDOWS
 		mId(getpid()),
 #endif
-		mStatus(IS_TRANSFER_CONNECTING),
-		mReporter(*new StatusReporter(*this))
+		mStatus(IS_TRANSFER_CONNECTING)
+#ifndef WINDOWS
+		, mReporter(*new StatusReporter(*this))
+#endif
 	       	{
 			bcastProgressBegin(*this);
+#ifndef WINDOWS
 			mReporter.start();
+#endif
 		}
 
 		string getFileName() {
@@ -176,7 +180,9 @@ class FileReader : public fileStatus_t {
 				if(dynamic_cast<jsonStr_t &>(h["action"]).getVal() == "finished")
 				*/
 				//bcastProgressUpdate(*this);
+#ifndef WINDOWS
 				mReporter.join();
+#endif
 				mStatus = IS_TRANSFER_FINISHED;
 				bcastProgressEnd(*this);
 				return 1;
@@ -199,7 +205,9 @@ class FileReader : public fileStatus_t {
 		File mFile;
 		File::Size mSize, mBytes;
 		int mId, mStatus;
+#ifndef WINDOWS
 		StatusReporter &mReporter;
+#endif
 };
 
 fileStatus_t::~fileStatus_t() {}
@@ -229,16 +237,19 @@ pluginInstanceAutoPtr<peer_t> findWay(jsonArr_t &ways) {
 }
 
 bool sendEntry(const string &entry, size_t ignored, const string &tname, peer_t &client) {
-	if(entry.size() > 1 && entry.substr(entry.size() - 2) == "/.") return true;
-	if(entry.size() > 2 && entry.substr(entry.size() - 3) == "/..") return true;
+	fprintf(stderr, "Sending %s\n", entry.c_str());
+	if(entry.size() > 1 && (entry.substr(entry.size() - 2) == "/." || entry.substr(entry.size() - 2) == "\\.")) return true;
+	if(entry.size() > 2 && (entry.substr(entry.size() - 3) == "/.."|| entry.substr(entry.size() - 3) == "\\..")) return true;
 	bool success = true;
 	try {
 		Directory dir(entry);
+		fprintf(stderr, "Sending directory %s\n", entry.c_str());
 		while(1) {
 			success = success && sendEntry(combinePath(entry, dir.next()), ignored, tname, client);
 		}
 	}
 	catch(ENotDir &e) {
+		fprintf(stderr, "Opening %s\n", entry.c_str());
 		// Open file
 		FileReader file(entry, tname);
 
@@ -341,6 +352,10 @@ int main(int argc, char **argv) {
 		//char *dlerr = dlerror();
 		fprintf(stderr, "Error: %s\n", msg);
 		//if(dlerr) fprintf(stderr, "; %s\n", dlerr); else putc('\n', stderr);
+		return 1;
+	}
+	catch(exception &e) {
+		fprintf(stderr, "Error: %s\n", e.what());
 		return 1;
 	}
 	fprintf(stderr, "Return value: %d\n", failuredetected);
