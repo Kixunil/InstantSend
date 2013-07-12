@@ -1,3 +1,9 @@
+#include "pluginapi.h"
+#include "logger.h"
+
+#define LOG(level, message) instantSend->logger().log(level, message)
+
+namespace InstantSend {
 extern volatile bool stopApp;
 extern volatile bool stopAppFast;
 
@@ -26,3 +32,26 @@ void freezeMainThread();
  * \see freezeMainThread()
  */
 void unfreezeMainThread();
+
+class Application : public ApplicationEnvironment {
+	public:
+		Application(int argc, char **argv);
+
+		const std::string &systemDataDir();
+		const std::string &systemConfigDir();
+		const std::string &userDataDir();
+		const std::string &fileDir();
+
+		void fileDir(const std::string &dir);
+
+		void requestStop();
+		void requestFastStop();
+
+		inline Logger &logger() { return mLogger; }
+	private:
+		BasicLogger mLogger;
+};
+
+extern Application *instantSend;
+
+}

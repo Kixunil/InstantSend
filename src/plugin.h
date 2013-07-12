@@ -7,7 +7,7 @@
 
 #include "pluginapi.h"
 
-using namespace std;
+namespace InstantSend {
 
 template <class T>
 struct pluginInstanceAutoPtrRef {
@@ -15,6 +15,32 @@ struct pluginInstanceAutoPtrRef {
 	pluginInstanceAutoPtrRef(T *instance) : mInstance(instance) {}
 };
 
+typedef unsigned int RefCnt;
+
+class PluginStorageHandle {
+	virtual void checkUnload() = 0;
+};
+
+class InternalPluginEnvironment : public PluginEnvironment {
+	public:
+		InternalPluginEnvironment(ApplicationEnvironment &appEnv, const std::string &name);
+
+		const std::string &systemPluginDataDir();
+		const std::string &systemPluginConfigDir();
+		const std::string &userPluginDir();
+
+		void onInstanceCreated();
+		void onInstanceDestroyed();
+
+		void log(Logger::Level level, const std::string &message);
+
+		void checkUnload();
+		inline void setStorageHandle(PluginStorageHandle *handle) { mStorageHandle.reset(handle); }
+	private:
+		const std::string mName;
+		RefCnt instanceCount;
+		auto_ptr<PluginStorageHandle> mStorageHandle;
+};
 
 template <class T>
 class pluginInstanceAutoPtr {
@@ -34,7 +60,14 @@ class pluginInstanceAutoPtr {
 		inline operator pluginInstanceAutoPtrRef<T>() { return pluginInstanceAutoPtrRef<T>(this->release()); }
 		template <class T2>
 			inline operator pluginInstanceAutoPtrRef<T2>() { return pluginInstanceAutoPtrRef<T2>(this->release()); }
-		void reset(T *instance = NULL) { if(mInstance) { pluginMultiInstanceCreator_t &creator(mInstance->getCreator()); delete mInstance; creator.checkUnload(); } mInstance = instance; }
+		void reset(T *instance = NULL) {
+			if(mInstance) {
+				InternalPluginEnvironment &env(static_cast<InternalPluginEnvironment &>(mInstance->mEnv));
+				delete mInstance;
+				env.checkUnload();
+			}
+			mInstance = instance;
+		}
 		inline bool valid() { return mInstance; }
 	private:
 		inline T *release() {
@@ -47,16 +80,16 @@ class pluginInstanceAutoPtr {
 
 
 class EPluginInvalid : public runtime_error {
-	inline EPluginInvalid(const string &message) : runtime_error(message) {};
+	inline EPluginInvalid(const std::string &message) : runtime_error(message) {};
 };
 
 class LibraryHandle {
 	public:
 		virtual void onUnload() = 0;
 		virtual ~LibraryHandle();
-		inline pluginInstanceCreator_t *creator() { return mCreator; }
+		inline PluginInstanceCreator *creator() { return mCreator; }
 	protected:
-		pluginInstanceCreator_t *mCreator;
+		PluginInstanceCreator *mCreator;
 };
 
 /*! \brief Holds all necessary informations about plugin
@@ -92,7 +125,7 @@ class pluginHandle_t {
 
 		/*! Decreases reference count and returns true, if ti's possible to unload plugin */
 		inline bool decRC() throw() {
-			return !--refCnt && mLibrary->creator()->unloadPossible();
+			return !--refCnt;
 		}
 
 		/*! Returns actual reference count */
@@ -101,11 +134,11 @@ class pluginHandle_t {
 		}
 
 		inline bool isUnloadable() {
-			return !refCnt && mLibrary->creator()->unloadPossible();
+			return !refCnt;
 		}
 
 		/* Returns pointer to instance creator */
-		inline pluginInstanceCreator_t *creator() {
+		inline PluginInstanceCreator *creator() {
 			return mLibrary->creator();
 		}
 
@@ -168,46 +201,6 @@ class BPluginRef {
 		pluginHandle_t *mHandle;
 };
 
-#if 0
-class plugin_t {
-	private:
-		pluginHandle_t *handle;
-	public:
-		plugin_t(const pluginHandle_t *handle);
-		plugin_t(const plugin_t &plugin);
-		inline plugin_t() {
-			handle = NULL;
-		}
-		~plugin_t();
-		plugin_t &operator=(plugin_t &plugin);
-		pluginHandle_t *operator=(pluginHandle_t *handle);
-
-		inline pluginInstanceCreator_t *creator() {
-			return handle->creator();
-		}
-
-		inline bool loaded() {
-			return handle && handle->loaded();
-		}
-
-		inline pluginInstanceAutoPtr<peer_t> newClient(const jsonComponent_t &config) {
-			return dynamic_cast<connectionCreator_t &>(*handle->creator()).newClient(config);
-		}
-
-		inline pluginInstanceAutoPtr<serverPlugin_t> newServer(const jsonComponent_t &config) {
-			return dynamic_cast<connectionCreator_t &>(*handle->creator()).newServer(config);
-		}
-
-		inline const char *lastError() {
-			return handle->creator()->getErr();
-		}
-
-		/* \brief Returns true, if instance of plugin_t is last thing that depends on plugin
-		 */
-		inline bool isLast() {
-			return handle->getRC() == 1 && handle->creator()->unloadPossible();
-		}
-};
-#endif // if 0
+} // namespace InstantSend 
 
 #endif

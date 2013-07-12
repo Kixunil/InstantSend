@@ -1,22 +1,45 @@
+#include <cstdio>
+#include <stdarg.h>
+
 #include "pluginapi.h"
 
-pluginInstance_t::~pluginInstance_t() {
-	instcreator.dec();
+using namespace InstantSend;
+
+void PluginEnvironment::log(Logger::Level level, const char *format, ...) {
+	va_list vl;
+	va_start(vl, format);
+	int msgSize = vsnprintf(NULL, 0, format, vl);
+	++msgSize; // take '\0' into account
+	va_end(vl);
+	char buf[msgSize]; // output error will never occur in this case
+	va_start(vl, format);
+	vsnprintf(buf, msgSize, format, vl);
+	va_end(vl);
+	log(level, string(buf));
 }
 
-pluginInstanceCreator_t::~pluginInstanceCreator_t() {
+Logger::~Logger() {}
+
+const char *Logger::LevelToStr(Level level) {
+	static const char *names[] = {
+		"Fatal error",
+		"Security error",
+		"Error",
+		"Security warning",
+		"Warning",
+		"Note",
+		"Debug",
+		"Verbose debug"
+	};
+
+	return names[level];
 }
 
-bool pluginInstanceCreator_t::unloadPossible() {
-	return true;
+PluginInstance::~PluginInstance() {
+	mEnv.onInstanceDestroyed();
 }
 
-bool pluginMultiInstanceCreator_t::unloadPossible() {
-	return !count;
-}
-
-pluginMultiInstanceCreator_t::~pluginMultiInstanceCreator_t() {
-}
+PluginInstanceCreator::~PluginInstanceCreator() {}
 
 #if 0
 event_t::~event_t() {

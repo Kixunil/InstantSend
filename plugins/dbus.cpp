@@ -10,6 +10,7 @@
 
 #define D(MSG) fprintf(stderr, MSG "\n"); fflush(stderr);
 
+using namespace InstantSend;
 using namespace std;
 
 class dbusConnectionHandle {
@@ -18,14 +19,14 @@ class dbusConnectionHandle {
 		virtual void printError() = 0;
 };
 
-class progressHandler : public eventProgress_t {
+class progressHandler : public EventProgress {
 	private:
 		dbusConnectionHandle &dbconnhandle;
 		struct timeval lastUpdate;
 		//int updatenum;
 	public:
-		inline progressHandler(dbusConnectionHandle &handle) : eventProgress_t(), dbconnhandle(handle) {}
-		void onBegin(fileStatus_t &fStatus) throw() {
+		inline progressHandler(dbusConnectionHandle &handle) : EventProgress(), dbconnhandle(handle) {}
+		void onBegin(FileStatus &fStatus) throw() {
 			DBusMessage *dbmsg = dbus_message_new_signal("/sk/pixelcomp/instantsend", "sk.pixelcomp.instantsend", "onBegin");
 			if(!dbmsg) {
 				dbconnhandle.printError();
@@ -50,7 +51,7 @@ class progressHandler : public eventProgress_t {
 //			updatenum = 0;
 		}
 
-		void onUpdate(fileStatus_t &fStatus) throw() {
+		void onUpdate(FileStatus &fStatus) throw() {
 			// This prevents overloading dbus
 			struct timeval curTime;
 			gettimeofday(&curTime, NULL);
@@ -70,15 +71,15 @@ class progressHandler : public eventProgress_t {
 			dbus_message_unref(dbmsg);
 		}
 
-		void onPause(fileStatus_t &fStatus) throw() {
+		void onPause(FileStatus &fStatus) throw() {
 			(void)fStatus;
 		}
 
-		void onResume(fileStatus_t &fStatus) throw() {
+		void onResume(FileStatus &fStatus) throw() {
 			(void)fStatus;
 		}
 
-		void onEnd(fileStatus_t &fStatus) throw() {
+		void onEnd(FileStatus &fStatus) throw() {
 			DBusMessage *dbmsg = dbus_message_new_signal("/sk/pixelcomp/instantsend", "sk.pixelcomp.instantsend", "onEnd");
 			if(!dbmsg) {
 				dbconnhandle.printError();
@@ -92,13 +93,13 @@ class progressHandler : public eventProgress_t {
 		}
 };
 
-class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
+class ehCreator_t : public EventHandlerCreator, dbusConnectionHandle {
 	private:
 		progressHandler progress;
 		DBusError dberr;
 		DBusConnection *dbconn;
 	public:
-		ehCreator_t() : eventHandlerCreator_t(), progress(*this) {
+		ehCreator_t(PluginEnvironment &env) : EventHandlerCreator(env), progress(*this) {
 			try {
 				dbus_threads_init_default();
 				dbus_error_init(&dberr);
@@ -118,12 +119,12 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 			return "No error occured";
 		}
 
-		void regEvents(eventRegister_t &reg, jsonComponent_t *config) throw() {
+		void regEvents(EventRegister &reg, jsonComponent_t *config) throw() {
 			(void)config;
 			reg.regProgress(progress);
 		}
 
-		void unregEvents(eventRegister_t &reg) throw() {
+		void unregEvents(EventRegister &reg) throw() {
 			reg.unregProgress(progress);
 		}
 
@@ -145,9 +146,8 @@ class ehCreator_t : public eventHandlerCreator_t, dbusConnectionHandle {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
-		(void)callback;
-		static ehCreator_t creator;
+	PluginInstanceCreator *getCreator(PluginEnvironment &env) {
+		static ehCreator_t creator(env);
 		return &creator;
 	}
 }

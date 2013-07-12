@@ -1,39 +1,42 @@
 #include <stdio.h>
 #include <stdexcept>
 
-#include "eventsink.h"
 #include "pluginlist.h"
+#include "eventsink.h"
 
 #define BCAST_EVENT_DEF(evType, evName, dataType) \
-void eventSink_t::send ## evType ## evName (dataType &eventData) throw() {\
-	sendEvent< event ## evType ## _t, dataType >(evType ## Events, &event ## evType ## _t::on ## evName, eventData); \
+void EventSink::send ## evType ## evName (dataType &eventData) throw() {\
+	sendEvent< Event ## evType, dataType >(evType ## Events, &Event ## evType::on ## evName, eventData); \
 }
 
 #define EVENTDEF(evType) \
-	void eventSink_t::reg ## evType (event ## evType ## _t &eventHandler) throw() { \
+	void EventSink::reg ## evType (Event ## evType &eventHandler) throw() { \
 		MutexHolder mh(mMutex); \
 		evType ## Events.insert(&eventHandler); \
 	} \
-	void eventSink_t::unreg ## evType (event ## evType ## _t &eventHandler) throw() { \
+	void EventSink::unreg ## evType (Event ## evType &eventHandler) throw() { \
 		MutexHolder mh(mMutex); \
 		evType ## Events.erase(&eventHandler); \
 	}
 
-//eventData_t::~eventData_t() {}
+using namespace InstantSend;
+using namespace std;
 
-eventSink_t &eventSink_t::instance() {
-	static eventSink_t sink;
+EventSink &EventSink::instance() {
+	static EventSink sink;
 	return sink;
 }
 
 EVENTDEF(Progress);
 EVENTDEF(Connections);
+/*
 EVENTDEF(Receive);
 EVENTDEF(Send);
+*/
 EVENTDEF(Server);
 EVENTDEF(Plugin);
 
-void eventSink_t::autoLoad(jsonObj_t &plugins) {
+void EventSink::autoLoad(jsonObj_t &plugins) {
 	for(jsonIterator it = plugins.begin(); it != plugins.end(); ++it) {
 		try {
 			loadEventPlugin(it.key(), it.value());
@@ -44,24 +47,24 @@ void eventSink_t::autoLoad(jsonObj_t &plugins) {
 	}
 }
 
-void eventSink_t::loadEventPlugin(const string &name, jsonComponent_t &config) {
+void EventSink::loadEventPlugin(const string &name, jsonComponent_t &config) {
 	if(eventPlugins.count(name)) throw runtime_error(string("Plugin ") + name + " already loaded");
-	PluginPtr<eventHandlerCreator_t> plugin(pluginList_t::instance()[name].as<eventHandlerCreator_t>());
+	PluginPtr<EventHandlerCreator> plugin(PluginList::instance()[name].as<EventHandlerCreator>());
 	plugin->regEvents(*this, &config);
 	eventPlugins[name] = plugin;
 }
 
-void eventSink_t::unloadEventPlugin(const string &name) {
-	map<string, PluginPtr<eventHandlerCreator_t> >::iterator plugin(eventPlugins.find(name));
+void EventSink::unloadEventPlugin(const string &name) {
+	map<string, PluginPtr<EventHandlerCreator> >::iterator plugin(eventPlugins.find(name));
 	if(plugin == eventPlugins.end()) throw runtime_error(string("Plugin ") + name + " not loaded");
 	plugin->second->unregEvents(*this);
 	eventPlugins.erase(plugin);
 	//pluginList_t::instance().checkUnload(name);
 }
 
-void eventSink_t::unloadAllEventPlugins() {
+void EventSink::unloadAllEventPlugins() {
 	while(eventPlugins.size()) {
-		map<string, PluginPtr<eventHandlerCreator_t> >::iterator it(eventPlugins.begin());
+		map<string, PluginPtr<EventHandlerCreator> >::iterator it(eventPlugins.begin());
 		string pluginName(it->first);
 		fprintf(stderr, "Unloading: %s\n", pluginName.c_str());
 		it->second->unregEvents(*this);
@@ -71,14 +74,14 @@ void eventSink_t::unloadAllEventPlugins() {
 	}
 }
 
-BCAST_EVENT_DEF(Progress, Begin, fileStatus_t);
-BCAST_EVENT_DEF(Progress, Update, fileStatus_t);
-BCAST_EVENT_DEF(Progress, Pause, fileStatus_t);
-BCAST_EVENT_DEF(Progress, Resume, fileStatus_t);
-BCAST_EVENT_DEF(Progress, End, fileStatus_t);
+BCAST_EVENT_DEF(Progress, Begin, FileStatus);
+BCAST_EVENT_DEF(Progress, Update, FileStatus);
+BCAST_EVENT_DEF(Progress, Pause, FileStatus);
+BCAST_EVENT_DEF(Progress, Resume, FileStatus);
+BCAST_EVENT_DEF(Progress, End, FileStatus);
 
-BCAST_EVENT_DEF(Server, Started, serverController_t);
-BCAST_EVENT_DEF(Server, Stopped, serverController_t);
+BCAST_EVENT_DEF(Server, Started, ServerController);
+BCAST_EVENT_DEF(Server, Stopped, ServerController);
 
 BCAST_EVENT_DEF(Plugin, Load, const string);
 BCAST_EVENT_DEF(Plugin, Unload, const string);

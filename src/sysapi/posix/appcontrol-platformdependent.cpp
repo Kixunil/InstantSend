@@ -15,6 +15,7 @@
 #include <signal.h>
 
 #include "posix-appcontrol.h"
+#include "sysapi.h"
 
 #ifndef UNIX_PATH_MAX
 #define UNIX_PATH_MAX    108
@@ -23,19 +24,20 @@
 	#define O_CLOEXEC 0
 #endif
 
+using namespace InstantSend;
 using namespace std;
 
 static int pipefd[2], sockfd = -1;
 
-volatile bool stopApp = false;
-volatile bool stopAppFast = false;
+volatile bool InstantSend::stopApp = false;
+volatile bool InstantSend::stopAppFast = false;
 pthread_mutex_t threadQueueMutex, threadCountMutex;
 queue<pthread_t> threadQueue;
 unsigned int threadCount = 0;
 int verbose = 0;
 int lockfd = -1;
 
-void unfreezeMainThread() {
+void InstantSend::unfreezeMainThread() {
 	char buf = 0;
 	write(pipefd[1], &buf, 1);
 }
@@ -87,7 +89,7 @@ void writePid(const char *pidFile) {
 	if(write(lockfd, buf, len) < len) throw runtime_error(string("fwrite: ") + strerror(errno));
 }
 
-void onAppStart(int argc, char **argv) {
+void InstantSend::onAppStart(int argc, char **argv) {
 	// Setup pipe
 	if(pipe(pipefd) < 0) throw runtime_error(string("pipie: ") + strerror(errno));
 
@@ -118,7 +120,7 @@ void onAppStart(int argc, char **argv) {
 	pthread_mutex_init(&threadCountMutex, NULL);
 }
 
-void onAppStop() {
+void InstantSend::onAppStop() {
 	close(pipefd[0]);
 	close(pipefd[1]);
 	if(sockfd > -1) close(sockfd);
@@ -127,7 +129,7 @@ void onAppStop() {
 	pthread_mutex_destroy(&threadCountMutex);
 }
 
-void freezeMainThread() {
+void InstantSend::freezeMainThread() {
 	fd_set fds;
 	char buf;
 	FD_ZERO(&fds);
@@ -152,3 +154,39 @@ void threadAboutToExit(pthread_t thread) {
 	pthread_mutex_unlock(&threadQueueMutex);
 	unfreezeMainThread();
 }
+
+Application::Application(int argc, char **argv) : mLogger(stderr) {
+}
+
+void InstantSend::Application::requestStop() {
+	stopApp = true;
+	unfreezeMainThread();
+}
+
+void InstantSend::Application::requestFastStop() {
+	stopApp = true;
+	stopAppFast = true;
+	unfreezeMainThread();
+}
+
+const std::string &Application::systemDataDir() {
+	return getSystemDataDir();
+}
+
+const std::string &Application::systemConfigDir() {
+	return getSystemCfgDir();
+}
+
+const std::string &Application::userDataDir() {
+	return getUserDir();
+}
+
+const std::string &Application::fileDir() {
+	getUserDir() + "/files";
+}
+
+void Application::fileDir(const std::string &dir) {
+	//TODO implement
+}
+
+InstantSend::Application *InstantSend::instantSend;

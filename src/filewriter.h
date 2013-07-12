@@ -11,7 +11,7 @@
 
 #define MAX_BUF_FRAGMENT_COUNT 32
 
-using namespace std;
+namespace InstantSend {
 
 class dataFragment_t {
 	private:
@@ -32,9 +32,9 @@ class dataFragment_t {
 
 class fileWriter_t : public fileController_t, thread_t {
 	protected:
-		string fName; 
+		std::string fName; 
 		File::Size fSize; 
-		string mId;
+		std::string mId;
 
 		WritableFile file;
 		Mutex mutex;
@@ -59,10 +59,10 @@ class fileWriter_t : public fileController_t, thread_t {
 		bool cleanupCheck(bool calledByThisThread = false);
 		void writeBuffer();
 	public:
-		fileWriter_t(int id, const string &fileName, File::Size fileSize, const string &machineId);
-		string getFileName();
+		fileWriter_t(int id, const std::string &fileName, File::Size fileSize, const std::string &machineId);
+		std::string getFileName();
 		File::Size getFileSize();
-		string getMachineId();
+		std::string getMachineId();
 
 		bool writeData(File::Size position, auto_ptr<anyData> &data);
 		void run();
@@ -76,5 +76,7 @@ class fileWriter_t : public fileController_t, thread_t {
 
 		~fileWriter_t();
 };
+
+}
 
 #endif

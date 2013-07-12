@@ -20,7 +20,13 @@
 #include "serverlist.h"
 #include "internalevents.h"
 
-string savedir;
+using namespace std;
+
+namespace InstantSend {
+	string savedir;
+}
+
+using namespace InstantSend;
 //string recvScript;
 
 extern unsigned int threadCount;
@@ -34,9 +40,10 @@ bool checkRunningServers() {
 
 int main(int argc, char **argv) {
 	onAppStart(argc, argv);
+	auto_ptr<Application>(new Application(argc, argv));
 	InternalEventHandler ieh; // no need to do anything - it registers and unregisters itself automatically
-	pluginList_t &pl = pluginList_t::instance();
-	pl.setSink(eventSink_t::instance());
+	PluginList &pl = PluginList::instance();
+	pl.setSink(EventSink::instance());
 	auto_ptr<jsonComponent_t> cfgptr;
 
 	try {
@@ -80,7 +87,7 @@ int main(int argc, char **argv) {
 
 		fprintf(stderr, "Loading events\n");
 		try {
-			eventSink_t::instance().autoLoad(dynamic_cast<jsonObj_t &>(cfg.gie("eventhandlers")));
+			EventSink::instance().autoLoad(dynamic_cast<jsonObj_t &>(cfg.gie("eventhandlers")));
 		}
 		catch(exception &e) {
 			fprintf(stderr, "No event plugins loaded: %s\n", e.what());
@@ -131,7 +138,7 @@ int main(int argc, char **argv) {
 	}
 
 	serverList_t::instance().remove();
-	eventSink_t::instance().unloadAllEventPlugins();
+	EventSink::instance().unloadAllEventPlugins();
 
 	while(!stopAppFast && pl.count() && threadCount) {
 		freezeMainThread();

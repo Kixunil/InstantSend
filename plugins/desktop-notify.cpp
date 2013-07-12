@@ -7,6 +7,7 @@
 #include "pluginapi.h"
 #include "config.h"
 
+using namespace InstantSend;
 using namespace std;
 
 const string &intToStr(int num) {
@@ -25,7 +26,7 @@ string getBaseFileName(const string &path) {
 	return path.substr(path[i] != '/'?i:i+1);
 }
 
-class notifyProgressHandler : public eventProgress_t{
+class notifyProgressHandler : public EventProgress {
 	private:
 		auto_ptr<string> icon;
 		void sendNotification(const string &msg) {
@@ -44,28 +45,28 @@ class notifyProgressHandler : public eventProgress_t{
 		
 		}
 	public:
-		notifyProgressHandler() : eventProgress_t(), icon(NULL) {
+		notifyProgressHandler() : EventProgress(), icon(NULL) {
 		}
 
 		void setIcon(const string &icon) {
 			this->icon.reset(new string(icon));
 		}
 
-		void onBegin(fileStatus_t &fStatus) throw() {
+		void onBegin(FileStatus &fStatus) throw() {
 			if(fStatus.getDirection() == IS_DIRECTION_DOWNLOAD)
 				sendNotification(string("Incoming file ") + getBaseFileName(fStatus.getFileName()) + " (" + intToStr(fStatus.getFileSize()) + "B)");
 		}
 
-		void onUpdate(fileStatus_t &fStatus) throw() {
+		void onUpdate(FileStatus &fStatus) throw() {
 			(void)fStatus;
 		}
-		void onPause(fileStatus_t &fStatus) throw() {
+		void onPause(FileStatus &fStatus) throw() {
 			(void)fStatus;
 		}
-		void onResume(fileStatus_t &fStatus) throw() {
+		void onResume(FileStatus &fStatus) throw() {
 			(void)fStatus;
 		}
-		void onEnd(fileStatus_t &fStatus) throw() {
+		void onEnd(FileStatus &fStatus) throw() {
 			string msg = "File transfer ended due to unknown reason.";
 			switch(fStatus.getTransferStatus()) {
 				case IS_TRANSFER_FINISHED:
@@ -84,15 +85,15 @@ class notifyProgressHandler : public eventProgress_t{
 		}
 };
 
-class notifyCreator_t : public eventHandlerCreator_t {
+class notifyCreator_t : public EventHandlerCreator {
 	private:
 		notifyProgressHandler progress;
 	public:
-		notifyCreator_t() : eventHandlerCreator_t(), progress() {
+		notifyCreator_t(PluginEnvironment &env) : EventHandlerCreator(env), progress() {
 			if(!notify_init("InstantSend")) throw runtime_error("Can't init libnotify");
 		}
 
-		void regEvents(eventRegister_t &reg, jsonComponent_t *config) throw() {
+		void regEvents(EventRegister &reg, jsonComponent_t *config) throw() {
 			reg.regProgress(progress);
 			//(void)config;
 			try {
@@ -107,7 +108,7 @@ class notifyCreator_t : public eventHandlerCreator_t {
 			}
 		}
 
-		void unregEvents(eventRegister_t &reg) throw() {
+		void unregEvents(EventRegister &reg) throw() {
 			reg.unregProgress(progress);
 		}
 
@@ -121,9 +122,8 @@ class notifyCreator_t : public eventHandlerCreator_t {
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
-		(void)callback;
-		static notifyCreator_t *creator = new notifyCreator_t();
-		return creator;
+	PluginInstanceCreator *getCreator(PluginEnvironment &env) {
+		static notifyCreator_t creator(env);
+		return &creator;
 	}
 }

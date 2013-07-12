@@ -2,39 +2,32 @@
 
 #include "plugin.h"
 
-using namespace std;
+namespace InstantSend {
 
-class CheckUnloadCallback : public pluginDestrCallback_t {
+class LibraryHandleWithEnvironment : public LibraryHandle {
 	public:
-		typedef map<string, pluginHandle_t>::iterator StorageRef;
-		inline CheckUnloadCallback(const StorageRef &storageRef) : mStorRef(storageRef) {}
-		void onUnload();
-
-	private:
-		StorageRef mStorRef;
-};
-
-class LibraryHandleWithCallback : public LibraryHandle {
-	public:
-		inline LibraryHandleWithCallback(auto_ptr<CheckUnloadCallback> callback) : mCallback(callback) {};
-		~LibraryHandleWithCallback();
+		inline LibraryHandleWithEnvironment(auto_ptr<InternalPluginEnvironment> &environment) : mEnvironment(environment) {};
+		~LibraryHandleWithEnvironment();
 		void onUnload();
 	private:
-		auto_ptr<CheckUnloadCallback> mCallback;
+		auto_ptr<InternalPluginEnvironment> mEnvironment;
 
 };
 
-class pluginLoader_t {
+
+class PluginLoader {
 	protected:
-		vector<string> paths;
+		vector<std::string> paths;
 
-		string getFullName(const string &path, const string &name);
-		auto_ptr<LibraryHandle> tryLoad(const string &path, const CheckUnloadCallback::StorageRef &storageRef);
+		std::string getFullName(const std::string &path, const std::string &name);
+		auto_ptr<LibraryHandle> tryLoad(const std::string &path, auto_ptr<InternalPluginEnvironment> &pluginEnv);
 	public:
 //		pluginLoader_t();
-		inline void addPath(const string &path) {
+		inline void addPath(const std::string &path) {
 			paths.push_back(path);
 		}
 
-		auto_ptr<LibraryHandle> loadPlugin(const string &name, const CheckUnloadCallback::StorageRef &storageRef);
+		auto_ptr<LibraryHandle> loadPlugin(const std::string &name, auto_ptr<InternalPluginEnvironment> &pluginEnv);
 };
+
+}

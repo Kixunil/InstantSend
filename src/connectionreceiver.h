@@ -1,25 +1,28 @@
 #include "plugin.h"
 #include "multithread.h"
 
+namespace InstantSend {
+
 extern int runningServers;
 extern Mutex mRunningServers;
 
-class connectionReceiver_t: public thread_t, serverController_t {
+class ConnectionReceiver: public thread_t, ServerController {
 	public:
-		connectionReceiver_t(const string &plugin, const jsonComponent_t &config);
+		ConnectionReceiver(const std::string &plugin, const jsonComponent_t &config);
 		bool checkRunning();
 		void run();
 		void stop() throw();
-		const string &getPluginName() throw();
+		const std::string &getPluginName() throw();
 		const jsonComponent_t &getPluginConf() throw();
 		bool autoDelete();
 
 	private:
 		Mutex runningmutex;
 		volatile bool running;
-		string pluginName;
+		std::string pluginName;
 		auto_ptr<jsonComponent_t> pluginConfig;
 		BPluginRef pref;
-		pluginInstanceAutoPtr<serverPlugin_t> server;
+		pluginInstanceAutoPtr<ServerPlugin> server;
 };
 
+}

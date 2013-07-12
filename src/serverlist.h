@@ -4,16 +4,18 @@
 
 #include "connectionreceiver.h"
 
-using namespace std;
+namespace InstantSend {
 
 class serverList_t {
 	public:
-		void add(const string &name, const jsonComponent_t &);
-		void remove(const string &name);
+		void add(const std::string &name, const jsonComponent_t &);
+		void remove(const std::string &name);
 		void remove();
 		inline unsigned int count() { return servers.size(); }
 		static serverList_t &instance();
 	private:
-		void remove(const map<string, list<connectionReceiver_t *> >::iterator &server);
-		map<string, list<connectionReceiver_t *> > servers;
+		void remove(const map<std::string, list<ConnectionReceiver *> >::iterator &server);
+		map<std::string, list<ConnectionReceiver *> > servers;
 };
+
+}

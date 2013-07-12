@@ -22,12 +22,15 @@
 	#define MSG_NOSIGNAL 0
 #endif
 
-class i6tPeer : public peer_t {
+using namespace InstantSend;
+using namespace std;
+
+class i6tPeer : public Peer {
 	private:
 		int fd;
 		string machineId;
 	public:
-		inline i6tPeer(int newfd, const string &mId, pluginMultiInstanceCreator_t &creator) : peer_t(creator) {
+		inline i6tPeer(int newfd, const string &mId, PluginEnvironment &env) : Peer(env) {
 			fd = newfd;
 			machineId = mId;
 		}
@@ -91,11 +94,11 @@ class i6tPeer : public peer_t {
 
 };
 
-class i6tserver : public serverPlugin_t, public asyncStop_t {
+class i6tserver : public ServerPlugin, public AsyncStop {
 	private:
 		int fd, pipefd[2];
 	public:
-		i6tserver(const jsonComponent_t &config, pluginMultiInstanceCreator_t &creator) : serverPlugin_t(creator) {
+		i6tserver(const jsonComponent_t &config, PluginEnvironment &env) : ServerPlugin(env) {
 			struct sockaddr_in6 srvaddr;
 			int backlog;
 			if(pipe(pipefd) < 0) throw runtime_error(string("pipe: ") + strerror(errno));
@@ -127,7 +130,7 @@ class i6tserver : public serverPlugin_t, public asyncStop_t {
 
 		}
 
-		auto_ptr<peer_t> acceptClient() throw() {
+		auto_ptr<Peer> acceptClient() throw() {
 			try {
 				struct sockaddr_in6 saddr;
 				saddr.sin6_family = AF_INET6;
@@ -145,17 +148,17 @@ class i6tserver : public serverPlugin_t, public asyncStop_t {
 				if(FD_ISSET(pipefd[0], &fds)) {
 					char buf;
 					if(read(pipefd[0], &buf, 1) < 0) throw runtime_error(string("accept: ") + strerror(errno));
-					return auto_ptr<peer_t>();
+					return auto_ptr<Peer>();
 				}
 
 				int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
 				if(res < 0) throw runtime_error(string("accept: ") + strerror(errno));
 
 				char buf[256];
-				return auto_ptr<peer_t>(new i6tPeer(res, string(inet_ntop(AF_INET6, &saddr.sin6_addr, buf, 256)), getCreator()));
+				return auto_ptr<Peer>(new i6tPeer(res, string(inet_ntop(AF_INET6, &saddr.sin6_addr, buf, 256)), mEnv));
 			}
 			catch(...) {
-				return auto_ptr<peer_t>();
+				return auto_ptr<Peer>();
 			}
 		}
 
@@ -175,15 +178,12 @@ class i6tserver : public serverPlugin_t, public asyncStop_t {
 		}
 };
 
-class i6tCreator : public connectionCreator_t {
-	private:
-		string lastErr;
+class i6tCreator : public ConnectionCreator {
 	public:
-		i6tCreator(pluginDestrCallback_t &callback) : connectionCreator_t(callback) {
-			lastErr = "No error";
+		i6tCreator(PluginEnvironment &env) : ConnectionCreator(env) {
 		}
 
-		auto_ptr<peer_t> newClient(const jsonComponent_t &config) throw() {
+		auto_ptr<Peer> newClient(const jsonComponent_t &config) throw() {
 			int fd = -1;
 			try {
 				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
@@ -268,34 +268,30 @@ class i6tCreator : public connectionCreator_t {
 				dstaddr.sin6_port = htons(dstPort);
 
 				if(connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in6)) < 0) throw runtime_error(string("connect: ") + strerror(errno));
-				return auto_ptr<peer_t>(new i6tPeer(fd, dstHost, *this));
+				return auto_ptr<Peer>(new i6tPeer(fd, dstHost, mEnv));
 			}
 			catch(exception &e) {
 				if(fd > -1) close(fd);
 				fd = -1;
-				lastErr = e.what();
-				return auto_ptr<peer_t>();
+				mEnv.log(Logger::Error, e.what());
+				return auto_ptr<Peer>();
 			}
 	}
 
-	auto_ptr<serverPlugin_t> newServer(const jsonComponent_t &config) throw() {
+	auto_ptr<ServerPlugin> newServer(const jsonComponent_t &config) throw() {
 		try {
-			return auto_ptr<serverPlugin_t>(new i6tserver(config, *this));
+			return auto_ptr<ServerPlugin>(new i6tserver(config, mEnv));
 		}
 		catch(exception &e) {
-			lastErr = e.what();
-			return auto_ptr<serverPlugin_t>();
+			mEnv.log(Logger::Error, e.what());
+			return auto_ptr<ServerPlugin>();
 		}
-	}
-
-	const char *getErr() {
-		return lastErr.c_str();
 	}
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
-		static i6tCreator creator(callback);
+	PluginInstanceCreator *getCreator(PluginEnvironment &env) {
+		static i6tCreator creator(env);
 		return &creator;
 	}
 }

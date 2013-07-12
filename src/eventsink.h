@@ -9,43 +9,39 @@
 
 #define BCAST_EVENT(evType, evName, dataType) \
 	inline void bcast ## evType ## evName (dataType &eventData) { \
-		eventSink_t::instance().send ## evType ## evName (eventData); \
+		EventSink::instance().send ## evType ## evName (eventData); \
 	}
-/*
-class eventData_t {
-	public:
-		virtual void sendEvent(event_t &event) = 0;
-		virtual ~eventData_t();
-};
-*/
-
 #define EVENTTYPE(evType) \
 	private: \
-		set<event ## evType ## _t *> evType ## Events; \
+		set<Event ## evType *> evType ## Events; \
 	public: \
-		void reg ## evType (event ## evType ## _t &eventHandler)  throw(); \
-		void unreg ## evType (event ## evType ## _t &eventHandler)  throw()
+		void reg ## evType (Event ## evType &eventHandler)  throw(); \
+		void unreg ## evType (Event ## evType &eventHandler)  throw()
 
 #define SENDEVDECL(evType, evName, dataType) \
 	public: \
 		virtual void send ## evType ## evName (dataType &eventData) throw()
 
-class eventSink_t : public eventRegister_t {
+namespace InstantSend {
+
+class EventSink : public EventRegister {
 	EVENTTYPE(Progress);
 	EVENTTYPE(Connections);
+#if 0
 	EVENTTYPE(Receive);
 	EVENTTYPE(Send);
+#endif
 	EVENTTYPE(Server);
 	EVENTTYPE(Plugin);
 
-	SENDEVDECL(Progress, Begin, fileStatus_t);
-	SENDEVDECL(Progress, Update, fileStatus_t);
-	SENDEVDECL(Progress, Pause, fileStatus_t);
-	SENDEVDECL(Progress, Resume, fileStatus_t);
-	SENDEVDECL(Progress, End, fileStatus_t);
+	SENDEVDECL(Progress, Begin, FileStatus);
+	SENDEVDECL(Progress, Update, FileStatus);
+	SENDEVDECL(Progress, Pause, FileStatus);
+	SENDEVDECL(Progress, Resume, FileStatus);
+	SENDEVDECL(Progress, End, FileStatus);
 
-	SENDEVDECL(Server, Started, serverController_t);
-	SENDEVDECL(Server, Stopped, serverController_t);
+	SENDEVDECL(Server, Started, ServerController);
+	SENDEVDECL(Server, Stopped, ServerController);
 
 	SENDEVDECL(Plugin, Load, const string);
 	SENDEVDECL(Plugin, Unload, const string);
@@ -55,10 +51,10 @@ class eventSink_t : public eventRegister_t {
 			for(typename set<TEvent *>::iterator it = evSet.begin(); it != evSet.end(); ++it) ((*it)->*event)(eventData);
 		}
 
-		map<string, PluginPtr<eventHandlerCreator_t> > eventPlugins;
+		map<string, PluginPtr<EventHandlerCreator> > eventPlugins;
 		Mutex mMutex;
 	public:
-		static eventSink_t &instance();
+		static EventSink &instance();
 		void autoLoad(jsonObj_t &plugins);
 		void loadEventPlugin(const string &name, jsonComponent_t &config);
 		void unloadEventPlugin(const string &name);
@@ -66,16 +62,18 @@ class eventSink_t : public eventRegister_t {
 
 };
 
-BCAST_EVENT(Progress, Begin, fileStatus_t);
-BCAST_EVENT(Progress, Update, fileStatus_t);
-BCAST_EVENT(Progress, Pause, fileStatus_t);
-BCAST_EVENT(Progress, Resume, fileStatus_t);
-BCAST_EVENT(Progress, End, fileStatus_t);
+BCAST_EVENT(Progress, Begin, FileStatus);
+BCAST_EVENT(Progress, Update, FileStatus);
+BCAST_EVENT(Progress, Pause, FileStatus);
+BCAST_EVENT(Progress, Resume, FileStatus);
+BCAST_EVENT(Progress, End, FileStatus);
 
-BCAST_EVENT(Server, Started, serverController_t);
-BCAST_EVENT(Server, Stopped, serverController_t);
+BCAST_EVENT(Server, Started, ServerController);
+BCAST_EVENT(Server, Stopped, ServerController);
 
 BCAST_EVENT(Plugin, Load, const string);
 BCAST_EVENT(Plugin, Unload, const string);
+
+}
 
 #endif

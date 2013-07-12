@@ -9,6 +9,9 @@
 	#define random() rand()
 #endif
 
+using namespace InstantSend;
+using namespace std;
+
 fileController_t::fileController_t(int id) {
 	identifier = id;
 	refcount = 0;

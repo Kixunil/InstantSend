@@ -9,26 +9,37 @@
 #include "multithread.h"
 #include "eventsink.h"
 
-using namespace std;
+namespace InstantSend {
 
-class pluginList_t { // Singleton DP
+class PluginList { // Singleton DP
 	private:
-		map<string, pluginHandle_t> storage;
-		pluginLoader_t loader;
+		typedef map<std::string, pluginHandle_t> Container;
+		Container storage;
+		PluginLoader loader;
 		Mutex modifyMutex;
-		eventSink_t *mSink;
+		EventSink *mSink;
+
+		class MapPluginHandle : public PluginStorageHandle {
+			public:
+				inline MapPluginHandle(PluginList &pluginList, Container::iterator iter) : mPluginList(pluginList), mIter(iter) {}
+				void checkUnload();
+			private:
+				PluginList &mPluginList;
+				Container::iterator mIter;
+		};
 	public:
-		inline pluginList_t() : mSink(NULL) {}
-		BPluginRef operator[](const string &name);
+		inline PluginList() : mSink(NULL) {}
+		BPluginRef operator[](const std::string &name);
 		/*inline BPluginRef &operator[](const char *name) {
-			return (*this)[string(name)];
+			return (*this)[std::string(name)];
 		}*/
-		static pluginList_t &instance();
-		inline void addSearchPath(const string &path) {
+		// TODO: avoid static
+		static PluginList &instance();
+		inline void addSearchPath(const std::string &path) {
 			loader.addPath(path);
 		}
 
-		void checkUnload(const map<string, pluginHandle_t>::iterator plugin);
+		void checkUnload(const map<std::string, pluginHandle_t>::iterator plugin);
 
 		unsigned int count();
 
@@ -40,9 +51,11 @@ class pluginList_t { // Singleton DP
 			modifyMutex.unlock();
 		}
 
-		inline void setSink(eventSink_t &sink) {
+		inline void setSink(EventSink &sink) {
 			mSink = &sink;
 		}
 };
+
+}
 
 #endif

@@ -15,6 +15,9 @@
 #include "eventsink.h"
 #include <stdexcept>
 
+using namespace InstantSend;
+using namespace std;
+
 int outputpercentage = 0;
 
 inline size_t getBaseFileName(const string &path) {
@@ -23,7 +26,7 @@ inline size_t getBaseFileName(const string &path) {
 
 class StatusReporter : public thread_t {
 	public:
-		StatusReporter(fileStatus_t &fs) : mFileStatus(fs), mRunning(true), mSem(0) {}
+		StatusReporter(FileStatus &fs) : mFileStatus(fs), mRunning(true), mSem(0) {}
 		void run() {
 			while(mRunning) {
 #ifndef WINDOWS
@@ -49,13 +52,13 @@ class StatusReporter : public thread_t {
 			return true;
 		}
 	private:
-		fileStatus_t &mFileStatus;
+		FileStatus &mFileStatus;
 		volatile bool mRunning;
 		Semaphore mSem;
 
 };
 
-class FileReader : public fileStatus_t {
+class FileReader : public FileStatus {
 	public:
 		FileReader(const string &name, const string &target) : mName(name), mTarget(target), mFile(name), mSize(mFile.size()), mBytes(0),
 #ifndef WINDOWS
@@ -103,7 +106,7 @@ class FileReader : public fileStatus_t {
 		void pauseTransfer() {}
 		void resumeTransfer() {}
 
-		int send(peer_t &client, const string &basename) {
+		int send(Peer &client, const string &basename) {
 			try {
 				fprintf(stderr, "File size: %llu\n", (unsigned long long)mSize);
 				fflush(stderr);
@@ -210,10 +213,10 @@ class FileReader : public fileStatus_t {
 #endif
 };
 
-fileStatus_t::~fileStatus_t() {}
+FileStatus::~FileStatus() {}
 
-pluginInstanceAutoPtr<peer_t> findWay(jsonArr_t &ways) {
-	pluginList_t &pl = pluginList_t::instance();
+pluginInstanceAutoPtr<Peer> findWay(jsonArr_t &ways) {
+	PluginList &pl = PluginList::instance();
 	for(int i = 0; i < ways.count(); ++i) {
 		string pname = "UNKNOWN";
 		try {
@@ -223,7 +226,7 @@ pluginInstanceAutoPtr<peer_t> findWay(jsonArr_t &ways) {
 
 			// Load plugin and try to connect
 			fprintf(stderr, "Connecting...\n");
-			pluginInstanceAutoPtr<peer_t> client(pl[pname].as<connectionCreator_t>()->newClient(way.gie("config")));
+			pluginInstanceAutoPtr<Peer> client(pl[pname].as<ConnectionCreator>()->newClient(way.gie("config")));
 			if(client.valid()) return client; // else fprintf(stderr, "Couldn't connect with way %d: %s\n", i, pl[pname].lastError());
 		}
 		catch(exception &e) {
@@ -236,7 +239,7 @@ pluginInstanceAutoPtr<peer_t> findWay(jsonArr_t &ways) {
 	throw runtime_error("No usable way found");
 }
 
-bool sendEntry(const string &entry, size_t ignored, const string &tname, peer_t &client) {
+bool sendEntry(const string &entry, size_t ignored, const string &tname, Peer &client) {
 	fprintf(stderr, "Sending %s\n", entry.c_str());
 	if(entry.size() > 1 && (entry.substr(entry.size() - 2) == "/." || entry.substr(entry.size() - 2) == "\\.")) return true;
 	if(entry.size() > 2 && (entry.substr(entry.size() - 3) == "/.."|| entry.substr(entry.size() - 3) == "\\..")) return true;
@@ -284,7 +287,7 @@ int main(int argc, char **argv) {
 	int failuredetected = 0;
 
 	try {
-		pluginList_t &pl = pluginList_t::instance();
+		PluginList &pl = PluginList::instance();
 		pl.addSearchPath(getSystemPluginDir());
 		pl.addSearchPath(combinePath(userdir, string("plugins")));
 
@@ -294,14 +297,14 @@ int main(int argc, char **argv) {
 		jsonObj_t &targets = dynamic_cast<jsonObj_t &>(config.gie("targets"));
 
 		try {
-			eventSink_t::instance().autoLoad(dynamic_cast<jsonObj_t &>(config.gie("eventhandlers")));
+			EventSink::instance().autoLoad(dynamic_cast<jsonObj_t &>(config.gie("eventhandlers")));
 		}
 		catch(...) {
 			fprintf(stderr, "Note: no event handler loaded\n");
 		}           
 
 		char *tname = NULL;
-		pluginInstanceAutoPtr<peer_t> client;
+		pluginInstanceAutoPtr<Peer> client;
 		for(int i = 1; i+1 < argc; ++i) {
 			if(string(argv[i]) == string("-t")) {
 				if(!argv[++i]) {

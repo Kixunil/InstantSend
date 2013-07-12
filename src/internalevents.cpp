@@ -2,8 +2,11 @@
 #include "appcontrol.h"
 #include "eventsink.h"
 
+using namespace InstantSend;
+using namespace std;
+
 InternalEventHandler::InternalEventHandler() {
-	eventSink_t::instance().regPlugin(*this);
+	EventSink::instance().regPlugin(*this);
 }
 
 void InternalEventHandler::onLoad(const string &pluginName) {
@@ -16,5 +19,5 @@ void InternalEventHandler::onUnload(const string &pluginName) {
 }
 
 InternalEventHandler::~InternalEventHandler() {
-	eventSink_t::instance().unregPlugin(*this);
+	EventSink::instance().unregPlugin(*this);
 }

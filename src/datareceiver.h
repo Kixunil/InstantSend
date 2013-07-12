@@ -4,12 +4,14 @@
 #include "filewriter.h"
 #include "plugin.h"
 
-extern string savedir;
+namespace InstantSend {
 
-class dataReceiver_t: public thread_t {
-	pluginInstanceAutoPtr<peer_t> cptr;
+extern std::string savedir;
+
+class DataReceiver: public thread_t {
+	pluginInstanceAutoPtr<Peer> cptr;
 	public:
-		inline dataReceiver_t(pluginInstanceAutoPtr<peer_t> &peer) : cptr(peer) {
+		inline DataReceiver(pluginInstanceAutoPtr<Peer> &peer) : cptr(peer) {
 		}
 
 		void run(); 	// This is called as new thread
@@ -19,5 +21,7 @@ class dataReceiver_t: public thread_t {
 		void receiveFileData(fileWriter_t &writer);
 		void sendHeader(jsonComponent_t &json);
 };
+
+}
 
 #endif

@@ -4,48 +4,49 @@
 
 #include "pluginloader.h"
 
-class PosixLibraryHandle : public LibraryHandleWithCallback {
+using namespace InstantSend;
+using namespace std;
+
+class PosixLibraryHandle : public LibraryHandleWithEnvironment {
 	public:
-		inline PosixLibraryHandle(void *libHandle, auto_ptr<CheckUnloadCallback> callback) : LibraryHandleWithCallback(callback), mLibHandle(libHandle) {}
+		inline PosixLibraryHandle(void *libHandle, auto_ptr<InternalPluginEnvironment> &env) : LibraryHandleWithEnvironment(env), mLibHandle(libHandle) {}
 
 		~PosixLibraryHandle() {
-//#ifndef NODLCLOSE
-			/*void *data;
-			if(dlinfo(mLibHandle, RTLD_DI_TLS_DATA, (void **)&data) < 0) {
-				fprintf(stderr, "dlinfo: %s\n", dlerror());
-			} else free(data); //hack*/
-
 			dlclose(mLibHandle);
 			fprintf(stderr, "Library closed\n");
-//#endif
 		}
 
-		inline void setCreator(pluginInstanceCreator_t *creator) {
+		inline void setCreator(PluginInstanceCreator *creator) {
 			mCreator = creator;
 		}
 	private:
 		void *mLibHandle;
 };
 
-string pluginLoader_t::getFullName(const string &path, const string &name) {
+string PluginLoader::getFullName(const string &path, const string &name) {
 	return path + "/" + name + LIBRARY_EXTENSION;
 }
 
-pluginInstanceCreator_t *getCreator(void *handle, pluginDestrCallback_t &callback) {
-	pluginInstanceCreator_t *(* creator)(pluginDestrCallback_t &);
+PluginInstanceCreator *getCreator(void *handle, PluginEnvironment &env) {
+	PluginInstanceCreator *(* creator)(PluginEnvironment &);
 	*(void **)(&creator) = dlsym(handle, "getCreator");
 	if(!creator) throw runtime_error("Invalid plugin");
-	pluginInstanceCreator_t *result = creator(callback);
+	PluginInstanceCreator *result = creator(env);
 	return result;
 }
 
 
-auto_ptr<LibraryHandle> pluginLoader_t::tryLoad(const string &path, const CheckUnloadCallback::StorageRef &storageRef) {
+auto_ptr<LibraryHandle> PluginLoader::tryLoad(const string &path, auto_ptr<InternalPluginEnvironment> &pluginEnv) {
+	// Open library
 	void *dlhandle = dlopen(path.c_str(), RTLD_LAZY);
 	if(!dlhandle) throw runtime_error(dlerror());
-	auto_ptr<CheckUnloadCallback> cb(new CheckUnloadCallback(storageRef));
-	CheckUnloadCallback &cbRef(*cb);
-	auto_ptr<PosixLibraryHandle> posixLib(new PosixLibraryHandle(dlhandle, cb));
-	posixLib->setCreator(getCreator(dlhandle, cbRef));
+
+	// Get creator
+	PluginInstanceCreator *creator = getCreator(dlhandle, *pluginEnv);
+
+	// Create library handle
+	auto_ptr<PosixLibraryHandle> posixLib(new PosixLibraryHandle(dlhandle, pluginEnv));
+	posixLib->setCreator(creator);
+
 	return auto_ptr<LibraryHandle>(posixLib);
 }

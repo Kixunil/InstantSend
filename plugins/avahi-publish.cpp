@@ -16,6 +16,7 @@
 
 #define D(MSG) fprintf(stderr, MSG "\n"); fflush(stderr);
 
+using namespace InstantSend;
 using namespace std;
 
 
@@ -35,15 +36,16 @@ class avahiData {
 void clientCallback(AvahiClient *c, AvahiClientState state, void * userdata);
 void groupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state, void *userdata);
 
-class serverHandler : public eventServer_t {
+class serverHandler : public EventServer {
 	private:
-		map<serverController_t *, avahiData *> published;
+		map<ServerController *, avahiData *> published;
 		AvahiThreadedPoll *pollObj;
 		AvahiClient *client;
 		AvahiEntryGroup *group;
 		char *name;
+		PluginEnvironment &mEnv;
 	public:
-		serverHandler() : eventServer_t(), pollObj(avahi_threaded_poll_new()), group(NULL) {
+		serverHandler(PluginEnvironment & env) : EventServer(), pollObj(avahi_threaded_poll_new()), group(NULL), mEnv(env) {
 			if(!pollObj) throw runtime_error("Failed to create threaded poll object.");
 
 			char buf[HOST_NAME_MAX + 1];
@@ -76,7 +78,7 @@ class serverHandler : public eventServer_t {
 				avahi_threaded_poll_free(pollObj);
 			}
 			
-			for(map<serverController_t *, avahiData *>::iterator it = published.begin(); it != published.end(); ++it) {
+			for(map<ServerController *, avahiData *>::iterator it = published.begin(); it != published.end(); ++it) {
 				delete it->second;
 			}
 			avahi_free(name);
@@ -87,7 +89,7 @@ class serverHandler : public eventServer_t {
 			if(!group && !(group = avahi_entry_group_new(client, groupCallback, (void *)this))) return;
 			if(!group || !published.size()) return;
 			avahi_entry_group_reset(group);
-			for(map<serverController_t *, avahiData *>::iterator it = published.begin(); it != published.end(); ++it) {
+			for(map<ServerController *, avahiData *>::iterator it = published.begin(); it != published.end(); ++it) {
 				avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, (AvahiPublishFlags)0, name, "_instantsend._tcp", NULL, NULL, it->second->getPort(), NULL);
 			}
 			int res = avahi_entry_group_commit(group);
@@ -126,7 +128,7 @@ class serverHandler : public eventServer_t {
 			}
 		}
 
-		void onStarted(serverController_t &server) throw() {
+		void onStarted(ServerController &server) throw() {
 			if(server.getPluginName() != "ip4tcp") return;
 			auto_ptr<jsonComponent_t> conf(server.getPluginConf().clone());
 			avahi_threaded_poll_lock(pollObj);
@@ -136,7 +138,7 @@ class serverHandler : public eventServer_t {
 
 				auto_ptr<avahiData> adata(new avahiData(port));
 
-				published.insert(pair<serverController_t *, avahiData *>(&server, adata.get()));
+				published.insert(pair<ServerController *, avahiData *>(&server, adata.get()));
 				adata.release();
 
 				createServices();
@@ -151,10 +153,10 @@ class serverHandler : public eventServer_t {
 			avahi_threaded_poll_unlock(pollObj);
 		}
 
-		void onStopped(serverController_t &server) throw() {
+		void onStopped(ServerController &server) throw() {
 			if(server.getPluginName() != "ip4tcp") return;
 			avahi_threaded_poll_lock(pollObj);
-			map<serverController_t *, avahiData *>::iterator it = published.find(&server);
+			map<ServerController *, avahiData *>::iterator it = published.find(&server);
 			if(it == published.end()) return;
 
 			delete it->second;
@@ -182,35 +184,29 @@ void groupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state, void *use
 	((serverHandler *)userdata)->callback(state);
 }
 
-class ehCreator_t : public eventHandlerCreator_t {
-	private:
-		serverHandler sh;
-//		eventRegister_t *er;
+class ehCreator_t : public EventHandlerCreator {
 	public:
-		ehCreator_t() : eventHandlerCreator_t(), sh() {}
-		const char *getErr() {
-			return "No error occured";
-		}
+		ehCreator_t(PluginEnvironment &env) : EventHandlerCreator(env), sh(env) {}
 
-		void regEvents(eventRegister_t &reg, jsonComponent_t *config) throw() {
+		void regEvents(EventRegister &reg, jsonComponent_t *config) throw() {
 			(void)config;
-			//er = &reg;
 			reg.regServer(sh);
 		}
 
-		void unregEvents(eventRegister_t &reg) throw() {
+		void unregEvents(EventRegister &reg) throw() {
 			reg.unregServer(sh);
 		}
 
 		~ehCreator_t() {
-//			er->unregServer(sh);
 		}
+
+	private:
+		serverHandler sh;
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
-		(void)callback;
-		static ehCreator_t creator;
+	PluginInstanceCreator *getCreator(PluginEnvironment &env) {
+		static ehCreator_t creator(env);
 		return &creator;
 	}
 }

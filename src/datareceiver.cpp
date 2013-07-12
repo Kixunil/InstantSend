@@ -13,7 +13,10 @@
 #define D(MSG) do ; while(0)
 #endif
 
-void sendErrMsg(const pluginInstanceAutoPtr<peer_t> &client, const char *msg) {
+using namespace InstantSend;
+using namespace std;
+
+void sendErrMsg(const pluginInstanceAutoPtr<Peer> &client, const char *msg) {
 	// Sends information about error to client
 	fprintf(stderr, "%s\n", msg);
 	fflush(stderr);
@@ -27,7 +30,7 @@ void sendErrMsg(const pluginInstanceAutoPtr<peer_t> &client, const char *msg) {
 	client->sendData(data.get());
 }
 
-void dataReceiver_t::parseHeader(jsonObj_t &h) {
+void DataReceiver::parseHeader(jsonObj_t &h) {
 	if(dynamic_cast<jsonStr_t &>(h["service"]) != "filetransfer") throw runtime_error("Service not supported");
 	string fname(dynamic_cast<jsonStr_t &>(h.gie("filename")).getVal());
 	File::Size fsize = dynamic_cast<jsonInt_t &>(h.gie("filesize")).getVal();
@@ -61,7 +64,7 @@ void dataReceiver_t::parseHeader(jsonObj_t &h) {
 	receiveFileData(*writer);
 }
 
-void dataReceiver_t::receiveFileData(fileWriter_t &writer) {
+void DataReceiver::receiveFileData(fileWriter_t &writer) {
 	auto_ptr<anyData> data(allocData(DMAXSIZE + 1));
 	while((data->size = DMAXSIZE) && cptr->recvData(data.get())) {
 		data->data[data->size] = 0;
@@ -99,7 +102,7 @@ void dataReceiver_t::receiveFileData(fileWriter_t &writer) {
 	writer.decRC();
 }
 
-void dataReceiver_t::run() {
+void DataReceiver::run() {
 	D("Client thread started");
 	auto_ptr<anyData> data = allocData(DMAXSIZE + 1);
 	while((data->size = DMAXSIZE) && cptr->recvData(data.get())) {
@@ -125,12 +128,12 @@ void dataReceiver_t::run() {
 	return;
 }
 
-void dataReceiver_t::sendHeader(jsonComponent_t &json) {
+void DataReceiver::sendHeader(jsonComponent_t &json) {
 	string msg(json.toString());
 	auto_ptr<anyData> msgdata = allocData(msg.size() + 1);
 	cptr->sendData(msgdata.get());
 }
 
-bool dataReceiver_t::autoDelete() {
+bool DataReceiver::autoDelete() {
 	return true;
 }

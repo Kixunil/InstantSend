@@ -1,5 +1,39 @@
 #include "plugin.h"
 #include <cstdio>
+#include "appcontrol.h"
+
+using namespace std;
+using namespace InstantSend;
+
+InternalPluginEnvironment::InternalPluginEnvironment(ApplicationEnvironment &appEnv, const std::string &name) : PluginEnvironment(appEnv), mName(name) {
+}
+
+const std::string &InternalPluginEnvironment::systemPluginDataDir() {
+	throw runtime_error("Unimplemented method");
+}
+
+const std::string &InternalPluginEnvironment::systemPluginConfigDir() {
+	throw runtime_error("Unimplemented method");
+}
+
+const std::string &InternalPluginEnvironment::userPluginDir() {
+	throw runtime_error("Unimplemented method");
+}
+
+void InternalPluginEnvironment::onInstanceCreated() {
+	++instanceCount;
+}
+
+void InternalPluginEnvironment::onInstanceDestroyed() {
+	--instanceCount;
+}
+
+void InternalPluginEnvironment::log(Logger::Level level, const std::string &message) {
+	instantSend->logger().log(level, message, mName);
+}
+
+void InternalPluginEnvironment::checkUnload() {
+}
 
 LibraryHandle::~LibraryHandle() {}
 
@@ -10,42 +44,5 @@ pluginHandle_t::pluginHandle_t(const pluginHandle_t &other) : refCnt(0), mLibrar
 }
 
 pluginHandle_t::~pluginHandle_t() {
-	fprintf(stderr, "~pluginHandle_t(); mOwner = %d\n", (int)mOwner);
 	if(mOwner) delete mLibrary;
 }
-
-/*
-plugin_t::plugin_t(const pluginHandle_t *handle) {
-	this->handle = (pluginHandle_t *)handle;
-	if(handle) this->handle->incRC();
-}
-
-plugin_t::plugin_t(const plugin_t &plugin) {
-	if(&plugin == this) return;
-	handle = plugin.handle;
-	if(handle) handle->incRC();
-}
-
-plugin_t &plugin_t::operator=(plugin_t &plugin) {
-	if(&plugin == this) return plugin;
-	handle = plugin.handle;
-	if(handle) handle->incRC();
-	return *this;
-}
-
-pluginHandle_t *plugin_t::operator=(pluginHandle_t *handle) {
-	if(this->handle == handle) return handle;
-	if(this->handle && this->handle->decRC()) delete this->handle;
-	this->handle = handle;
-	if(handle) handle->incRC();
-	return handle;
-}
-
-plugin_t::~plugin_t() {
-	if(handle && handle->decRC()) {
-		delete handle;
-		handle = NULL;
-	}
-}
-
-*/

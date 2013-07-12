@@ -9,7 +9,9 @@
 #include <stdio.h>
 
 #include "config.h"
+#include "appcontrol.h"
 
+using namespace InstantSend;
 using namespace std;
 
 string combinePath(const string &dir, const string &file) {

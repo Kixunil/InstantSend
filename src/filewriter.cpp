@@ -9,6 +9,9 @@
 #define DMG // fprintf(stderr, "Getting mutex at %d\n", __LINE__); fflush(stderr);
 #define DEBUG
 
+using namespace InstantSend;
+using namespace std;
+
 dataFragment_t::dataFragment_t(auto_ptr<anyData> &data, File::Size position, int batchNumber) {
 	dat = data.release();
 	pos = position;
@@ -231,7 +234,7 @@ fileWriter_t::~fileWriter_t() {
 	D("Mutex released")
 }
 
-fileStatus_t::~fileStatus_t() {
+FileStatus::~FileStatus() {
 }
 
 fileController_t *fileList_t::insertController(int id, const string &fileName, File::Size fileSize, const string &machineID) {

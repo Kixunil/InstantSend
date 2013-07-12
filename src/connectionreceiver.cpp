@@ -8,22 +8,25 @@
 #include "sysapi.h"
 #include "appcontrol.h"
 
-int runningServers;
-Mutex mRunningServers;
+using namespace InstantSend;
+using namespace std;
 
-connectionReceiver_t::connectionReceiver_t(const string &plugin, const jsonComponent_t &config) : running(true), pluginName(plugin), pluginConfig(config.clone()), pref(pluginList_t::instance()[pluginName]), server(pref.as<connectionCreator_t>()->newServer(*pluginConfig)) {
+int InstantSend::runningServers;
+Mutex InstantSend::mRunningServers;
+
+ConnectionReceiver::ConnectionReceiver(const string &plugin, const jsonComponent_t &config) : running(true), pluginName(plugin), pluginConfig(config.clone()), pref(PluginList::instance()[pluginName]), server(pref.as<ConnectionCreator>()->newServer(*pluginConfig)) {
 	if(!server.valid()) throw runtime_error("Plugin instance creation failed");
 }
 
-bool connectionReceiver_t::checkRunning() {
+bool ConnectionReceiver::checkRunning() {
 	runningmutex.lock();
 	bool tmp = running;
 	runningmutex.unlock();
 	return tmp;
 }
 
-void connectionReceiver_t::run() {
-	pluginInstanceAutoPtr<peer_t> client;
+void ConnectionReceiver::run() {
+	pluginInstanceAutoPtr<Peer> client;
 
 	mRunningServers.lock();
 	++runningServers;
@@ -31,9 +34,9 @@ void connectionReceiver_t::run() {
 
 	bcastServerStarted(*this);
 
-	while((client = pluginInstanceAutoPtr<peer_t>(server->acceptClient())).valid() && checkRunning()) {
+	while((client = pluginInstanceAutoPtr<Peer>(server->acceptClient())).valid() && checkRunning()) {
 		puts("Client connected.");
-		(new dataReceiver_t(client))->start();
+		(new DataReceiver(client))->start();
 	}
 
 	runningmutex.lock(); // synchronization trick
@@ -47,7 +50,7 @@ void connectionReceiver_t::run() {
 	unfreezeMainThread();
 }
 
-void connectionReceiver_t::stop() throw() {
+void ConnectionReceiver::stop() throw() {
 	runningmutex.lock();
 
 	fprintf(stderr, "Stopping server.\n");
@@ -55,7 +58,7 @@ void connectionReceiver_t::stop() throw() {
 	running = false;
 
 	try {
-		dynamic_cast<asyncStop_t &>(*server).stop();
+		dynamic_cast<AsyncStop &>(*server).stop();
 		fprintf(stderr, "Server should stop immediately.\n");
 	}
 	catch(std::bad_cast &e) {
@@ -66,16 +69,16 @@ void connectionReceiver_t::stop() throw() {
 	runningmutex.unlock();
 }
 
-const string &connectionReceiver_t::getPluginName() throw() {
+const string &ConnectionReceiver::getPluginName() throw() {
 	return pluginName;
 }
 
-const jsonComponent_t &connectionReceiver_t::getPluginConf() throw() {
+const jsonComponent_t &ConnectionReceiver::getPluginConf() throw() {
 	return *pluginConfig;
 }
 
-bool connectionReceiver_t::autoDelete() {
-	fprintf(stderr, "connectionReceiver_t::autoDelete();\n");
+bool ConnectionReceiver::autoDelete() {
+	fprintf(stderr, "ConnectionReceiver::autoDelete();\n");
 	return true;
 }
 

@@ -1,9 +1,13 @@
 #include "pluginapi.h"
 
-class InternalEventHandler : public eventPlugin_t {
+namespace InstantSend {
+
+class InternalEventHandler : public EventPlugin {
 	public:
 		InternalEventHandler();
 		~InternalEventHandler();
 		void onLoad(const string &pluginName);
 		void onUnload(const string &pluginName);
 };
+
+}

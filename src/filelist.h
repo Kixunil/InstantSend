@@ -6,7 +6,9 @@
 #include "multithread.h"
 #include "pluginapi.h"
 
-class fileController_t : public fileStatus_t {
+namespace InstantSend {
+
+class fileController_t : public FileStatus {
 	private:
 		int identifier;
 		volatile int refcount;
@@ -26,12 +28,14 @@ class fileController_t : public fileStatus_t {
 class fileList_t {
 	protected:
 		map<int, fileController_t *> identifiers;
-		fileController_t *insertController(int id, const string &fileName, File::Size fileSize, const string &machineID);
+		fileController_t *insertController(int id, const std::string &fileName, File::Size fileSize, const std::string &machineID);
 		Mutex listmutex;
 	public:
 		static fileList_t &getList();
-		fileController_t &getController(int id, const string &fileName, File::Size, const string &machineID);
+		fileController_t &getController(int id, const std::string &fileName, File::Size, const std::string &machineID);
 		void removeController(int id, bool del);
 };
+
+}
 
 #endif

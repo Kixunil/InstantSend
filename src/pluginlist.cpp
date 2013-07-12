@@ -3,7 +3,10 @@
 #include "pluginlist.h"
 #include "appcontrol.h"
 
-BPluginRef pluginList_t::operator[](const string &name) {
+using namespace InstantSend;
+using namespace std;
+
+BPluginRef PluginList::operator[](const string &name) {
 	/* This functon tries to insert new empty plugin handle to map.
 	 * If plugin is already loaded, nothing changes and map::insert returns fals as pair::second
 	 * In this case, iterator to existing item is returned as pair::first
@@ -18,8 +21,9 @@ BPluginRef pluginList_t::operator[](const string &name) {
 	map<string, pluginHandle_t>::iterator &plugin(insresult.first);
 	if(insresult.second) { // Plugin handle was inserted
 		try {
+			auto_ptr<InternalPluginEnvironment> pEnv(new InternalPluginEnvironment(*instantSend, name));
 			// Try load library
-			plugin->second.assignLibrary(loader.loadPlugin(name, plugin));
+			plugin->second.assignLibrary(loader.loadPlugin(name, pEnv));
 		}
 		catch(exception &e) {
 			// Remove invalid plugin handle - basic exception safety
@@ -37,19 +41,12 @@ BPluginRef pluginList_t::operator[](const string &name) {
 	return BPluginRef(plugin->second);
 }
 
-pluginList_t &pluginList_t::instance() {
-	static pluginList_t plugins;
+PluginList &PluginList::instance() {
+	static PluginList plugins;
 	return plugins;
 }
 
-/*
-pluginInstanceCreator_t &getPluginInstanceCreator(const string &name) { // Interface for plugins
-	pluginList_t &pl = pluginList_t::instance();
-	return *pl[name].creator();
-}
-*/
-
-void pluginList_t::checkUnload(const map<string, pluginHandle_t>::iterator plugin) {
+void PluginList::checkUnload(const map<string, pluginHandle_t>::iterator plugin) {
 	MutexHolder mh(modifyMutex);
 	if(plugin->second.isUnloadable()) {
 		string pname(plugin->first);
@@ -58,17 +55,8 @@ void pluginList_t::checkUnload(const map<string, pluginHandle_t>::iterator plugi
 	}
 }
 
-unsigned int pluginList_t::count() {
+unsigned int PluginList::count() {
 	MutexHolder mh(modifyMutex);
 	return storage.size();
 }
 
-/*
-void pluginEmpty(const string &name) {
-	pluginList_t::instance().checkUnload(name);
-}
-*/
-
-void CheckUnloadCallback::onUnload() {
-	pluginList_t::instance().checkUnload(mStorRef);
-}
