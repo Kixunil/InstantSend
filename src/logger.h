@@ -5,8 +5,6 @@
 
 #include "pluginapi.h"
 
-#define LOG(level, message, ...) instantSend->logger().flog(level, message, ## __VA_ARGS__)
-
 namespace InstantSend {
 
 class BasicLogger : public Logger {
