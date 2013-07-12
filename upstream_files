@@ -87,6 +87,8 @@ src/eventsink.cpp
 src/serverlist.cpp
 src/internalevents.cpp
 src/client.cpp
+src/logger.cpp
+src/logger.h
 src/pluginloader.cpp
 src/connectionreceiver.cpp
 src/plugin-common.cpp
