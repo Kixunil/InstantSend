@@ -12,12 +12,15 @@
 asm (".section .drectve");
 asm (".ascii \"-export:getCreator\"");
 
-class i4tPeer : public peer_t {
+using namespace InstantSend;
+using namespace std;
+
+class i4tPeer : public Peer {
 	private:
 		SOCKET fd;
 		string machineId;
 	public:
-		inline i4tPeer(int newfd, const string &mId, pluginMultiInstanceCreator_t &creator) : peer_t(creator) {
+		inline i4tPeer(int newfd, const string &mId, PluginEnvironment &env) : Peer(env) {
 			fd = newfd;
 			machineId = mId;
 		}
@@ -89,11 +92,11 @@ class i4tPeer : public peer_t {
 
 };
 
-class i4tserver : public serverPlugin_t {
+class i4tserver : public ServerPlugin {
 	private:
 		int fd;
 	public:
-		i4tserver(const jsonComponent_t &config, pluginMultiInstanceCreator_t &creator) : serverPlugin_t(creator) {
+		i4tserver(const jsonComponent_t &config, PluginEnvironment &env) : ServerPlugin(env) {
 			struct sockaddr_in srvaddr;
 			int backlog;
 				srvaddr.sin_family = AF_INET;
@@ -122,13 +125,13 @@ class i4tserver : public serverPlugin_t {
 
 		}
 
-		auto_ptr<peer_t> acceptClient() throw() {
+		auto_ptr<Peer> acceptClient() throw() {
 			struct sockaddr_in saddr;
 			saddr.sin_family = AF_INET;
 			int socksize = sizeof(struct sockaddr_in);
 			int res = accept(fd, (struct sockaddr *)&saddr, &socksize);
-			if(res < 0) return auto_ptr<peer_t>();
-			return auto_ptr<peer_t>(new i4tPeer(res, string(inet_ntoa(saddr.sin_addr)), getCreator()));
+			if(res < 0) return auto_ptr<Peer>();
+			return auto_ptr<Peer>(new i4tPeer(res, string(inet_ntoa(saddr.sin_addr)), mEnv));
 		}
 
 		void reconfigure(jsonComponent_t *config) { (void)config; }
@@ -138,13 +141,13 @@ class i4tserver : public serverPlugin_t {
 		}
 };
 
-class i4tCreator : public connectionCreator_t {
+class i4tCreator : public ConnectionCreator {
 	private:
 		string lastErr;
 	public:
-		i4tCreator(pluginDestrCallback_t &callback) : connectionCreator_t(callback), lastErr("No error") {}
+		i4tCreator(PluginEnvironment &env) : ConnectionCreator(env), lastErr("No error") {}
 
-		auto_ptr<peer_t> newClient(const jsonComponent_t &config) throw() {
+		auto_ptr<Peer> newClient(const jsonComponent_t &config) throw() {
 			int fd;
 			try {
 				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
@@ -181,7 +184,7 @@ class i4tCreator : public connectionCreator_t {
 
 				connect(fd, (struct sockaddr *)&dstaddr, sizeof(struct sockaddr_in));
 				if(errno) throw runtime_error(string("connect: ") + strerror(errno));
-				return auto_ptr<peer_t>(new i4tPeer(fd, dstIP.getVal(), *this));
+				return auto_ptr<Peer>(new i4tPeer(fd, dstIP.getVal(), mEnv));
 			}
 			catch(exception &e) {
 				if(fd > -1) closesocket(fd);
@@ -192,12 +195,12 @@ class i4tCreator : public connectionCreator_t {
 				if(fd > -1) closesocket(fd);
 				fd = -1;
 			}
-			return auto_ptr<peer_t>();
+			return auto_ptr<Peer>();
 	}
 
-	auto_ptr<serverPlugin_t> newServer(const jsonComponent_t &config) throw() {
+	auto_ptr<ServerPlugin> newServer(const jsonComponent_t &config) throw() {
 		try {
-			return auto_ptr<serverPlugin_t>(new i4tserver(config, *this));
+			return auto_ptr<ServerPlugin>(new i4tserver(config, mEnv));
 		}
 		catch(exception &e) {
 			lastErr = e.what();
@@ -205,17 +208,13 @@ class i4tCreator : public connectionCreator_t {
 		catch(...) {
 			lastErr = "Unknown error";
 		}
-		return auto_ptr<serverPlugin_t>();
-	}
-
-	const char *getErr() {
-		return lastErr.c_str();
+		return auto_ptr<ServerPlugin>();
 	}
 };
 
 extern "C" {
-	pluginInstanceCreator_t *getCreator(pluginDestrCallback_t &callback) {
-		static i4tCreator creator(callback);
+	PluginInstanceCreator *getCreator(PluginEnvironment &env) {
+		static i4tCreator creator(env);
 		return &creator;
 	}
 }

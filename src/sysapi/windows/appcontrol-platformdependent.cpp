@@ -7,25 +7,27 @@
 #include <cstdio>
 
 #include "windows-appcontrol.h"
+#include "sysapi.h"
 
 #ifndef UNIX_PATH_MAX
 #define UNIX_PATH_MAX    108
 #endif
 
+using namespace InstantSend;
 using namespace std;
 
-volatile bool stopApp = false;
-volatile bool stopAppFast = false;
+volatile bool InstantSend::stopApp = false;
+volatile bool InstantSend::stopAppFast = false;
 unsigned int threadCount = 0;
 CRITICAL_SECTION threadCountMutex;
 
 static HANDLE mainThread;
 
-void unfreezeMainThread() {
+void InstantSend::unfreezeMainThread() {
 	ResumeThread(mainThread);
 }
 
-void onAppStart(int argc, char **argv) {
+void InstantSend::onAppStart(int argc, char **argv) {
 	mainThread = GetCurrentThread(); //OpenThread(THREAD_SUSPEND_RESUME, 0, GetCurrentProcessId());
 	if(!mainThread) {
 		LPVOID lpMsgBuf;
@@ -60,19 +62,46 @@ void onAppStart(int argc, char **argv) {
 	*/
 }
 
-void onAppStop() {
+void InstantSend::onAppStop() {
 	DeleteCriticalSection(&threadCountMutex);
 }
 
-void freezeMainThread() {
+void InstantSend::freezeMainThread() {
 	SuspendThread(mainThread);
 }
 
-/*
-void threadAboutToExit(pthread_t thread) {
-	pthread_mutex_lock(&threadQueueMutex);
-	threadQueue.push(thread);
-	pthread_mutex_unlock(&threadQueueMutex);
+Application::Application(int argc, char **argv) : mLogger(stderr) {
+}
+
+void InstantSend::Application::requestStop() {
+	stopApp = true;
 	unfreezeMainThread();
 }
-*/
+
+void InstantSend::Application::requestFastStop() {
+	stopApp = true;
+	stopAppFast = true;
+	unfreezeMainThread();
+}
+
+const std::string &Application::systemDataDir() {
+	return getSystemDataDir();
+}
+
+const std::string &Application::systemConfigDir() {
+	return getSystemCfgDir();
+}
+
+const std::string &Application::userDataDir() {
+	return getUserDir();
+}
+
+const std::string &Application::fileDir() {
+	getUserDir() + "\\files";
+}
+
+void Application::fileDir(const std::string &dir) {
+	//TODO implement
+}
+
+InstantSend::Application *InstantSend::instantSend;
