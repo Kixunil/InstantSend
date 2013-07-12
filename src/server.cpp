@@ -40,7 +40,8 @@ bool checkRunningServers() {
 
 int main(int argc, char **argv) {
 	onAppStart(argc, argv);
-	auto_ptr<Application>(new Application(argc, argv));
+	auto_ptr<Application> app(new Application(argc, argv));
+	instantSend = app.get();
 	InternalEventHandler ieh; // no need to do anything - it registers and unregisters itself automatically
 	PluginList &pl = PluginList::instance();
 	pl.setSink(EventSink::instance());

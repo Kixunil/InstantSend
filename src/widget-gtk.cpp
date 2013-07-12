@@ -88,7 +88,7 @@ class FileInfoItem {
 		}
 
 		inline char getProgress() {
-			return (100 * bytes) / fileSize;
+			return fileSize?(100 * bytes) / fileSize:0;
 		}
 
 		inline char getDirection() {

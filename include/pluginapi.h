@@ -53,6 +53,7 @@ class Logger {
 
 		virtual void log(Level level, const std::string &message) = 0;
 		virtual void log(Level level, const std::string &message, const std::string &pluginName) = 0;
+		void flog(Level level, const char * format, ...);
 
 		virtual ~Logger();
 
@@ -84,7 +85,7 @@ class PluginEnvironment {
 		virtual void onInstanceDestroyed() = 0;
 
 		virtual void log(Logger::Level level, const std::string &message) = 0;
-		void log(Logger::Level level, const char *format, ...);
+		void flog(Logger::Level level, const char *format, ...);
 	protected:
 		inline PluginEnvironment(ApplicationEnvironment &appEnv) : mAppEnv(appEnv) {}
 };

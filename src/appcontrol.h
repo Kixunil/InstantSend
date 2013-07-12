@@ -1,7 +1,7 @@
 #include "pluginapi.h"
 #include "logger.h"
 
-#define LOG(level, message) instantSend->logger().log(level, message)
+#define LOG(level, message, ...) instantSend->logger().flog(level, message, ## __VA_ARGS__)
 
 namespace InstantSend {
 extern volatile bool stopApp;

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdexcept>
 #include "pluginloader.h"
+#include "appcontrol.h"
 
 using namespace InstantSend;
 
@@ -21,11 +22,11 @@ auto_ptr<LibraryHandle> PluginLoader::loadPlugin(const string &name, auto_ptr<In
 	unsigned int i;
 	for(i = 0; i < paths.size(); ++i) {
 		try {
-			fprintf(stderr, "Loading: %s\n", getFullName(paths[i], name).c_str());
+			LOG(Logger::Note, "Loading: %s", getFullName(paths[i], name).c_str());
 			return tryLoad(getFullName(paths[i], name), pluginEnv);
 		}
 		catch(exception &e) {
-			fprintf(stderr, "Failed to load plugin %s from path %s (%s)\n", name.c_str(), getFullName(paths[i], name).c_str(), e.what());
+			LOG(Logger::Note, "Failed to load plugin %s from path %s (%s)", name.c_str(), getFullName(paths[i], name).c_str(), e.what());
 		}
 	}
 	throw runtime_error("Failed to load plugin %s");

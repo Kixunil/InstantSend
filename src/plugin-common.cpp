@@ -5,7 +5,20 @@
 
 using namespace InstantSend;
 
-void PluginEnvironment::log(Logger::Level level, const char *format, ...) {
+void PluginEnvironment::flog(Logger::Level level, const char *format, ...) {
+	va_list vl;
+	va_start(vl, format);
+	int msgSize = vsnprintf(NULL, 0, format, vl);
+	++msgSize; // take '\0' into account
+	va_end(vl);
+	char buf[msgSize]; // output error will never occur in this case
+	va_start(vl, format);
+	vsnprintf(buf, msgSize, format, vl);
+	va_end(vl);
+	log(level, string(buf));
+}
+
+void Logger::flog(Level level, const char * format, ...) {
 	va_list vl;
 	va_start(vl, format);
 	int msgSize = vsnprintf(NULL, 0, format, vl);

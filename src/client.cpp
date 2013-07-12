@@ -13,6 +13,8 @@
 #include "pluginlist.h"
 #include "sysapi.h"
 #include "eventsink.h"
+#include "appcontrol.h"
+
 #include <stdexcept>
 
 using namespace InstantSend;
@@ -37,7 +39,6 @@ class StatusReporter : public thread_t {
 				bcastProgressUpdate(mFileStatus);
 				if(outputpercentage) {
 					printf("%ld\n", 100*mFileStatus.getTransferredBytes() / mFileStatus.getFileSize());
-					fflush(stdout);
 				}
 			}
 			++mSem;
@@ -108,8 +109,7 @@ class FileReader : public FileStatus {
 
 		int send(Peer &client, const string &basename) {
 			try {
-				fprintf(stderr, "File size: %llu\n", (unsigned long long)mSize);
-				fflush(stderr);
+				LOG(Logger::Debug, "File size: %llu", (unsigned long long)mSize);
 
 				mStatus = IS_TRANSFER_IN_PROGRESS;
 
@@ -163,13 +163,6 @@ class FileReader : public FileStatus {
 					data->size += msg.size() + 1;
 
 					if(!client.sendData(data.get())) throw runtime_error("Can't send!");
-/*					if(!(fragmentcnt = (fragmentcnt +1) % 5000)) {
-						bcastProgressUpdate(*this);
-						if(outputpercentage) {
-							printf("%ld\n", 100*mBytes / mSize);
-							fflush(stdout);
-						}
-					}*/
 				} while(fpos < mSize);
 				strcpy(data->data, "{\"action\":\"finished\"}");
 				data->size = 26;
@@ -225,12 +218,12 @@ pluginInstanceAutoPtr<Peer> findWay(jsonArr_t &ways) {
 			pname = dynamic_cast<jsonStr_t &>(way.gie("plugin")).getVal();
 
 			// Load plugin and try to connect
-			fprintf(stderr, "Connecting...\n");
+			LOG(Logger::Debug, "Connecting...");
 			pluginInstanceAutoPtr<Peer> client(pl[pname].as<ConnectionCreator>()->newClient(way.gie("config")));
-			if(client.valid()) return client; // else fprintf(stderr, "Couldn't connect with way %d: %s\n", i, pl[pname].lastError());
+			if(client.valid()) return client;
 		}
 		catch(exception &e) {
-			printf("Skipping %s: %s\n", pname.c_str(), e.what());
+			LOG(Logger::Note, "Skipping %s: %s", pname.c_str(), e.what());
 		}
 		catch(...) {
 			// continue trying
@@ -240,25 +233,25 @@ pluginInstanceAutoPtr<Peer> findWay(jsonArr_t &ways) {
 }
 
 bool sendEntry(const string &entry, size_t ignored, const string &tname, Peer &client) {
-	fprintf(stderr, "Sending %s\n", entry.c_str());
+	LOG(Logger::Debug, "Sending %s", entry.c_str());
 	if(entry.size() > 1 && (entry.substr(entry.size() - 2) == "/." || entry.substr(entry.size() - 2) == "\\.")) return true;
 	if(entry.size() > 2 && (entry.substr(entry.size() - 3) == "/.."|| entry.substr(entry.size() - 3) == "\\..")) return true;
 	bool success = true;
 	try {
 		Directory dir(entry);
-		fprintf(stderr, "Sending directory %s\n", entry.c_str());
+		LOG(Logger::Debug, "Sending directory %s", entry.c_str());
 		while(1) {
 			success = success && sendEntry(combinePath(entry, dir.next()), ignored, tname, client);
 		}
 	}
 	catch(ENotDir &e) {
-		fprintf(stderr, "Opening %s\n", entry.c_str());
+		LOG(Logger::Debug, "Opening %s", entry.c_str());
 		// Open file
 		FileReader file(entry, tname);
 
 		// Send file
 		if(file.send(client, entry.substr(ignored))) {
-			printf("File \"%s\" sent to \"%s\".\n", entry.substr(ignored).c_str(), tname.c_str());
+			LOG(Logger::Note, "File \"%s\" sent to \"%s\".", entry.substr(ignored).c_str(), tname.c_str());
 			return true;
 		} else success = false;
 	}
@@ -267,6 +260,9 @@ bool sendEntry(const string &entry, size_t ignored, const string &tname, Peer &c
 }
 
 int main(int argc, char **argv) {
+	auto_ptr<Application> app(new Application(argc, argv));
+	instantSend = app.get();
+
 	if(argc < 2) return 1;
 
 	string userdir(getUserDir());
@@ -276,7 +272,7 @@ int main(int argc, char **argv) {
 	for(int i = 1; i+1 < argc; ++i) {
 		if(string(argv[i]) == "-c") {
 			if(!argv[++i]) {
-				fprintf(stderr, "Too few arguments after '-c'\n");
+				LOG(Logger::Error, "Too few arguments after '-c'");
 				return 1;
 			}
 			cfgfile = string(argv[i]);
@@ -300,7 +296,7 @@ int main(int argc, char **argv) {
 			EventSink::instance().autoLoad(dynamic_cast<jsonObj_t &>(config.gie("eventhandlers")));
 		}
 		catch(...) {
-			fprintf(stderr, "Note: no event handler loaded\n");
+			LOG(Logger::Note, "No event handler loaded");
 		}           
 
 		char *tname = NULL;
@@ -308,23 +304,21 @@ int main(int argc, char **argv) {
 		for(int i = 1; i+1 < argc; ++i) {
 			if(string(argv[i]) == string("-t")) {
 				if(!argv[++i]) {
-					fprintf(stderr, "Too few arguments after '-t'\n");
+					LOG(Logger::Error, "Too few arguments after '-t'");
 					return 1;
 				}
 				tname = argv[i];
 				try {
 					client = findWay(dynamic_cast<jsonArr_t &>(dynamic_cast<jsonObj_t &>(targets.gie(tname)).gie("ways")));
 				} catch(exception &e) {
-					printf("Failed to connet to %s: %s\n", tname, e.what());
-					fflush(stdout);
+					LOG(Logger::Error, "Failed to connet to %s: %s", tname, e.what());
 					failuredetected = 1; 
 					while(i + 1 < argc && string(argv[i]) != string("-t")) ++i; // skip unusable target
 					if(i + 1 < argc) --i;
 					continue;
 				}
 				if(!client.valid()) {
-					printf("Failed to connet to %s\n", tname);
-					fflush(stdout);
+					LOG(Logger::Error, "Failed to connet to %s", tname);
 					failuredetected = 1;
 					while(i + 1 < argc && string(argv[i]) != string("-t")) ++i; // skip unusable target
 					if(i + 1 < argc) --i;
@@ -336,16 +330,16 @@ int main(int argc, char **argv) {
 
 			if(string(argv[i]) == string("-f") && tname) {
 				if(!argv[++i]) {
-					fprintf(stderr, "Too few arguments after '-f'\n");
+					LOG(Logger::Error, "Too few arguments after '-f'");
 					return 1;
 				}
 				
 				string fn(argv[i]);
 				trimSlashes(fn);
 				
-				fprintf(stderr, "Sending data...\n");
+				LOG(Logger::Debug, "Sending data...");
 				if(sendEntry(fn, getFileName(fn), tname, *client)) {
-					fprintf(stderr, "Sending successfull.\n");
+					LOG(Logger::Debug, "Sending successfull.");
 				} else failuredetected = 1;
 			}
 		}
@@ -353,14 +347,13 @@ int main(int argc, char **argv) {
 	}
 	catch(const char *msg) {
 		//char *dlerr = dlerror();
-		fprintf(stderr, "Error: %s\n", msg);
-		//if(dlerr) fprintf(stderr, "; %s\n", dlerr); else putc('\n', stderr);
+		LOG(Logger::Error, "Error: %s", msg);
 		return 1;
 	}
 	catch(exception &e) {
-		fprintf(stderr, "Error: %s\n", e.what());
+		LOG(Logger::Error, "Error: %s", e.what());
 		return 1;
 	}
-	fprintf(stderr, "Return value: %d\n", failuredetected);
+	LOG(Logger::Debug, "Return value: %d", failuredetected);
 	_exit(failuredetected);
 }
