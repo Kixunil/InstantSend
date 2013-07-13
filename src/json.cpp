@@ -9,6 +9,9 @@
 	#define SECTOR_SIZE 4096
 #endif
 
+using namespace InstantSend;
+using namespace std;
+
 #ifdef NOPURE
 
 string jsonComponent_t::toString() {
@@ -24,6 +27,8 @@ jsonComponent_t *jsonComponent_t::clone() const {
 }
 
 #endif
+
+namespace InstantSend {
 
 jsonSyntaxErr::~jsonSyntaxErr() throw() { ; }
 
@@ -527,6 +532,8 @@ jsonObj_t::~jsonObj_t() {
 jsonNotExist::~jsonNotExist() throw() { ;}
 fileNotAccesible::~fileNotAccesible() throw() {;}
 fileUnreadable::~fileUnreadable() throw() {;}
+
+}
 
 // JAL
 /*

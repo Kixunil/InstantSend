@@ -39,7 +39,7 @@ class InternalPluginEnvironment : public PluginEnvironment {
 	private:
 		const std::string mName;
 		RefCnt instanceCount;
-		auto_ptr<PluginStorageHandle> mStorageHandle;
+		std::auto_ptr<PluginStorageHandle> mStorageHandle;
 };
 
 template <class T>
@@ -51,7 +51,7 @@ class pluginInstanceAutoPtr {
 		inline pluginInstanceAutoPtr(pluginInstanceAutoPtr &other) throw() : mInstance(other.release()) {}
 		inline pluginInstanceAutoPtr(const pluginInstanceAutoPtrRef<T> &other) throw() : mInstance(other.mInstance) {}
 		inline pluginInstanceAutoPtr &operator=(pluginInstanceAutoPtr &other) throw() { reset(other.release()); return *this; }
-		inline pluginInstanceAutoPtr &operator=(auto_ptr<T> &other) throw() { reset(other.release()); return *this; }
+		inline pluginInstanceAutoPtr &operator=(std::auto_ptr<T> &other) throw() { reset(other.release()); return *this; }
 		inline pluginInstanceAutoPtr &operator=(const pluginInstanceAutoPtrRef<T> &other) throw() { reset(other.mInstance); return *this; }
 		template<class T2>
 			pluginInstanceAutoPtr &operator=(pluginInstanceAutoPtr<T2> &other) { reset(other.release()); return *this; }
@@ -79,8 +79,8 @@ class pluginInstanceAutoPtr {
 };
 
 
-class EPluginInvalid : public runtime_error {
-	inline EPluginInvalid(const std::string &message) : runtime_error(message) {};
+class EPluginInvalid : public std::runtime_error {
+	inline EPluginInvalid(const std::string &message) : std::runtime_error(message) {};
 };
 
 class LibraryHandle {
@@ -106,13 +106,13 @@ class pluginHandle_t {
 	public:
 		/*! Standard constructor */
 		inline pluginHandle_t() : refCnt(0), mLibrary(NULL), mOwner(false) {}
-		pluginHandle_t(auto_ptr<LibraryHandle> library);
+		pluginHandle_t(std::auto_ptr<LibraryHandle> library);
 		pluginHandle_t(const pluginHandle_t &other);
 
 		/* Frees associated resources and unloads library */
 		~pluginHandle_t();
 
-		inline void assignLibrary(auto_ptr<LibraryHandle> library) {
+		inline void assignLibrary(std::auto_ptr<LibraryHandle> library) {
 			assert(library.get());
 			mLibrary = library.release();
 			mOwner = true;
@@ -160,7 +160,7 @@ class PluginPtr {
 		 * \note Strong exception safety ensured.
 		 */
 		inline PluginPtr() : mHandle(NULL), mCreator(NULL) {}
-		inline PluginPtr(pluginHandle_t *handle) throw(bad_cast) : mHandle(handle), mCreator((handle)?&dynamic_cast<T &>(*handle->creator()):NULL) { if(mHandle) mHandle->incRC(); }
+		inline PluginPtr(pluginHandle_t *handle) throw(std::bad_cast) : mHandle(handle), mCreator((handle)?&dynamic_cast<T &>(*handle->creator()):NULL) { if(mHandle) mHandle->incRC(); }
 		inline PluginPtr(const PluginPtr &other) throw() : mHandle(other.mHandle), mCreator(other.mCreator) { if(mHandle) mHandle->incRC(); }
 		inline ~PluginPtr() { if(mHandle && mHandle->decRC()) mHandle->onUnload(); }
 		inline T *operator->() const throw() { return mCreator; }
@@ -192,7 +192,7 @@ class BPluginRef {
 		
 		/*! Returns specialized instance of PluginPtr */
 		template <class T>
-		inline PluginPtr<T> as() const throw(bad_cast) { assert(mHandle); return PluginPtr<T>(mHandle); }
+		inline PluginPtr<T> as() const throw(std::bad_cast) { assert(mHandle); return PluginPtr<T>(mHandle); }
 	private:
 		/*! Assignment operator is disabled */
 		inline void operator=(const BPluginRef &){}

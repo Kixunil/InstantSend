@@ -4,6 +4,7 @@
 #include "pluginapi.h"
 
 using namespace InstantSend;
+using namespace std;
 
 void PluginEnvironment::flog(Logger::Level level, const char *format, ...) {
 	va_list vl;

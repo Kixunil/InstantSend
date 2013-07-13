@@ -6,8 +6,8 @@ class InternalEventHandler : public EventPlugin {
 	public:
 		InternalEventHandler();
 		~InternalEventHandler();
-		void onLoad(const string &pluginName);
-		void onUnload(const string &pluginName);
+		void onLoad(const std::string &pluginName);
+		void onUnload(const std::string &pluginName);
 };
 
 }

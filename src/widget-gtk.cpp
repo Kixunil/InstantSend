@@ -32,6 +32,7 @@
 
 #define _(str) gettext(str)
 
+using namespace InstantSend;
 using namespace Gtk;
 using namespace std;
 using namespace Glib;

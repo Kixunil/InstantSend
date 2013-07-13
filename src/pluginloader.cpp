@@ -4,6 +4,7 @@
 #include "appcontrol.h"
 
 using namespace InstantSend;
+using namespace std;
 
 //void pluginEmpty(const string &name);
 

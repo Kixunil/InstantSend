@@ -8,35 +8,26 @@
 
 #include <stdint.h>
 
-// For debugging
-#define NOPURE
-
-#ifdef NOPURE
-#define PURE
-#else
-#define PURE = 0
-#endif
-
-using namespace std;
-
 typedef int64_t intL_t;
 typedef double floatL_t;
 
+namespace InstantSend {
+
 /*! Exception thrown on attempt to access not existing item in json object */
-class jsonNotExist : public exception {
+class jsonNotExist : public std::exception {
 	private:
 		/*! Human readable error message */
-		string msg;
+		std::string msg;
 	public:
 		/*! Constructor
 		 * \param name Name of not existing item
 		 */
-		inline jsonNotExist(const string &name) {
-			msg = string("Item \"") + name + string("\" does not exist");
+		inline jsonNotExist(const std::string &name) {
+			msg = std::string("Item \"") + name + std::string("\" does not exist");
 		}
 
 		/* Description of exception
-		 * \return Null terminated human readable string */
+		 * \return Null terminated human readable std::string */
 		virtual const char *what() const throw() {
 			return msg.c_str();
 		}
@@ -45,29 +36,29 @@ class jsonNotExist : public exception {
 		~jsonNotExist() throw();
 };
 
-/*! Exception thrown when parsing invalid json string */
-class jsonSyntaxErr : public exception {
+/*! Exception thrown when parsing invalid json std::string */
+class jsonSyntaxErr : public std::exception {
 	private:
 		/*! Pointer to description of error */
-		string *s;
-		/*! Auto destructing container for self owned string */
-		auto_ptr<string> ownstr;
+		std::string *s;
+		/*! Auto destructing container for self owned std::string */
+		std::auto_ptr<std::string> ownstr;
 		/*! Possition, where error occured */
 		int p;
 	public:
 		/*! Creates exception with error message and position */
-		inline jsonSyntaxErr(string *str, int pos) {
+		inline jsonSyntaxErr(std::string *str, int pos) {
 			s = str;
 			p = pos;
 		}
 
-		inline jsonSyntaxErr(const string &str) {
-			s = (ownstr = auto_ptr<string>(new string(str))).get();
+		inline jsonSyntaxErr(const std::string &str) {
+			s = (ownstr = std::auto_ptr<std::string>(new std::string(str))).get();
 			p = 0;
 		}
 
 		inline jsonSyntaxErr(const jsonSyntaxErr &err) {
-			if(err.ownstr.get()) ownstr = auto_ptr<string>(new string(*err.ownstr));
+			if(err.ownstr.get()) ownstr = std::auto_ptr<std::string>(new std::string(*err.ownstr));
 		}
 
 		virtual const char *what() const throw() {
@@ -81,12 +72,12 @@ class jsonSyntaxErr : public exception {
 		~jsonSyntaxErr() throw();
 };
 
-class fileNotAccesible : public exception {
+class fileNotAccesible : public std::exception {
 	private:
-		string msg;
+		std::string msg;
 	public:
-		inline fileNotAccesible(const string &filename) {
-			msg = string("Can't access file ") + filename;
+		inline fileNotAccesible(const std::string &filename) {
+			msg = std::string("Can't access file ") + filename;
 		}
 
 		const char *what() {
@@ -96,12 +87,12 @@ class fileNotAccesible : public exception {
 		~fileNotAccesible() throw();
 };
 
-class fileUnreadable : public exception {
+class fileUnreadable : public std::exception {
 	private:
-		string msg;
+		std::string msg;
 	public:
-		inline fileUnreadable(const string &filename) {
-			msg = string("Can't access file ") + filename;
+		inline fileUnreadable(const std::string &filename) {
+			msg = std::string("Can't access file ") + filename;
 		}
 
 		virtual const char *what() throw() {
@@ -115,9 +106,9 @@ class fileUnreadable : public exception {
 class jsonComponent_t
 {
 	public:
-		virtual string toString() PURE;
-		virtual void fromString(string *str) PURE;
-		virtual jsonComponent_t *clone() const PURE;
+		virtual std::string toString() = 0;
+		virtual void fromString(std::string *str) = 0;
+		virtual jsonComponent_t *clone() const = 0;
 		virtual ~jsonComponent_t();
 };
 
@@ -126,11 +117,11 @@ class jsonInt_t : public jsonComponent_t {
 		jsonInt_t(intL_t value) {
 			val = value;
 		}
-		jsonInt_t(string *str);
+		jsonInt_t(std::string *str);
 		~jsonInt_t();
 
-		string toString();
-		void fromString(string *str);
+		std::string toString();
+		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 		inline intL_t getVal() const {
 			return val;
@@ -175,10 +166,10 @@ class jsonInt_t : public jsonComponent_t {
 class jsonFloat_t : public jsonComponent_t {
 	public:
 		jsonFloat_t(floatL_t value);
-		jsonFloat_t(string *str);
+		jsonFloat_t(std::string *str);
 		~jsonFloat_t();
-		string toString();
-		void fromString(string *str);
+		std::string toString();
+		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 
 		inline floatL_t getVal() const {
@@ -207,60 +198,60 @@ class jsonFloat_t : public jsonComponent_t {
 class jsonStr_t : public jsonComponent_t {
 	public:
 		jsonStr_t();
-		jsonStr_t(string *str);
+		jsonStr_t(std::string *str);
 		~jsonStr_t();
 		inline jsonStr_t(const char *str) {
-			val = string(str);
+			val = std::string(str);
 		}
-		string toString();
-		void fromString(string *str);
+		std::string toString();
+		void fromString(std::string *str);
 
-		string getVal() const {
+		std::string getVal() const {
 			return val;
 		}
 
-		inline void setVal(string value) {
+		inline void setVal(std::string value) {
 			val = value;
 		}
 
 		jsonComponent_t *clone() const;
 
 		inline bool operator==(const char *str) {
-			return val == string(str);
+			return val == std::string(str);
 		}
 
-		inline bool operator==(const string &str) {
+		inline bool operator==(const std::string &str) {
 			return val == str;
 		}
 
 		inline bool operator!=(const char *str) {
-			return val != string(str);
+			return val != std::string(str);
 		}
 
-		inline bool operator!=(const string &str) {
+		inline bool operator!=(const std::string &str) {
 			return val != str;
 		}
 
 		inline const char *operator=(const char *value) {
-			val = string(value);
+			val = std::string(value);
 			return value;
 		}                                             
 
-		inline const string &operator=(const string value) {
+		inline const std::string &operator=(const std::string value) {
 			return val = value;                                  
 		}                                             
 
 	private:
-		string val;
+		std::string val;
 };
 
 class jsonBool_t : public jsonComponent_t {
 	public:
 		jsonBool_t(bool value);
-		jsonBool_t(string *str);
+		jsonBool_t(std::string *str);
 		~jsonBool_t();
-		string toString();
-		void fromString(string *str);
+		std::string toString();
+		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 
 		inline bool getVal() const {
@@ -282,17 +273,17 @@ class jsonBool_t : public jsonComponent_t {
 class jsonNull_t :  public jsonComponent_t {
 	public:
 		jsonNull_t() {}
-		jsonNull_t(string *str) {
+		jsonNull_t(std::string *str) {
 			fromString(str);
 		}
 		~jsonNull_t();
 		jsonComponent_t *clone() const;
 
-		string toString() {
+		std::string toString() {
 			return "null";
 		}
 
-		void fromString(string *str) {
+		void fromString(std::string *str) {
 			if(str->substr(0, 4) == "null") str->erase(0, 4); // else throw ...
 		}
 };
@@ -322,8 +313,8 @@ class itemContainer_t {
 	public:
 
 		inline itemContainer_t() : mRC(NULL), mItem(NULL) {
-			//puts("itemContainer_t created");
 		}
+
 		inline itemContainer_t(const itemContainer_t &other) : mRC(other.mRC), mItem(other.mItem) { if(mRC) ++*mRC; }
 
 		inline itemContainer_t(jsonComponent_t *value, bool owns) : mRC(owns?new unsigned int:NULL), mItem(value) {
@@ -357,9 +348,9 @@ class itemContainer_t {
 
 class jsonIterator {
 	private:
-		map<string, itemContainer_t>::iterator mapiterator;
+		std::map<std::string, itemContainer_t>::iterator mapiterator;
 	public:
-		inline jsonIterator(map<string, itemContainer_t>::iterator mi) {
+		inline jsonIterator(std::map<std::string, itemContainer_t>::iterator mi) {
 			mapiterator = mi;
 		}
 
@@ -374,7 +365,7 @@ class jsonIterator {
 			return tmp;
 		}
 
-		inline string key() {
+		inline std::string key() {
 			return mapiterator->first;
 		}
 
@@ -390,11 +381,11 @@ class jsonIterator {
 class jsonArr_t: public jsonStructuredComponent_t {
 	public:
 		inline jsonArr_t() {;}
-		inline jsonArr_t(string *str) {
+		inline jsonArr_t(std::string *str) {
 			fromString(str);
 		}
-		string toString();
-		void fromString(string *str);
+		std::string toString();
+		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 
 		jsonArr_t &operator=(const jsonArr_t &other);
@@ -430,13 +421,14 @@ class jsonArr_t: public jsonStructuredComponent_t {
 		~jsonArr_t();
 
 	private:
-		vector<itemContainer_t> data;
+		typedef std::vector<itemContainer_t> Container;
+		Container data;
 };
 
 class jsonObj_t: public jsonStructuredComponent_t {
 	public:
 		inline jsonObj_t() {};
-		inline jsonObj_t(string *str) {
+		inline jsonObj_t(std::string *str) {
 			fromString(str);
 		}
 
@@ -447,30 +439,30 @@ class jsonObj_t: public jsonStructuredComponent_t {
 		}
 
 		inline jsonObj_t(const char *str) {
-			string tmp = string(str);
+			std::string tmp = std::string(str);
 			fromString(&tmp);
 		}
 
-		inline const jsonComponent_t &operator[] (const string &key) const {
+		inline const jsonComponent_t &operator[] (const std::string &key) const {
 			return gie(key);
 		}
 
-		inline jsonComponent_t &operator[] (const string &key) {
+		inline jsonComponent_t &operator[] (const std::string &key) {
 			return gie(key);
 		}
 
-		inline bool exists(const string &key) {
+		inline bool exists(const std::string &key) {
 			return data.count(key) > 0;
 		}
 
-		inline jsonComponent_t &gie(const string &key) const {
-			map<string, itemContainer_t>::const_iterator it(data.find(key));
+		inline jsonComponent_t &gie(const std::string &key) const {
+			Container::const_iterator it(data.find(key));
 			if(it == data.end()) throw jsonNotExist(key);
 			return *it->second;
 		}
 /*
-		inline jsonComponent_t &gie(const string &key) {
-			map<string, itemContainer_t>::iterator it(data.find(key));
+		inline jsonComponent_t &gie(const std::string &key) {
+			Container::iterator it(data.find(key));
 			if(it == data.end()) throw jsonNotExist(key);
 			return *it->second;
 		}
@@ -487,13 +479,13 @@ class jsonObj_t: public jsonStructuredComponent_t {
 			return jsonIterator(data.end());
 		}
 
-		void insertNew(const string &key, jsonComponent_t *value);
-		inline void insertVal(const string &key, jsonComponent_t *value) {
+		void insertNew(const std::string &key, jsonComponent_t *value);
+		inline void insertVal(const std::string &key, jsonComponent_t *value) {
 			data[key] = itemContainer_t(value, false);
 		}
 
-		string toString();
-		void fromString(string *str);
+		std::string toString();
+		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 
 		inline int count() {
@@ -503,39 +495,14 @@ class jsonObj_t: public jsonStructuredComponent_t {
 		void deleteContent();
 		~jsonObj_t();
 	private:
-		int type;
-		map<string, itemContainer_t> data;
+		typedef std::map<std::string, itemContainer_t> Container;
+		Container data;
 };
-
-/* // Idea for universal access to Json components
-class JALParser_t {
-	protected:
-		auto_ptr<JALParser_t> subparser;
-		inline JALParser_t() {;}
-	public:
-		JALParser_t(const string &str);
-		virtual jsonComponent_t *&access(jsonComponent_t &json);
-};
-
-class JALObjParser_t : public JALParser_t {
-	private:
-		string key;
-	public:
-		JALObjParser_t(const string &str);
-		jsonComponent_t *&access(jsonComponent_t &json);
-};
-
-class JALArrParser_t : public JALParser_t {
-	private:
-		int index;
-	public:
-		JALArrParser_t(const string &str);
-		jsonComponent_t *&access(jsonComponent_t &json);
-};
-*/
 
 // Wrapper functions
-auto_ptr<jsonComponent_t> cfgReadStr(const char *str);
-auto_ptr<jsonComponent_t> cfgReadFile(const char *path);
+std::auto_ptr<jsonComponent_t> cfgReadStr(const char *str);
+std::auto_ptr<jsonComponent_t> cfgReadFile(const char *path);
+
+}
 
 #endif

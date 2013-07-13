@@ -30,8 +30,8 @@ typedef struct {
  * \param size Maximum size of data, chunk can hold.
  * \return Auto pointer to allocated data chunk.
 */
-inline auto_ptr<anyData> allocData(size_t size) {
-	return auto_ptr<anyData>((anyData *)operator new(sizeof(anyData) + size));
+inline std::auto_ptr<anyData> allocData(size_t size) {
+	return std::auto_ptr<anyData>((anyData *)operator new(sizeof(anyData) + size));
 }
 
 class pluginDestrCallback {
@@ -158,7 +158,7 @@ class ServerPlugin : public PluginInstance {
 		 * \return Instance of Peer which should communicate with connected client
 		 * \attention This function MUST block!
 		 */
-		virtual auto_ptr<Peer> acceptClient() throw() = 0;
+		virtual std::auto_ptr<Peer> acceptClient() throw() = 0;
 };
 
 /*! \brief Interface for asynchronously stopping server or Peer
@@ -250,12 +250,12 @@ class ConnectionCreator : public PluginInstanceCreator {
 		/*! \brief Connects to server 
 		 *  \return Instance of Peer, which will communicate with server
 		 */
-		virtual auto_ptr<Peer> newClient(const jsonComponent_t &config) throw() = 0;
+		virtual std::auto_ptr<Peer> newClient(const jsonComponent_t &config) throw() = 0;
 
 		/*! \brief Initialises server
 		 * \return Instance of serverPlugin, which is ready to accept clients
 		 */
-		virtual auto_ptr<ServerPlugin> newServer(const jsonComponent_t &config) throw() = 0;
+		virtual std::auto_ptr<ServerPlugin> newServer(const jsonComponent_t &config) throw() = 0;
 };
 
 /*! \brief Creates encryption instances
@@ -269,13 +269,13 @@ class SecurityCreator : public PluginInstanceCreator {
 		 * \param config User defined configuration
 		 * \return instance of Peer, which encrypts communication between server and client
 		 */
-		virtual auto_ptr<Peer> seconnect(Peer &peer, jsonComponent_t &config) throw() = 0;
+		virtual std::auto_ptr<Peer> seconnect(Peer &peer, jsonComponent_t &config) throw() = 0;
 
 		/*! \brief Waits for client to initiate secure connection
 		 * \param config User defined configuration
 		 * \return instance of Peer, which encrypts communication between server and client
 		 */
-		virtual auto_ptr<Peer> seaccept(Peer &peer, jsonComponent_t &config) throw() = 0;
+		virtual std::auto_ptr<Peer> seaccept(Peer &peer, jsonComponent_t &config) throw() = 0;
 };
 
 #define IS_TRANSFER_IN_PROGRESS 0

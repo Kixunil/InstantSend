@@ -5,6 +5,7 @@
 #include "json.h"
 #include "sysapi.h"
 
+using namespace InstantSend;
 using namespace std;
 
 void printHelp() {
