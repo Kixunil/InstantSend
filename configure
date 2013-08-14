@@ -612,6 +612,8 @@ have_nautilus_extension
 have_caja_extension
 have_scanner_avahi
 have_scan
+have_mate_keyring
+have_gnome_keyring
 have_widget_gtk
 have_configtool
 have_server
@@ -629,6 +631,10 @@ NAUTILUS_EXTENSION3_LIBS
 NAUTILUS_EXTENSION3_CFLAGS
 CAJA_EXTENSION_LIBS
 CAJA_EXTENSION_CFLAGS
+MATE_KEYRING_LIBS
+MATE_KEYRING_CFLAGS
+GNOME_KEYRING_LIBS
+GNOME_KEYRING_CFLAGS
 WIDGET_GTK_LIBS
 WIDGET_GTK_CFLAGS
 GTKMM_LIBS
@@ -750,6 +756,8 @@ enable_plugin_avahi
 enable_scanners
 enable_scanner_avahi
 enable_plugin_notify
+enable_plugin_gnome_keyring
+enable_plugin_mate_keyring
 enable_filemanager_caja
 enable_filemanager_nautilus
 enable_doc_html
@@ -784,6 +792,10 @@ GTKMM_CFLAGS
 GTKMM_LIBS
 WIDGET_GTK_CFLAGS
 WIDGET_GTK_LIBS
+GNOME_KEYRING_CFLAGS
+GNOME_KEYRING_LIBS
+MATE_KEYRING_CFLAGS
+MATE_KEYRING_LIBS
 CAJA_EXTENSION_CFLAGS
 CAJA_EXTENSION_LIBS
 NAUTILUS_EXTENSION3_CFLAGS
@@ -1449,6 +1461,12 @@ Optional Features:
   --enable-plugin-notify[=yes|no|auto]
                           define whether notify plugin should be compiled
                           [default=$default_plugin_notify]
+  --enable-plugin-gnome-keyring[=yes|no|auto]
+                          define whether gnome keyring plugin should be
+                          compiled [default=$default_plugin_gnome_keyring]
+  --enable-plugin-mate-keyring[=yes|no|auto]
+                          define whether mate keyring plugin should be
+                          compiled [default=$default_plugin_mate_keyring]
   --enable-filemanager-caja[=yes|no|auto]
                           define whether extension for caja file manager
                           should be compiled
@@ -1503,6 +1521,14 @@ Some influential environment variables:
               C compiler flags for WIDGET_GTK, overriding pkg-config
   WIDGET_GTK_LIBS
               linker flags for WIDGET_GTK, overriding pkg-config
+  GNOME_KEYRING_CFLAGS
+              C compiler flags for GNOME_KEYRING, overriding pkg-config
+  GNOME_KEYRING_LIBS
+              linker flags for GNOME_KEYRING, overriding pkg-config
+  MATE_KEYRING_CFLAGS
+              C compiler flags for MATE_KEYRING, overriding pkg-config
+  MATE_KEYRING_LIBS
+              linker flags for MATE_KEYRING, overriding pkg-config
   CAJA_EXTENSION_CFLAGS
               C compiler flags for CAJA_EXTENSION, overriding pkg-config
   CAJA_EXTENSION_LIBS
@@ -3054,6 +3080,8 @@ if test "x$operating_system" '=' xlinux; then :
        default_scanner_avahi=yes
        default_filemanager_caja=auto
        default_filemanager_nautilus=auto
+       default_plugin_gnome_keyring=auto
+       default_plugin_mate_keyring=auto
 
 fi
 
@@ -3069,6 +3097,8 @@ if test "x$operating_system" '=' xmacosx; then :
        default_scanner_avahi=no
        default_filemanager_caja=no
        default_filemanager_nautilus=no
+       default_plugin_gnome_keyring=no
+       default_plugin_mate_keyring=no
 
 fi
 
@@ -3084,6 +3114,8 @@ if test "x$operating_system" '=' xwindows; then :
        default_scanner_avahi=no
        default_filemanager_caja=no
        default_filemanager_nautilus=no
+       default_plugin_gnome_keyring=no
+       default_plugin_mate_keyring=no
 
 fi
 
@@ -3256,6 +3288,34 @@ else
   enable_plugin_notify=auto
 else
   enable_plugin_notify=$default_plugin_notify
+fi
+
+
+fi
+
+
+# Check whether --enable-plugin-gnome-keyring was given.
+if test "${enable_plugin_gnome_keyring+set}" = set; then :
+  enableval=$enable_plugin_gnome_keyring;
+else
+  if test "x$enable_automatic" = xyes; then :
+  enable_plugin_gnome_keyring=auto
+else
+  enable_plugin_gnome_keyring=$default_plugin_gnome_keyring
+fi
+
+
+fi
+
+
+# Check whether --enable-plugin-mate-keyring was given.
+if test "${enable_plugin_mate_keyring+set}" = set; then :
+  enableval=$enable_plugin_mate_keyring;
+else
+  if test "x$enable_automatic" = xyes; then :
+  enable_plugin_mate_keyring=auto
+else
+  enable_plugin_mate_keyring=$default_plugin_mate_keyring
 fi
 
 
@@ -5138,6 +5198,8 @@ have_gtkmm=no
 have_widget_gtk=no
 have_caja_extension=no
 have_nautilus_extension=no
+have_gnome_kayring=no
+have_mate_keyring=no
 
 # Headers has been checked before
 # TODO: Make it better
@@ -5946,6 +6008,163 @@ fi
 
 fi
 
+if test "x$enable_plugin_gnome_keyring" '!=' xno; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GNOME_KEYRING" >&5
+$as_echo_n "checking for GNOME_KEYRING... " >&6; }
+
+if test -n "$GNOME_KEYRING_CFLAGS"; then
+    pkg_cv_GNOME_KEYRING_CFLAGS="$GNOME_KEYRING_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gnome-keyring-1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gnome-keyring-1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GNOME_KEYRING_CFLAGS=`$PKG_CONFIG --cflags "gnome-keyring-1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$GNOME_KEYRING_LIBS"; then
+    pkg_cv_GNOME_KEYRING_LIBS="$GNOME_KEYRING_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gnome-keyring-1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gnome-keyring-1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GNOME_KEYRING_LIBS=`$PKG_CONFIG --libs "gnome-keyring-1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        GNOME_KEYRING_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gnome-keyring-1" 2>&1`
+        else
+	        GNOME_KEYRING_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gnome-keyring-1" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$GNOME_KEYRING_PKG_ERRORS" >&5
+
+	have_gnome_keyring=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	have_gnome_keyring=no
+else
+	GNOME_KEYRING_CFLAGS=$pkg_cv_GNOME_KEYRING_CFLAGS
+	GNOME_KEYRING_LIBS=$pkg_cv_GNOME_KEYRING_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_GNOME_KEYRING 1" >>confdefs.h
+
+			  have_gnome_keyring=yes
+fi
+
+fi
+
+if test "x$enable_plugin_mate_keyring" '!=' xno; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for MATE_KEYRING" >&5
+$as_echo_n "checking for MATE_KEYRING... " >&6; }
+
+if test -n "$MATE_KEYRING_CFLAGS"; then
+    pkg_cv_MATE_KEYRING_CFLAGS="$MATE_KEYRING_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"mate-keyring-1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "mate-keyring-1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_MATE_KEYRING_CFLAGS=`$PKG_CONFIG --cflags "mate-keyring-1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$MATE_KEYRING_LIBS"; then
+    pkg_cv_MATE_KEYRING_LIBS="$MATE_KEYRING_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"mate-keyring-1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "mate-keyring-1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_MATE_KEYRING_LIBS=`$PKG_CONFIG --libs "mate-keyring-1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        MATE_KEYRING_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "mate-keyring-1" 2>&1`
+        else
+	        MATE_KEYRING_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "mate-keyring-1" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$MATE_KEYRING_PKG_ERRORS" >&5
+
+	have_mate_keyring=no
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	have_mate_keyring=no
+else
+	MATE_KEYRING_CFLAGS=$pkg_cv_MATE_KEYRING_CFLAGS
+	MATE_KEYRING_LIBS=$pkg_cv_MATE_KEYRING_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_MATE_KEYRING 1" >>confdefs.h
+
+			  have_mate_keyring=yes
+fi
+
+fi
 
 # Caja and Nautilus are always automatic or disabled
 if test "x$enable_filemanager_caja" '!=' xno; then :
@@ -6320,6 +6539,26 @@ if test "x$enable_plugin_notify" = xyes; then :
 
 	 if test "x$have_notify" '!=' xyes; then :
   as_fn_error $? "You have missing modules libnotify1 and libnotify4! Install one of them or disable." "$LINENO" 5
+
+fi
+
+
+fi
+
+if test "x$enable_plugin_gnome_keyring" = xyes; then :
+
+	 if test "x$have_gnome_keyring" '!=' xyes; then :
+  as_fn_error $? "You have missing module gnome-keyring-1! Install it or disable." "$LINENO" 5
+
+fi
+
+
+fi
+
+if test "x$enable_plugin_mate_keyring" = xyes; then :
+
+	 if test "x$have_mate_keyring" '!=' xyes; then :
+  as_fn_error $? "You have missing module mate-keyring-1! Install it or disable." "$LINENO" 5
 
 fi
 
@@ -6807,6 +7046,8 @@ _ACEOF
 
 fi
 done
+
+
 
 
 
@@ -8330,6 +8571,8 @@ if test "x$have_notify" = xyes; then :
 
 fi
 info_msg="${info_msg}avahi:                                                                       $have_avahi
+gnome-keyring:                                                               $have_gnome_keyring
+mate-keyring:                                                                $have_mate_keyring
 
 ------------------------------------Scanners------------------------------------
 Scanners enabled:                                                            $have_scan

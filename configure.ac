@@ -25,6 +25,8 @@ AS_IF([test "x$operating_system" '=' xlinux], [
        default_scanner_avahi=yes
        default_filemanager_caja=auto
        default_filemanager_nautilus=auto
+       default_plugin_gnome_keyring=auto
+       default_plugin_mate_keyring=auto
        ], [])
 
 AS_IF([test "x$operating_system" '=' xmacosx], [
@@ -38,6 +40,8 @@ AS_IF([test "x$operating_system" '=' xmacosx], [
        default_scanner_avahi=no
        default_filemanager_caja=no
        default_filemanager_nautilus=no
+       default_plugin_gnome_keyring=no
+       default_plugin_mate_keyring=no
        ], [])
 
 AS_IF([test "x$operating_system" '=' xwindows], [
@@ -51,6 +55,8 @@ AS_IF([test "x$operating_system" '=' xwindows], [
        default_scanner_avahi=no
        default_filemanager_caja=no
        default_filemanager_nautilus=no
+       default_plugin_gnome_keyring=no
+       default_plugin_mate_keyring=no
        ], [])
 
 # Options
@@ -195,6 +201,28 @@ AC_ARG_ENABLE([plugin-notify],
 		]
 		)
 
+AC_ARG_ENABLE([plugin-gnome-keyring],
+	      [AS_HELP_STRING([--enable-plugin-gnome-keyring@<:@=yes|no|auto@:>@],
+			      [define whether gnome keyring plugin should be compiled @<:@default=$default_plugin_gnome_keyring@:>@]
+			      )],
+			      [],
+			      [AS_IF([test "x$enable_automatic" = xyes],
+				     [enable_plugin_gnome_keyring=auto],
+				     [enable_plugin_gnome_keyring=$default_plugin_gnome_keyring])
+			      ]
+			      )
+
+AC_ARG_ENABLE([plugin-mate-keyring],
+	      [AS_HELP_STRING([--enable-plugin-mate-keyring@<:@=yes|no|auto@:>@],
+			      [define whether mate keyring plugin should be compiled @<:@default=$default_plugin_mate_keyring@:>@]
+			      )],
+			      [],
+			      [AS_IF([test "x$enable_automatic" = xyes],
+				     [enable_plugin_mate_keyring=auto],
+				     [enable_plugin_mate_keyring=$default_plugin_mate_keyring])
+			      ]
+			      )
+
 AC_ARG_ENABLE([filemanager-caja],
 	      [AS_HELP_STRING([--enable-filemanager-caja@<:@=yes|no|auto@:>@],
 			      [define whether extension for caja file manager should be compiled @<:@default=$default_filemanager_caja@:>@] 
@@ -247,6 +275,8 @@ have_gtkmm=no
 have_widget_gtk=no
 have_caja_extension=no
 have_nautilus_extension=no
+have_gnome_kayring=no
+have_mate_keyring=no
 
 # Headers has been checked before
 # TODO: Make it better
@@ -311,6 +341,19 @@ AS_IF([test "x$enable_widget_gtk" '!=' xno], [
 			  [])
 ])
 
+AS_IF([test "x$enable_plugin_gnome_keyring" '!=' xno], [
+	PKG_CHECK_MODULES([GNOME_KEYRING], [gnome-keyring-1],
+			  [AC_DEFINE([HAVE_GNOME_KEYRING], [1], [Use Gnome keyring])
+			  have_gnome_keyring=yes],
+			  [have_gnome_keyring=no])
+])
+
+AS_IF([test "x$enable_plugin_mate_keyring" '!=' xno], [
+	PKG_CHECK_MODULES([MATE_KEYRING], [mate-keyring-1],
+			  [AC_DEFINE([HAVE_MATE_KEYRING], [1], [Use Mate keyring])
+			  have_mate_keyring=yes],
+			  [have_mate_keyring=no])
+])
 
 # Caja and Nautilus are always automatic or disabled
 AS_IF([test "x$enable_filemanager_caja" '!=' xno], [
@@ -383,6 +426,22 @@ AS_IF([test "x$enable_plugin_notify" = xyes],
 	 ]
       )
 
+AS_IF([test "x$enable_plugin_gnome_keyring" = xyes],
+	[
+	 AS_IF([test "x$have_gnome_keyring" '!=' xyes],
+	       [AC_MSG_ERROR([You have missing module gnome-keyring-1! Install it or disable.])]
+	       )
+	 ]
+      )
+
+AS_IF([test "x$enable_plugin_mate_keyring" = xyes],
+	[
+	 AS_IF([test "x$have_mate_keyring" '!=' xyes],
+	       [AC_MSG_ERROR([You have missing module mate-keyring-1! Install it or disable.])]
+	       )
+	 ]
+      )
+
 AS_IF([test "x$enable_widget_gtk" = xyes],
 	[
 	 AS_IF([test "x$have_gtkmm" '!=' xyes],
@@ -435,6 +494,8 @@ AC_SUBST([have_client])
 AC_SUBST([have_server])
 AC_SUBST([have_configtool])
 AC_SUBST([have_widget_gtk])
+AC_SUBST([have_gnome_keyring])
+AC_SUBST([have_mate_keyring])
 AC_SUBST([have_scan])
 AC_SUBST([have_scanner_avahi])
 AC_SUBST([have_caja_extension])
@@ -479,6 +540,8 @@ AS_IF([test "x$have_notify" = xyes], [
 "
 ])
 info_msg="${info_msg}avahi:                                                                       $have_avahi
+gnome-keyring:                                                               $have_gnome_keyring
+mate-keyring:                                                                $have_mate_keyring
 
 ------------------------------------Scanners------------------------------------
 Scanners enabled:                                                            $have_scan

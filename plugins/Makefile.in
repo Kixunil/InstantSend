@@ -16,12 +16,20 @@ LIBNOTIFY_VERSION=@libnotify_version@
 HAVE_AVAHI=@have_avahi@
 HAVE_DBUS=@have_dbus@
 HAVE_OPENSSL=@have_openssl@
+HAVE_GNOME_KEYRING=@have_mate_keyring@
+HAVE_MATE_KEYRING=@have_mate_keyring@
 
 DBUS_CFLAGS=@DBUS_CFLAGS@
 DBUS_LIBS=@DBUS_LIBS@
 
 AVAHI_CFLAGS=@AVAHI_CFLAGS@
 AVAHI_LIBS=@AVAHI_LIBS@
+
+GNOME_KEYRING_CFLAGS=@GNOME_KEYRING_CFLAGS@
+GNOME_KEYRING_LIBS=@GNOME_KEYRING_CFLAGS@
+
+MATE_KEYRING_CFLAGS=@MATE_KEYRING_CFLAGS@
+MATE_KEYRING_LIBS=@MATE_KEYRING_CFLAGS@
 
 HOST=@host_alias@
 
@@ -59,6 +67,14 @@ endif
 
 ifeq ($(HAVE_AVAHI),yes)
 	ALL+=avahi-publish$(LIBEXTENSION)
+endif
+
+ifeq ($(HAVE_GNOME_KEYRING),yes)
+	ALL+=gnome-keyring$(LIBEXTENSION)
+endif
+
+ifeq ($(HAVE_MATE_KEYRING),yes)
+	ALL+=mate-keyring$(LIBEXTENSION)
 endif
 
 ifeq ($(HOST),i686-linux-gnu)
@@ -137,10 +153,19 @@ desktop-notify$(LIBEXTENSION): desktop-notify.cpp ../src/libinstantsend-plugin$(
 avahi-publish$(LIBEXTENSION): avahi-publish.cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
 	$(CXX) $(CXXFLAGS) $(AVAHI_CFLAGS) $(DEFS) -o $@ avahi-publish.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS) $(AVAHI_LIBS)
 
+gnome-keyring$(LIBEXTENSION): gnome-keyring.cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(GNOME_KEYRING_CFLAGS) $(DEFS) -o $@ gnome-keyring.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS) $(GNOME_KEYRING_LIBS)
+
+mate-keyring$(LIBEXTENSION): mate-keyring.cpp ../src/libinstantsend-plugin$(LIBEXTENSION) ../src/libinstantsend-json$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(MATE_KEYRING_CFLAGS) $(DEFS) -o $@ mate-keyring.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS) $(MATE_KEYRING_LIBS)
+
+mate-keyring.cpp: gnome-keyring.cpp
+	sed -e 's/gnome/mate/g' -e 's/Gnome/Mate/g' -e 's/GNOME/MATE/g' gnome-keyring.cpp $@
+
 check:
 
 clean:
-	rm -f *.so *.dll *.dylib
+	rm -f *.so *.dll *.dylib mate-keyring.cpp
 
 distclean: clean
 	rm -f Makefile

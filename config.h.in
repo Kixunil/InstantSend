@@ -24,6 +24,9 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
 
+/* Use Gnome keyring */
+#undef HAVE_GNOME_KEYRING
+
 /* Use gtkmm */
 #undef HAVE_GTKMM
 
@@ -41,6 +44,9 @@
 
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
+
+/* Use Mate keyring */
+#undef HAVE_MATE_KEYRING
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
