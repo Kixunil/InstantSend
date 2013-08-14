@@ -72,7 +72,7 @@ class pluginInstanceAutoPtr {
 		void reset(T *instance = NULL) {
 			if(mInstance) {
 				InternalPluginEnvironment &env(static_cast<InternalPluginEnvironment &>(mInstance->mEnv));
-				fprintf(stderr, "Plugin environment pointer = %p\n", &env);
+				LOG(Logger::VerboseDebug, "Plugin environment pointer = %p\n", &env);
 				delete mInstance;
 				env.checkUnload();
 			}

@@ -1,7 +1,7 @@
 #include "pluginapi.h"
 #include "logger.h"
 
-#define LOG(level, message, ...) instantSend->logger().flog(level, message, ## __VA_ARGS__)
+#define LOG(level, message, ...) InstantSend::instantSend->logger().flog(level, message, ## __VA_ARGS__)
 
 namespace InstantSend {
 extern volatile bool stopApp;
@@ -47,13 +47,14 @@ class Application : public ApplicationEnvironment {
 		void requestStop();
 		void requestFastStop();
 
-		inline Logger &logger() { return mLogger; }
+		inline Logger &logger() { return mFilter; }
 
 		inline SecureStorage *secureStorage() { return mSecureStorage; }
 		inline void secureStorage(SecureStorage *storage) { mSecureStorage = storage; }
 
 	private:
 		BasicLogger mLogger;
+		LogFilter mFilter;
 		SecureStorage *mSecureStorage;
 };
 

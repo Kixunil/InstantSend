@@ -19,6 +19,20 @@ class BasicLogger : public Logger {
 		bool mAutoClose;
 };
 
+class LogFilter : public Logger {
+	public:
+		inline LogFilter(Logger &logger, Logger::Level maxLevel = Logger::Warning) : mLogger(logger), mMaxLevel(maxLevel) {}
+		void log(Logger::Level level, const std::string &message);
+		void log(Logger::Level level, const std::string &message, const std::string &pluginName);
+		inline void setMaxLevel(Logger::Level maxLevel) {
+			mMaxLevel = maxLevel;
+		}
+		~LogFilter();
+	private:
+		Logger &mLogger;
+		Logger::Level mMaxLevel;
+};
+
 }
 
 #endif

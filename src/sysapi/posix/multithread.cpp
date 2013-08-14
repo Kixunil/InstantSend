@@ -8,7 +8,10 @@
 #include <errno.h>
 
 #include "multithread.h"
+#include "appcontrol.h"
 #include "posix-appcontrol.h"
+
+using namespace InstantSend;
 
 class PosixMutexData : public Mutex::Data {
 	private:
@@ -127,7 +130,7 @@ void delThread(void *thread) {
 	threadAboutToExit(t->thread);
 	if(t->parent->autoDelete()) {
 		delete t->parent;
-		fprintf(stderr, "Thread deleted.\n");
+		LOG(Logger::Debug, "Thread deleted.");
 	}
 }
 

@@ -155,7 +155,7 @@ void threadAboutToExit(pthread_t thread) {
 	unfreezeMainThread();
 }
 
-Application::Application(int argc, char **argv) : mLogger(stderr) {
+Application::Application(int argc, char **argv) : mLogger(stderr), mFilter(mLogger), mSecureStorage(NULL) {
 }
 
 void InstantSend::Application::requestStop() {

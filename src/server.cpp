@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 		}
 
 		// Load configuration
-		fprintf(stderr, "Loading configuration\n");
+		LOG(Logger::Debug, "Loading configuration");
 		cfgptr = cfgReadFile(cfgfile.c_str());
 		jsonObj_t &cfg = dynamic_cast<jsonObj_t &>(*cfgptr.get());
 
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 		}
 
 // Explicitly defined paths have bigger priority than system path, which has bigger priority than user path
-		fprintf(stderr, "Loading plugin search paths\n");
+		LOG(Logger::Debug, "Loading plugin search paths");
 		try {
 			jsonArr_t &pluginpaths = dynamic_cast<jsonArr_t &>(cfg.gie("pluginsearchpaths"));
 			for(int i = 0; i < pluginpaths.count(); ++i) pl.addSearchPath(dynamic_cast<jsonStr_t &>(pluginpaths[i]).getVal());
@@ -85,12 +85,12 @@ int main(int argc, char **argv) {
 		pl.addSearchPath(getSystemPluginDir()); 
 		pl.addSearchPath(combinePath(userdir, string("plugins")));
 
-		fprintf(stderr, "Loading events\n");
+		LOG(Logger::Debug, "Loading events");
 		try {
 			EventSink::instance().autoLoad(dynamic_cast<jsonObj_t &>(cfg.gie("eventhandlers")));
 		}
 		catch(exception &e) {
-			fprintf(stderr, "No event plugins loaded: %s\n", e.what());
+			LOG(Logger::Note, "No event plugins loaded: %s", e.what());
 		}
 
 		try {
@@ -103,14 +103,14 @@ int main(int argc, char **argv) {
 				sscfg = NULL;
 			}
 			instantSend->secureStorage(secstorplug.as<SecureStorageCreator>()->openSecureStorage(sscfg));
-			/* TEST: if(instantSend->secureStorage()->setSecret("Hello", "Hello world!")) fprintf(stderr, "Secret stored.\n");
-			else fprintf(stderr, "Storing unsuccessful.\n"); */
+			/* TEST: if(instantSend->secureStorage()->setSecret("Hello", "Hello world!")) LOG(Logger::Note, "Secret stored.");
+			else LOG(Logger::Note, "Storing unsuccessful."); */
 		}
 		catch(exception &e) {
-			fprintf(stderr, "Secure storage plugin not loaded: %s\n", e.what());
+			LOG(Logger::Note, "Secure storage plugin not loaded: %s", e.what());
 		}
 
-		fprintf(stderr, "Loading servers\n");
+		LOG(Logger::Debug, "Loading servers\n");
 		jsonComponent_t &comp(cfg.gie("complugins"));
 		jsonArr_t &complugins = dynamic_cast<jsonArr_t &>(comp);
 
@@ -125,27 +125,16 @@ int main(int argc, char **argv) {
 				serverList_t::instance().add(pname.getVal(), pconf);
 				// Load plugin, create server instance and start new thread
 			} catch(exception &e) {
-				fprintf(stderr, "Warning, plugin not loaded: %s\n", e.what());
+				LOG(Logger::Warning, "Plugin not loaded: %s", e.what());
 			}
 		}
 	}
-	catch(const char *msg) {
-#ifndef WINDOWS
-		char *dlerr = dlerror();
-		if(dlerr) fprintf(stderr, "Error: %s; %s\n", msg, dlerror());
-		else fprintf(stderr, "Error: %s", msg);
-#else
-		fprintf(stderr, "Error: %s", msg);
-#endif
-
-		return 1;
-	}
 	catch(exception &e) {
-		fprintf(stderr, "Error: %s.\n", e.what());
+		LOG(Logger::Error, "Error: %s.", e.what());
 		return 1;
 	}
 	catch(...) {
-		fprintf(stderr, "Unknown error occured.\n"); // just in case, so program wont get stuck
+		LOG(Logger::Error, "Unknown error occured."); // just in case, so program wont get stuck
 		return 1;
 	}
 

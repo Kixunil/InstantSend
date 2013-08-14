@@ -70,7 +70,7 @@ void InstantSend::freezeMainThread() {
 	SuspendThread(mainThread);
 }
 
-Application::Application(int argc, char **argv) : mLogger(stderr) {
+Application::Application(int argc, char **argv) : mLogger(stderr), mFilter(mLogger), mSecureStorage(NULL) {
 }
 
 void InstantSend::Application::requestStop() {

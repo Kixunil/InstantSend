@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "multithread.h"
+#include "appcontrol.h"
 #include "windows-appcontrol.h"
 
 class WindowsMutexData : public Mutex::Data {

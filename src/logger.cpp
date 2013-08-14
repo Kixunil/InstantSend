@@ -14,3 +14,13 @@ void BasicLogger::log(Logger::Level level, const std::string &message, const std
 BasicLogger::~BasicLogger() {
 	if(mAutoClose) fclose(mOutFile);
 }
+
+void LogFilter::log(Logger::Level level, const std::string &message) {
+	if(level <= mMaxLevel) mLogger.log(level, message);
+}
+
+void LogFilter::log(Logger::Level level, const std::string &message, const std::string &pluginName) {
+	if(level <= mMaxLevel) mLogger.log(level, message, pluginName);
+}
+
+LogFilter::~LogFilter() {}

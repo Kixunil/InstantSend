@@ -13,7 +13,7 @@ class PosixLibraryHandle : public LibraryHandleWithEnvironment {
 
 		~PosixLibraryHandle() {
 			dlclose(mLibHandle);
-			fprintf(stderr, "Library closed\n");
+			LOG(Logger::Debug, "Library closed\n");
 		}
 
 		inline void setCreator(PluginInstanceCreator *creator) {
