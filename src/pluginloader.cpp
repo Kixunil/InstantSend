@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdexcept>
 #include "pluginloader.h"
-#include "appcontrol.h"
 
 using namespace InstantSend;
 using namespace std;

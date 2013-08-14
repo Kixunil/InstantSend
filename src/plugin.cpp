@@ -1,11 +1,16 @@
 #include "plugin.h"
 #include <cstdio>
-#include "appcontrol.h"
 
 using namespace std;
 using namespace InstantSend;
 
-InternalPluginEnvironment::InternalPluginEnvironment(ApplicationEnvironment &appEnv, const std::string &name) : PluginEnvironment(appEnv), mName(name) {
+InternalPluginEnvironment::InternalPluginEnvironment(Application &app, const std::string &name) :
+	PluginEnvironment(app),
+	mName(name),
+	instanceCount(0),
+	mSecureStorage(app.secureStorage()?
+			new SecureStorageWrapper(string("plugin_") + name + "_", *app.secureStorage()):
+			NULL) {
 }
 
 const std::string &InternalPluginEnvironment::systemPluginDataDir() {
@@ -21,10 +26,12 @@ const std::string &InternalPluginEnvironment::userPluginDir() {
 }
 
 void InternalPluginEnvironment::onInstanceCreated() {
+	LOG(Logger::VerboseDebug, "Created instance of plugin \"%s\".", mName.c_str());
 	++instanceCount;
 }
 
 void InternalPluginEnvironment::onInstanceDestroyed() {
+	LOG(Logger::VerboseDebug, "Destroyed instance of plugin \"%s\".", mName.c_str());
 	--instanceCount;
 }
 
@@ -33,16 +40,28 @@ void InternalPluginEnvironment::log(Logger::Level level, const std::string &mess
 }
 
 void InternalPluginEnvironment::checkUnload() {
+	LOG(Logger::VerboseDebug, "InternalPluginEnvironment::checkUnload(%p)", this);
+	if(!instanceCount && mStorageHandle.get())
+		mStorageHandle->checkUnload();
+}
+
+SecureStorage *InternalPluginEnvironment::secureStorage() {
+	return mSecureStorage.get();
 }
 
 LibraryHandle::~LibraryHandle() {}
 
 pluginHandle_t::pluginHandle_t(auto_ptr<LibraryHandle> library) : refCnt(0), mLibrary(library.release()), mOwner(true) {
+	LOG(Logger::VerboseDebug, "pluginHandle_t(%p, ...) called", this);
 }
 
 pluginHandle_t::pluginHandle_t(const pluginHandle_t &other) : refCnt(0), mLibrary(other.mLibrary), mOwner(false) {
+	LOG(Logger::VerboseDebug, "pluginHandle_t(%p, ...) called", this);
 }
 
 pluginHandle_t::~pluginHandle_t() {
 	if(mOwner) delete mLibrary;
+	LOG(Logger::VerboseDebug, "~pluginHandle_t(%p) called; Owner = %d", this, (int)mOwner);
 }
+
+InstantSend::PluginStorageHandle::~PluginStorageHandle() {}

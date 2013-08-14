@@ -60,6 +60,42 @@ class Logger {
 		static const char *LevelToStr(Level level);
 };
 
+/*! Interface for management of secrets (encryption keys, passwords...)
+ */
+class SecureStorage {
+	public:
+		/*! \return True if storage is locked (encrypted). */
+		virtual bool isLocked() = 0;
+
+		/*! Requests unlocking. This can ask user for password.
+		 * \return True if unlocking succeeded. */
+		virtual bool reuqestUnlock() = 0;
+
+		/*! Attemps to retrieve secret from storage.
+		 * \param name Meaningful name of secret. (example: "master password")
+		 * \param value Secret will be stored here
+		 * \param silent If true and storage is locked, retrieving should fail without asking user for password.
+		 * \return True if secret was successfuly retrieved
+		 * \note Plugins don't have to worry about name conflicts with other plugins or application. They will be automatically resolved by application.
+		 */
+		virtual bool getSecret(const std::string &name, std::string &value, bool silent = false) = 0;
+
+		/*! Attemps to store secret.
+		 * \param name Meaningful name of secret. (example: "master password")
+		 * \param value Secret to be stored
+		 * \param silent If true and storage is locked, retrieving should fail without asking user for password.
+		 * \return True if secret was successfuly stored
+		 */
+		virtual bool setSecret(const std::string &name, const std::string &value, bool silent = false) = 0;
+
+		/*! Attemps to remove secret from storage
+		 * \param name Meaningful name of secret. (example: "master password")
+		 * \return True if secret was successfuly removed
+		 */
+		virtual bool removeSecret(const std::string &name) = 0;
+};
+
+/* Provides global information and functions from application, operating system or other plugins. */
 class ApplicationEnvironment {
 	public:
 		virtual const std::string &systemDataDir() = 0;
@@ -73,6 +109,7 @@ class ApplicationEnvironment {
 		virtual void requestFastStop() = 0;
 };
 
+/* Provides plugin specific information and functions from application, operating system or other plugins. */
 class PluginEnvironment {
 	public:
 		ApplicationEnvironment &mAppEnv;
@@ -86,6 +123,10 @@ class PluginEnvironment {
 
 		virtual void log(Logger::Level level, const std::string &message) = 0;
 		void flog(Logger::Level level, const char *format, ...);
+
+		/* Secure storage if available. (NULL if not)*/
+		virtual SecureStorage *secureStorage() = 0;
+
 	protected:
 		inline PluginEnvironment(ApplicationEnvironment &appEnv) : mAppEnv(appEnv) {}
 };
@@ -94,9 +135,15 @@ class PluginEnvironment {
 class PluginInstanceCreator {
 	public:
 		inline PluginInstanceCreator(PluginEnvironment &pluginEnv) : mEnv(pluginEnv) {}
-		/*! \return Human readable description of last error */
 		virtual ~PluginInstanceCreator();
 		PluginEnvironment &mEnv;
+};
+
+/*! \brief Plugin can provide user-friendly initialization (or deletion) of configuration using this (optional) interface.
+ */
+class PluginConfigInitializer : public PluginInstanceCreator {
+	virtual void initUserConfig(jsonObj_t &globalConfig, const jsonComponent_t *systemConfig, bool server) = 0;
+	virtual void clearUserConfig(jsonObj_t &globalConfig, bool server) = 0;
 };
 
 /*! \brief Ancestor of all plugin instances.
@@ -147,6 +194,14 @@ class Peer : public PluginInstance {
 		/*! \return Human-readable std::string which identifies remote machine. (like "192.168.1.42:42000")
 		 */
 		virtual std::string getMachineIdentifier() = 0;
+};
+
+
+class SecureStorageCreator : public PluginInstanceCreator {
+	public:
+		inline SecureStorageCreator(PluginEnvironment &pluginEnv) : PluginInstanceCreator(pluginEnv) {}
+		virtual SecureStorage *openSecureStorage(const jsonComponent_t *config) = 0;
+		virtual void closeSecureStorage(SecureStorage &secureStorage) = 0;
 };
 
 /*! \brief Server interface

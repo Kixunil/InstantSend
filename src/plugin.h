@@ -4,8 +4,11 @@
 #include <string>
 #include <stdexcept>
 #include <assert.h>
+#include <cstdio>
 
 #include "pluginapi.h"
+#include "securestorage.h"
+#include "appcontrol.h"
 
 namespace InstantSend {
 
@@ -18,12 +21,14 @@ struct pluginInstanceAutoPtrRef {
 typedef unsigned int RefCnt;
 
 class PluginStorageHandle {
-	virtual void checkUnload() = 0;
+	public:
+		virtual void checkUnload() = 0;
+		virtual ~PluginStorageHandle();
 };
 
 class InternalPluginEnvironment : public PluginEnvironment {
 	public:
-		InternalPluginEnvironment(ApplicationEnvironment &appEnv, const std::string &name);
+		InternalPluginEnvironment(Application &app, const std::string &name);
 
 		const std::string &systemPluginDataDir();
 		const std::string &systemPluginConfigDir();
@@ -34,12 +39,16 @@ class InternalPluginEnvironment : public PluginEnvironment {
 
 		void log(Logger::Level level, const std::string &message);
 
+		SecureStorage *secureStorage();
+
 		void checkUnload();
 		inline void setStorageHandle(PluginStorageHandle *handle) { mStorageHandle.reset(handle); }
+
 	private:
 		const std::string mName;
 		RefCnt instanceCount;
 		std::auto_ptr<PluginStorageHandle> mStorageHandle;
+		std::auto_ptr<SecureStorageWrapper> mSecureStorage;
 };
 
 template <class T>
@@ -63,6 +72,7 @@ class pluginInstanceAutoPtr {
 		void reset(T *instance = NULL) {
 			if(mInstance) {
 				InternalPluginEnvironment &env(static_cast<InternalPluginEnvironment &>(mInstance->mEnv));
+				fprintf(stderr, "Plugin environment pointer = %p\n", &env);
 				delete mInstance;
 				env.checkUnload();
 			}
@@ -113,7 +123,6 @@ class pluginHandle_t {
 		~pluginHandle_t();
 
 		inline void assignLibrary(std::auto_ptr<LibraryHandle> library) {
-			assert(library.get());
 			mLibrary = library.release();
 			mOwner = true;
 		}

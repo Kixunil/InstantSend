@@ -1,5 +1,4 @@
 #include "internalevents.h"
-#include "appcontrol.h"
 #include "eventsink.h"
 
 using namespace InstantSend;

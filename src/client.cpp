@@ -13,7 +13,6 @@
 #include "pluginlist.h"
 #include "sysapi.h"
 #include "eventsink.h"
-#include "appcontrol.h"
 
 #include <stdexcept>
 

@@ -14,7 +14,6 @@
 
 #include "pluginapi.h"
 #include "pluginlist.h"
-#include "appcontrol.h"
 #include "sysapi.h"
 #include "eventsink.h"
 #include "serverlist.h"
@@ -94,9 +93,25 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "No event plugins loaded: %s\n", e.what());
 		}
 
+		try {
+			BPluginRef secstorplug(PluginList::instance()[dynamic_cast<jsonStr_t &>(cfg["securestorage_plugin"]).getVal()]);
+			jsonComponent_t *sscfg;
+			try {
+				sscfg = &cfg["securestorage_config"];
+			}
+			catch(...) {
+				sscfg = NULL;
+			}
+			instantSend->secureStorage(secstorplug.as<SecureStorageCreator>()->openSecureStorage(sscfg));
+			/* TEST: if(instantSend->secureStorage()->setSecret("Hello", "Hello world!")) fprintf(stderr, "Secret stored.\n");
+			else fprintf(stderr, "Storing unsuccessful.\n"); */
+		}
+		catch(exception &e) {
+			fprintf(stderr, "Secure storage plugin not loaded: %s\n", e.what());
+		}
+
 		fprintf(stderr, "Loading servers\n");
 		jsonComponent_t &comp(cfg.gie("complugins"));
-		fprintf(stderr, "Typename: %s\n", typeid(comp).name());
 		jsonArr_t &complugins = dynamic_cast<jsonArr_t &>(comp);
 
 		// Load communication plugins

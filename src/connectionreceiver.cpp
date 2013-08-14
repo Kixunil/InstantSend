@@ -6,7 +6,6 @@
 #include "pluginlist.h"
 #include "eventsink.h"
 #include "sysapi.h"
-#include "appcontrol.h"
 
 using namespace InstantSend;
 using namespace std;

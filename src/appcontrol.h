@@ -48,8 +48,13 @@ class Application : public ApplicationEnvironment {
 		void requestFastStop();
 
 		inline Logger &logger() { return mLogger; }
+
+		inline SecureStorage *secureStorage() { return mSecureStorage; }
+		inline void secureStorage(SecureStorage *storage) { mSecureStorage = storage; }
+
 	private:
 		BasicLogger mLogger;
+		SecureStorage *mSecureStorage;
 };
 
 extern Application *instantSend;

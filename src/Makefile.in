@@ -193,6 +193,9 @@ appcontrol-platformdependent.o: sysapi/$(PLATFORM)/appcontrol-platformdependent.
 internalevents.o: internalevents.cpp
 	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ internalevents.cpp
 
+securestorage.o: securestorage.cpp
+	$(CXX) $(CXXFLAGS) $(LIBCXXFLAGS) $(DEFS) -c -o $@ securestorage.cpp
+
 libinstantsend-plugin$(LIBEXTENSION): plugin-common.o
 	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ plugin-common.o $(LIBLDFLAGS) $(LDFLAGS)
 
@@ -202,8 +205,8 @@ libinstantsend-json$(LIBEXTENSION): json.o
 #libinstantsend-multithread$(LIBEXTENSION): multithread.o libinstantsend-common$(LIBEXTENSION)
 #	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ multithread.o $(LIBLDFLAGS) libinstantsend-common$(LIBEXTENSION) $(LDFLAGS)
 
-libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o file.o file-common.o sysapi.o logger.o libinstantsend-json$(LIBEXTENSION) libinstantsend-plugin$(LIBEXTENSION)
-	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ -I./sysapi/$(PLATFORM)/ appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o file.o file-common.o sysapi.o logger.o -L. -linstantsend-json -linstantsend-plugin $(LIBLDFLAGS) $(LDFLAGS)
+libinstantsend-common$(LIBEXTENSION): appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o file.o file-common.o sysapi.o logger.o securestorage.o libinstantsend-json$(LIBEXTENSION) libinstantsend-plugin$(LIBEXTENSION)
+	$(CXX) $(CXXFLAGS) $(DEFS) -o $@ -I./sysapi/$(PLATFORM)/ appcontrol-platformdependent.o multithread.o internalevents.o pluginloader.o pluginloader-platformdependent.o pluginlist.o plugin.o eventsink.o file.o file-common.o sysapi.o logger.o securestorage.o -L. -linstantsend-json -linstantsend-plugin $(LIBLDFLAGS) $(LDFLAGS)
 
 check:
 
