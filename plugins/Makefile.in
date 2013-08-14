@@ -160,7 +160,7 @@ mate-keyring$(LIBEXTENSION): mate-keyring.cpp ../src/libinstantsend-plugin$(LIBE
 	$(CXX) $(CXXFLAGS) $(MATE_KEYRING_CFLAGS) $(DEFS) -o $@ mate-keyring.cpp -L../src/ -linstantsend-json -linstantsend-plugin $(LDFLAGS) $(MATE_KEYRING_LIBS)
 
 mate-keyring.cpp: gnome-keyring.cpp
-	sed -e 's/gnome/mate/g' -e 's/Gnome/Mate/g' -e 's/GNOME/MATE/g' gnome-keyring.cpp $@
+	sed -e 's/gnome/mate/g' -e 's/Gnome/Mate/g' -e 's/GNOME/MATE/g' gnome-keyring.cpp > $@
 
 check:
 
