@@ -52,17 +52,17 @@ void ConnectionReceiver::run() {
 void ConnectionReceiver::stop() throw() {
 	runningmutex.lock();
 
-	LOG(Logger::Debug, "Stopping server.\n");
+	LOG(Logger::Debug, "Stopping server.");
 
 	running = false;
 
 	try {
 		dynamic_cast<AsyncStop &>(*server).stop();
-		LOG(Logger::Debug, "Server should stop immediately.\n");
+		LOG(Logger::Debug, "Server should stop immediately.");
 	}
 	catch(std::bad_cast &e) {
 		// ignore error
-		LOG(Logger::Note, "Sorry, you must wait for server to stop\n");
+		LOG(Logger::Note, "Sorry, you must wait for server to stop");
 	}
 
 	runningmutex.unlock();
@@ -77,7 +77,7 @@ const jsonComponent_t &ConnectionReceiver::getPluginConf() throw() {
 }
 
 bool ConnectionReceiver::autoDelete() {
-	LOG(Logger::VerboseDebug, "ConnectionReceiver::autoDelete();\n");
+	LOG(Logger::VerboseDebug, "ConnectionReceiver::autoDelete();");
 	return true;
 }
 

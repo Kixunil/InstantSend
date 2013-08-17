@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 			LOG(Logger::Note, "Secure storage plugin not loaded: %s", e.what());
 		}
 
-		LOG(Logger::Debug, "Loading servers\n");
+		LOG(Logger::Debug, "Loading servers");
 		jsonComponent_t &comp(cfg.gie("complugins"));
 		jsonArr_t &complugins = dynamic_cast<jsonArr_t &>(comp);
 

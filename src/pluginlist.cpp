@@ -50,11 +50,15 @@ PluginList &PluginList::instance() {
 }
 
 void PluginList::checkUnload(const map<string, pluginHandle_t>::iterator plugin) {
+	LOG(Logger::VerboseDebug, "PluginList::checkUnload(...)");
 	MutexHolder mh(modifyMutex);
 	if(plugin->second.isUnloadable()) {
+		LOG(Logger::Debug, "Unloading plugin %s", plugin->first.c_str());
 		string pname(plugin->first);
 		storage.erase(plugin);
 		if(mSink) mSink->sendPluginUnload(pname);
+	} else {
+		LOG(Logger::VerboseDebug, "Plugin %s not unloaded", plugin->first.c_str());
 	}
 }
 

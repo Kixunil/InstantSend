@@ -33,6 +33,7 @@ void InternalPluginEnvironment::onInstanceCreated() {
 void InternalPluginEnvironment::onInstanceDestroyed() {
 	LOG(Logger::VerboseDebug, "Destroyed instance of plugin \"%s\".", mName.c_str());
 	--instanceCount;
+	if(!instanceCount) LOG(Logger::VerboseDebug, "Instance count of plugin \"%s\" reached zero.", mName.c_str());
 }
 
 void InternalPluginEnvironment::log(Logger::Level level, const std::string &message) {
@@ -41,8 +42,10 @@ void InternalPluginEnvironment::log(Logger::Level level, const std::string &mess
 
 void InternalPluginEnvironment::checkUnload() {
 	LOG(Logger::VerboseDebug, "InternalPluginEnvironment::checkUnload(%p)", this);
-	if(!instanceCount && mStorageHandle.get())
+	if(!instanceCount && mStorageHandle.get()) {
+		LOG(Logger::VerboseDebug, "mStorageHandle->checkUnload();");
 		mStorageHandle->checkUnload();
+	}
 }
 
 SecureStorage *InternalPluginEnvironment::secureStorage() {

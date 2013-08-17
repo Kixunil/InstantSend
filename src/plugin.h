@@ -72,7 +72,7 @@ class pluginInstanceAutoPtr {
 		void reset(T *instance = NULL) {
 			if(mInstance) {
 				InternalPluginEnvironment &env(static_cast<InternalPluginEnvironment &>(mInstance->mEnv));
-				LOG(Logger::VerboseDebug, "Plugin environment pointer = %p\n", &env);
+				LOG(Logger::VerboseDebug, "Plugin environment pointer = %p", &env);
 				delete mInstance;
 				env.checkUnload();
 			}
@@ -115,7 +115,7 @@ class pluginHandle_t {
 		bool mOwner;
 	public:
 		/*! Standard constructor */
-		inline pluginHandle_t() : refCnt(0), mLibrary(NULL), mOwner(false) {}
+		inline pluginHandle_t() : refCnt(0), mLibrary(NULL), mOwner(false) { LOG(Logger::VerboseDebug, "pluginHandle_t(%p) called", this); }
 		pluginHandle_t(std::auto_ptr<LibraryHandle> library);
 		pluginHandle_t(const pluginHandle_t &other);
 
@@ -129,11 +129,13 @@ class pluginHandle_t {
 
 		/*! Increases reference count */
 		inline void incRC() throw() {
+			LOG(Logger::VerboseDebug, "incRC(%p); //%u", this, refCnt);
 			++refCnt;
 		}
 
 		/*! Decreases reference count and returns true, if ti's possible to unload plugin */
 		inline bool decRC() throw() {
+			LOG(Logger::VerboseDebug, "decRC(%p); //%u", this, refCnt);
 			return !--refCnt;
 		}
 
@@ -157,6 +159,7 @@ class pluginHandle_t {
 		}
 
 		inline void onUnload() {
+			LOG(Logger::VerboseDebug, "onUnload();");
 			mLibrary->onUnload();
 		}
 };

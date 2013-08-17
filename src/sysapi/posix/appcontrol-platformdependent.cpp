@@ -156,6 +156,12 @@ void threadAboutToExit(pthread_t thread) {
 }
 
 Application::Application(int argc, char **argv) : mLogger(stderr), mFilter(mLogger), mSecureStorage(NULL) {
+	for(int i = 1; i < argc; ++i) {
+		if(string(argv[i]) == "--") break;
+		if(string(argv[i]) == "--print-notes") mFilter.setMaxLevel(Logger::Note);
+		if(string(argv[i]) == "--debug") mFilter.setMaxLevel(Logger::Debug);
+		if(string(argv[i]) == "--verbose-debug") mFilter.setMaxLevel(Logger::VerboseDebug);
+	}
 }
 
 void InstantSend::Application::requestStop() {
