@@ -99,30 +99,29 @@ class i4tserver : public ServerPlugin {
 		i4tserver(const jsonComponent_t &config, PluginEnvironment &env) : ServerPlugin(env) {
 			struct sockaddr_in srvaddr;
 			int backlog;
-				srvaddr.sin_family = AF_INET;
-				const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
-				srvaddr.sin_port = htons(dynamic_cast<const jsonInt_t &>(cfg.gie("port")).getVal());
-				try {
-					srvaddr.sin_addr.s_addr = inet_addr(dynamic_cast<const jsonStr_t &>(cfg.gie("IP")).getVal().c_str());
-				}
-				catch(exception &e) {
-					srvaddr.sin_addr.s_addr = INADDR_ANY;
-				}
+			srvaddr.sin_family = AF_INET;
+			const jsonObj_t &cfg = dynamic_cast<const jsonObj_t &>(config);
+			srvaddr.sin_port = htons(dynamic_cast<const jsonInt_t &>(cfg.gie("port")).getVal());
+			try {
+				srvaddr.sin_addr.s_addr = inet_addr(dynamic_cast<const jsonStr_t &>(cfg.gie("IP")).getVal().c_str());
+			}
+			catch(exception &e) {
+				srvaddr.sin_addr.s_addr = INADDR_ANY;
+			}
 
-				try {
-					backlog = dynamic_cast<const jsonInt_t &>(cfg.gie("backlog")).getVal();
-				}
-				catch(exception &e) {
-					backlog = 10;
-				}
+			try {
+				backlog = dynamic_cast<const jsonInt_t &>(cfg.gie("backlog")).getVal();
+			}
+			catch(exception &e) {
+				backlog = 10;
+			}
 
-				fd = socket(AF_INET, SOCK_STREAM, 0);
-				if(fd < 0) throw runtime_error(string("socket: ") + strerror(errno));
+			fd = socket(AF_INET, SOCK_STREAM, 0);
+			if(fd < 0) throw runtime_error(string("socket: ") + strerror(errno));
 
-				if(bind(fd, (struct sockaddr *)&srvaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("bind: ") + strerror(errno));
+			if(bind(fd, (struct sockaddr *)&srvaddr, sizeof(struct sockaddr_in)) < 0) throw runtime_error(string("bind: ") + strerror(errno));
 
-				if(listen(fd, backlog) < 0) throw runtime_error(string("listen: ") + strerror(errno));
-
+			if(listen(fd, backlog) < 0) throw runtime_error(string("listen: ") + strerror(errno));
 		}
 
 		auto_ptr<Peer> acceptClient() throw() {
@@ -142,10 +141,8 @@ class i4tserver : public ServerPlugin {
 };
 
 class i4tCreator : public ConnectionCreator {
-	private:
-		string lastErr;
 	public:
-		i4tCreator(PluginEnvironment &env) : ConnectionCreator(env), lastErr("No error") {}
+		inline i4tCreator(PluginEnvironment &env) : ConnectionCreator(env) {}
 
 		auto_ptr<Peer> newClient(const jsonComponent_t &config) throw() {
 			int fd;
@@ -189,11 +186,12 @@ class i4tCreator : public ConnectionCreator {
 			catch(exception &e) {
 				if(fd > -1) closesocket(fd);
 				fd = -1;
-				lastErr = e.what();
+				mEnv.log(Logger::Error, e.what());
 			}
 			catch(...) {
 				if(fd > -1) closesocket(fd);
 				fd = -1;
+				mEnv.log(Logger::Error, "Unknown error occured");
 			}
 			return auto_ptr<Peer>();
 	}
@@ -203,10 +201,10 @@ class i4tCreator : public ConnectionCreator {
 			return auto_ptr<ServerPlugin>(new i4tserver(config, mEnv));
 		}
 		catch(exception &e) {
-			lastErr = e.what();
+			mEnv.log(Logger::Error, e.what());
 		}
 		catch(...) {
-			lastErr = "Unknown error";
+			mEnv.log(Logger::Error, "Unknown error occured");
 		}
 		return auto_ptr<ServerPlugin>();
 	}
