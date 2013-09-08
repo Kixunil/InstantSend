@@ -764,6 +764,43 @@ class instSendWidget : public Window, public dialogControl, public FileInfoConta
 			trIcon.timer();
 			return true;
 		}
+
+		void on_dropped_file(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) {
+			if ((selection_data.get_length() >= 0) && (selection_data.get_format() == 8)) {
+				std::vector<Glib::ustring> file_list;
+				file_list = selection_data.get_uris();
+				if (file_list.size() > 0) {
+					char **args = new char *[file_list.size() + 2]; // file names + first argument + NULL terminator
+					Glib::ustring path;
+					for(size_t i = 0; i < file_list.size(); ++i) {
+						path = Glib::filename_from_uri(file_list[i]);
+						args[i + 1] = new char [path.size() + 1];
+						strcpy(args[i + 1], path.c_str());
+					}
+
+					args[file_list.size() + 1] = NULL;
+					ustring sendprog(PREFIX "/bin/isend-gtk");
+					args[0] = new char [sendprog.size() + 1];
+					strcpy(args[0], sendprog.c_str());
+
+					pid_t pid = fork();
+					if(pid == 0) {
+						execv(args[0], args);
+						exit(1);
+					}
+
+					for(size_t i = 0; i < file_list.size() + 2; ++i) {
+						delete[] args[i];
+					}
+					delete[] args;
+
+					context->drag_finish(pid > 0, false, time);
+					return;
+				}
+			}
+
+			context->drag_finish(false, false, time);
+		}
 };
 
 static DBusHandlerResult
@@ -839,6 +876,12 @@ instSendWidget::instSendWidget() :
 	iconquit(Stock::QUIT, IconSize(ICON_SIZE_BUTTON)) {
 	
 	try {
+		std::list<Gtk::TargetEntry> listTargets;
+		listTargets.push_back(Gtk::TargetEntry("text/uri-list"));
+		drag_dest_set(listTargets, Gtk::DEST_DEFAULT_MOTION | Gtk::DEST_DEFAULT_DROP, Gdk::ACTION_COPY | Gdk::ACTION_MOVE);
+		signal_drag_data_received().connect(sigc::mem_fun(*this, &instSendWidget::on_dropped_file));
+
+
 		iconsend.set_from_icon_name(ustring("document-send"), ICON_SIZE_BUTTON);
 		iconsenddir.set_from_icon_name(ustring("document-send"), ICON_SIZE_BUTTON);
 		btnSendFiles.set_image(iconsend);
