@@ -3,19 +3,19 @@ Version: 0.8
 Author: Martin Habovštiak
 
 Features:
-	Server loads configuration
+	Client and server use configuration files
 	Server uses multithreading - one thread for each server plugin and connected client
-	Client can send file(s), targets are in its configuration file
+	Client can send file(s) and directory (directories), targets are in its configuration file
 	Both client and server use Json for handling communication and config files
 	You can create any imaginable plugin for communication
-	Plugins can use another plugins. This means you can chain them or add features without changing original plugin.
 	Server implements some events and uses event plugins
-	Experimental version of gtk-widget can show receiving files, start/stop server, invoke send command; localized
+	Experimental version of gtk-widget can show receiving files, start/stop server, invoke send command (via buttons, tray iconmenuu or drag&drop); localized
 	Caja and Nautilus modules provides comfortable sending from file manager
 
 Issues:
 	No integrity checking
 	Resuming of sending is not implemented
+	Encryption is not usable for average users
 
 Plugins:
 	ip4tcp		- as name suggests, it uses TCP/IP with IPv4
@@ -25,12 +25,18 @@ Plugins:
 	zenity		- uses zenity for showing progress of downloading
 	avahi-publish	- uses libavahi for publishing service in local network
 
+Scripts:
+	instsend-scan	- auto-finds targets
+	instsend-cli	- enhancement for CLI
+	bash-completion	- provides bash-completion support
+	others		- enhace user experience
+
 Config files:
 	Should be placed in ~/.instantsend/
 	Json syntax
 	See examples
 
 Data:
-	32×32 icon made by Dominik Průša. Usage permitted under Creative Commons Attribution 3.0 Unported.
+	Icons made by Dominik Průša. Usage permitted under Creative Commons Attribution 3.0 Unported.
 
 Work in progress, stay tuned :)

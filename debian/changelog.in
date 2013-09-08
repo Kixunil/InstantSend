@@ -1,3 +1,8 @@
+instantsend (0.8.3~###DISTRIBUTION###) unstable; urgency=low
+  * Added bash completion support and drag & drop feature.
+
+ -- Martin Habovštiak <martin.habovstiak@gmail.com>  Sun, 08 Sep 2013 22:16:42 +0200
+
 instantsend (0.8.2~###DISTRIBUTION###) unstable; urgency=low
   * Couple bug fixes, improved event sending from client side.
 
