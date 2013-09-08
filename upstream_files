@@ -127,6 +127,7 @@ src/serverfilelist.h
 src/server.cpp
 src/connectionreceiver.h
 scripts
+scripts/bash-completion.sh
 scripts/isend-cli.sh
 scripts/isend-gtk.sh
 scripts/instsend-scan.in
