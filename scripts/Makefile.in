@@ -13,6 +13,7 @@ HAVE_CONFIGTOOL=@have_configtool@
 HAVE_WIDGET_GTK=@have_widget_gtk@
 HAVE_SCAN=@have_scan@
 HAVE_SCANNER_AVAHI=@have_scanner_avahi@
+HAVE_BASH_COMPLETION=@have_bash_completion@
 
 ALL=
 INSTALL=
@@ -48,6 +49,10 @@ endif
 
 ifeq ($(HAVE_SCANNER_AVAHI),yes)
 	INSTALL+=install-scanner-avahi
+endif
+
+ifeq ($(HAVE_BASH_COMPLETION),yes)
+	INSTALL+=install-bash-completion
 endif
 
 all: $(ALL)
@@ -99,6 +104,9 @@ install-config-defaults:
 
 install-cli:
 	install -D isend-cli.sh $(DESTDIR)$(BINDIR)/isend-cli
+
+install-bash-completion:
+	install -D bash-completion.sh $(DESTDIR)$(SYSCONFDIR)/bash_completion.d/instantsend
 
 install: $(INSTALL)
 

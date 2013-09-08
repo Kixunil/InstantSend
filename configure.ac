@@ -25,6 +25,7 @@ AS_IF([test "x$operating_system" '=' xlinux], [
        default_scanner_avahi=yes
        default_filemanager_caja=auto
        default_filemanager_nautilus=auto
+       default_bash_completion=yes
        ], [])
 
 AS_IF([test "x$operating_system" '=' xmacosx], [
@@ -38,6 +39,7 @@ AS_IF([test "x$operating_system" '=' xmacosx], [
        default_scanner_avahi=no
        default_filemanager_caja=no
        default_filemanager_nautilus=no
+       default_bash_completion=yes
        ], [])
 
 AS_IF([test "x$operating_system" '=' xwindows], [
@@ -51,6 +53,7 @@ AS_IF([test "x$operating_system" '=' xwindows], [
        default_scanner_avahi=no
        default_filemanager_caja=no
        default_filemanager_nautilus=no
+       default_bash_completion=no
        ], [])
 
 # Options
@@ -217,6 +220,17 @@ AC_ARG_ENABLE([filemanager-nautilus],
 		]
 		)
 
+AC_ARG_ENABLE([bash-completion],
+	      [AS_HELP_STRING([--enable-bash-completion@<:@=yes|no|auto@:>@],
+			      [define whether bash-completion should be installed @<:@default=$default_bash_completion@:>@] 
+		)],
+		[],
+		[AS_IF([test "x$enable_automatic" = xyes],
+		       [enable_bash_completion=auto],
+		       [enable_bash_completion=$default_bash_completion])
+		]
+		)
+
 AC_ARG_ENABLE([doc-html],
 	      [AS_HELP_STRING([--enable-doc-html@<:@=yes|no|auto@:>@],
 			      [define whether HTML documentation should be built @<:@default=yes@:>@]
@@ -247,6 +261,8 @@ have_gtkmm=no
 have_widget_gtk=no
 have_caja_extension=no
 have_nautilus_extension=no
+
+have_bash_completion=$enable_bash_completion #no checks
 
 # Headers has been checked before
 # TODO: Make it better
@@ -441,6 +457,7 @@ AC_SUBST([have_caja_extension])
 AC_SUBST([have_nautilus_extension])
 AC_SUBST([nautilus_extension_version])
 AC_SUBST([have_doc_html])
+AC_SUBST([have_bash_completion])
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
@@ -493,6 +510,8 @@ AS_IF([test "x$have_nautilus_extension" = xyes], [
 ])
 
 info_msg="$info_msg
+-------------------------------------Scripts------------------------------------
+Bash completion                                                              $have_bash_completion
 ----------------------------------Documentation---------------------------------
 HTML (Doxygen):                                                              $have_doc_html"
 

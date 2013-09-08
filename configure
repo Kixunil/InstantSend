@@ -606,6 +606,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+have_bash_completion
 have_doc_html
 nautilus_extension_version
 have_nautilus_extension
@@ -752,6 +753,7 @@ enable_scanner_avahi
 enable_plugin_notify
 enable_filemanager_caja
 enable_filemanager_nautilus
+enable_bash_completion
 enable_doc_html
 enable_dependency_tracking
 '
@@ -1457,6 +1459,9 @@ Optional Features:
                           define whether extension for nautilus file manager
                           should be compiled
                           [default=$default_filemanager_nautilus]
+  --enable-bash-completion[=yes|no|auto]
+                          define whether bash-completion should be installed
+                          [default=$default_bash_completion]
   --enable-doc-html[=yes|no|auto]
                           define whether HTML documentation should be built
                           [default=yes]
@@ -3054,6 +3059,7 @@ if test "x$operating_system" '=' xlinux; then :
        default_scanner_avahi=yes
        default_filemanager_caja=auto
        default_filemanager_nautilus=auto
+       default_bash_completion=yes
 
 fi
 
@@ -3069,6 +3075,7 @@ if test "x$operating_system" '=' xmacosx; then :
        default_scanner_avahi=no
        default_filemanager_caja=no
        default_filemanager_nautilus=no
+       default_bash_completion=yes
 
 fi
 
@@ -3084,6 +3091,7 @@ if test "x$operating_system" '=' xwindows; then :
        default_scanner_avahi=no
        default_filemanager_caja=no
        default_filemanager_nautilus=no
+       default_bash_completion=no
 
 fi
 
@@ -3284,6 +3292,20 @@ else
   enable_filemanager_nautilus=auto
 else
   enable_filemanager_nautilus=$default_filemanager_nautilus
+fi
+
+
+fi
+
+
+# Check whether --enable-bash-completion was given.
+if test "${enable_bash_completion+set}" = set; then :
+  enableval=$enable_bash_completion;
+else
+  if test "x$enable_automatic" = xyes; then :
+  enable_bash_completion=auto
+else
+  enable_bash_completion=$default_bash_completion
 fi
 
 
@@ -5139,6 +5161,8 @@ have_widget_gtk=no
 have_caja_extension=no
 have_nautilus_extension=no
 
+have_bash_completion=$enable_bash_completion #no checks
+
 # Headers has been checked before
 # TODO: Make it better
 
@@ -6827,6 +6851,7 @@ done
 
 
 
+
 ac_config_files="$ac_config_files Makefile src/Makefile scripts/Makefile data/Makefile plugins/Makefile filemanagers/caja/Makefile filemanagers/nautilus/Makefile po/Makefile po/widget-gtk/Makefile include/Makefile doc/doxygen.conf doc/Makefile"
 
 
@@ -8346,6 +8371,8 @@ if test "x$have_nautilus_extension" = xyes; then :
 fi
 
 info_msg="$info_msg
+-------------------------------------Scripts------------------------------------
+Bash completion                                                              $have_bash_completion
 ----------------------------------Documentation---------------------------------
 HTML (Doxygen):                                                              $have_doc_html"
 
