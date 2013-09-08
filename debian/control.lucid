@@ -2,7 +2,7 @@ Source: instantsend
 Maintainer: Martin Habovštiak <martin.habovstiak@gmail.com>
 Section: misc
 Priority: optional
-Build-Depends: autoconf, automake, libdbus-1-dev, libnotify-dev, libgtkmm-2.4-dev, libavahi-common-dev, libavahi-client-dev, libnautilus-extension-dev
+Build-Depends: autoconf, automake, libdbus-1-dev, libnotify-dev, libgtkmm-2.4-dev, libavahi-common-dev, libavahi-client-dev, libnautilus-extension-dev, bash-completion
 
 #Libraries
 Package: libinstantsend-plugin
