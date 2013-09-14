@@ -161,6 +161,7 @@ Application::Application(int argc, char **argv) : mLogger(stderr), mFilter(mLogg
 		if(string(argv[i]) == "--print-notes") mFilter.setMaxLevel(Logger::Note);
 		if(string(argv[i]) == "--debug") mFilter.setMaxLevel(Logger::Debug);
 		if(string(argv[i]) == "--verbose-debug") mFilter.setMaxLevel(Logger::VerboseDebug);
+		if(string(argv[i]) == "--disable-warnings") mFilter.setMaxLevel(Logger::Error);
 	}
 }
 
