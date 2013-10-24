@@ -129,7 +129,6 @@ class FileReader : public FileStatus {
 				data->size = msg.size() + 1;
 				//msgobj.deleteContent();
 
-				client.sendData(data.get());
 				if(!client.sendData(data.get())) throw runtime_error("Can't send!");
 				data->size = DMAXSIZE;
 				if(!client.recvData(data.get())) throw runtime_error("Receiving failed");
@@ -164,11 +163,11 @@ class FileReader : public FileStatus {
 					protocolVersion = 0;
 				}
 
-				LOG(Logger::Debug, "Using protocol version %d", protocolVersion);
-
 				if(protocolVersion > maxProtocolVersion) {
 					protocolVersion = maxProtocolVersion;
 				}
+
+				LOG(Logger::Debug, "Using protocol version %d", protocolVersion);
 
 				msgobj.deleteContent();
 
