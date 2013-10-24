@@ -18,7 +18,7 @@ class DataReceiver: public thread_t {
 		bool autoDelete();
 	protected:
 		void parseHeader(jsonObj_t &h);
-		void receiveFileData(fileWriter_t &writer);
+		void receiveFileData(fileWriter_t &writer, int protocolVersion);
 		void sendHeader(jsonComponent_t &json);
 };
 

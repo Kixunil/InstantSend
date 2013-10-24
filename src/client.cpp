@@ -21,6 +21,8 @@ using namespace std;
 
 int outputpercentage = 0;
 
+const int maxProtocolVersion = 1;
+
 inline size_t getBaseFileName(const string &path) {
 	return getFileName(path);
 }
@@ -120,14 +122,17 @@ class FileReader : public FileStatus {
 				msgobj.insertNew("service", new jsonStr_t("filetransfer"));
 				msgobj.insertNew("filename", new jsonStr_t(basename.c_str()));
 				msgobj.insertNew("filesize", new jsonInt_t((intL_t)mSize));
+				msgobj.insertNew("max_msg_size", new jsonInt_t((intL_t)DMAXSIZE));
+				msgobj.insertNew("version", new jsonInt_t((intL_t)maxProtocolVersion));
 				string msg = msgobj.toString();
 				strcpy(data->data, msg.c_str());
 				data->size = msg.size() + 1;
 				//msgobj.deleteContent();
 
+				client.sendData(data.get());
 				if(!client.sendData(data.get())) throw runtime_error("Can't send!");
 				data->size = DMAXSIZE;
-				if(!client.recvData(data.get())) throw runtime_error("No response");
+				if(!client.recvData(data.get())) throw runtime_error("Receiving failed");
 				data->data[data->size] = 0;
 
 				msg = string(data->data);
@@ -145,6 +150,26 @@ class FileReader : public FileStatus {
 					}
 				}
 
+				try {
+					mPeerMaxSize = dynamic_cast<jsonInt_t &>(msgobj["max_msg_size"]).getVal();
+				} catch(...) {
+					mPeerMaxSize = OLD_DMAXSIZE;
+				}
+
+				LOG(Logger::Debug, "Max datagram size of peer = %d", (int)mPeerMaxSize);
+				int protocolVersion;
+				try {
+					protocolVersion = dynamic_cast<jsonInt_t &>(msgobj["version"]).getVal();
+				} catch(...) {
+					protocolVersion = 0;
+				}
+
+				LOG(Logger::Debug, "Using protocol version %d", protocolVersion);
+
+				if(protocolVersion > maxProtocolVersion) {
+					protocolVersion = maxProtocolVersion;
+				}
+
 				msgobj.deleteContent();
 
 				auto_ptr<jsonInt_t> fp(new jsonInt_t((intL_t)0));
@@ -153,15 +178,29 @@ class FileReader : public FileStatus {
 				File::Size fpos = 0;
 				unsigned int fragmentcnt = 0;
 				do {
-					fp->setVal(fpos);
-					string msg = msgobj.toString();
-					strcpy(data->data, msg.c_str());
-					data->size = mFile.read(data->data + msg.size() + 1, DMAXSIZE - 1 - msg.size());
-					fpos += data->size;
-					mBytes += data->size;
-					data->size += msg.size() + 1;
+					size_t dataOffset = 0;
+					if(protocolVersion < 1) {
+						fp->setVal(fpos);
+						string msg = msgobj.toString();
+						strcpy(data->data, msg.c_str());
+						dataOffset += msg.size() + 1;
+					} else {
+						File::Size tmp(fpos);
+						data->data[dataOffset] = 0;
+						++dataOffset;
+						for(size_t i = dataOffset + 7; i >= dataOffset; --i) {
+							data->data[i] = tmp % 256;
+							tmp /= 256;
+						}
+						dataOffset += 8;
+					}
 
+					size_t readSize = mFile.read(data->data + dataOffset, mPeerMaxSize - dataOffset);
+					data->size = dataOffset + readSize;
 					if(!client.sendData(data.get())) throw runtime_error("Can't send!");
+					fpos += readSize;
+					mBytes += readSize;
+
 				} while(fpos < mSize);
 				strcpy(data->data, "{\"action\":\"finished\"}");
 				data->size = 26;
@@ -200,6 +239,7 @@ class FileReader : public FileStatus {
 		File mFile;
 		File::Size mSize, mBytes;
 		int mId, mStatus;
+		size_t mPeerMaxSize;
 #ifndef WINDOWS
 		StatusReporter &mReporter;
 #endif

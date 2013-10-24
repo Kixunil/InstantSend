@@ -8,13 +8,15 @@
 
 //#define DEBUG
 #ifdef DEBUG
-#define D(MSG) fprintf(stderr, MSG "\n"); fflush(stderr);
+#define D(MSG) LOG(Logger::VerboseDebug, MSG)
 #else
 #define D(MSG) do ; while(0)
 #endif
 
 using namespace InstantSend;
 using namespace std;
+
+const int maxProtocolVersion = 1;
 
 void sendErrMsg(const pluginInstanceAutoPtr<Peer> &client, const char *msg) {
 	// Sends information about error to client
@@ -34,6 +36,17 @@ void DataReceiver::parseHeader(jsonObj_t &h) {
 	if(dynamic_cast<jsonStr_t &>(h["service"]) != "filetransfer") throw runtime_error("Service not supported");
 	string fname(dynamic_cast<jsonStr_t &>(h.gie("filename")).getVal());
 	File::Size fsize = dynamic_cast<jsonInt_t &>(h.gie("filesize")).getVal();
+	int protocolVersion;
+	try {
+		protocolVersion = dynamic_cast<jsonInt_t &>(h["version"]).getVal();
+	}
+	catch(...) {
+		protocolVersion = 0;
+	}
+
+	if(protocolVersion > maxProtocolVersion) {
+		protocolVersion = maxProtocolVersion;
+	}
 
 	//for(unsigned int i = 0; i < fname.size(); ++i) if(fname[i] == '/') fname[i] = '-'; //strip slashes TODO: use OS independent function
 	// stripPath(fname);
@@ -44,62 +57,97 @@ void DataReceiver::parseHeader(jsonObj_t &h) {
 		cptr->sendData(data.get());
 		return;
 	}
+
 	string destPath(combinePath(savedir, fname));
 	makePath(destPath);
 
-#ifdef DEBUG
-	fprintf(stderr, "Receiving file %s (%zu bytes)\n", fname.c_str(), (size_t)fsize);
-	fflush(stderr);
-#endif
+	LOG(Logger::Note, "Receiving file %s (%zu bytes)\n", fname.c_str(), (size_t)fsize);
 
-	fileWriter_t *writer = dynamic_cast<fileWriter_t *>(&fileList_t::getList().getController(0, destPath, (File::Size)fsize, cptr->getMachineIdentifier()));
-	writer->incRC();
-	D("Writer created");
+	FileWriterPtr writer(dynamic_cast<fileWriter_t &>(fileList_t::getList().getController(0, destPath, (File::Size)fsize, cptr->getMachineIdentifier())));
+	LOG(Logger::Debug, "Writer created");
 
-	auto_ptr<anyData> data(allocData(53));
-	strcpy(data->data, "{ \"service\" : \"filetransfer\", \"action\" : \"accept\" }");
-	data->size = 53;
+	jsonObj_t response("{ \"service\" : \"filetransfer\", \"action\" : \"accept\" }");
+	response.insertNew("version", new jsonInt_t(protocolVersion));
+	response.insertNew("max_msg_size", new jsonInt_t(DMAXSIZE));
+	LOG(Logger::VerboseDebug, "Response object crated, converting and sendng...");
+	string responseMsg(response.toString());
+	LOG(Logger::VerboseDebug, "Response: \"%s\"", responseMsg.c_str());
+	auto_ptr<anyData> data(allocData(responseMsg.size() + 1)); // +1 for null terminator
+	strcpy(data->data, responseMsg.c_str());
+	data->size = responseMsg.size(); // no need to send null terminator
 	cptr->sendData(data.get());
 
-	receiveFileData(*writer);
+	LOG(Logger::VerboseDebug, "Receiving file data");
+	receiveFileData(*writer, protocolVersion);
 }
 
-void DataReceiver::receiveFileData(fileWriter_t &writer) {
+void DataReceiver::receiveFileData(fileWriter_t &writer, int protocolVersion) {
 	auto_ptr<anyData> data(allocData(DMAXSIZE + 1));
 	while((data->size = DMAXSIZE) && cptr->recvData(data.get())) {
 		data->data[data->size] = 0;
 		string header(string(data->data));
-		//fprintf(stderr, "Header: %s\n", header.c_str());
-		size_t hlen = strlen(data->data);
+		size_t hlen = header.size();
+		size_t dataOffset = hlen + 1;
+
+		File::Size position;
+
+		if(protocolVersion == 0)
 		try {
 			jsonObj_t h = jsonObj_t(&header);
 
 			try {
-				File::Size position = dynamic_cast<jsonInt_t &>(h.gie("position")).getVal();
-				auto_ptr<anyData> rawData = allocData(data->size - hlen - 1);
-				memcpy(rawData->data, data->data + hlen + 1, data->size - hlen - 1);
-				rawData->size = data->size - hlen - 1;
-				writer.writeData(position, rawData);
+				position = dynamic_cast<jsonInt_t &>(h.gie("position")).getVal();
 			}
 			catch(jsonNotExist &e) {
 				if(dynamic_cast<jsonStr_t &>(h["action"]).getVal() == "finished") {
-					writer.decRC();
 					return;
 				} else throw;
 			}
 		}
 		catch(exception &e) {
 			sendErrMsg(cptr, e.what());
-			writer.decRC();
 			fprintf(stderr, "Exception while receiving: %s\n", e.what());
 			return;
 		}
+
+		if(protocolVersion == 1)
+		try {
+			if(header.size() > 0)
+			try {
+				jsonObj_t h(&header);
+				if(dynamic_cast<jsonStr_t &>(h["action"]).getVal() == "finished") {
+					return;
+				}
+			}
+			catch(...) {
+			}
+			if(data->size < 8 + dataOffset) throw runtime_error("Message too short");
+
+			// Conversion from MSB first position given in data to local variable
+			position = 0;
+			File::Size m = 1;
+			for(size_t i = dataOffset + 7; i >= dataOffset; --i) {
+				position += m*(unsigned char)data->data[i];
+				m *= 256;
+			}
+			dataOffset += 8;
+		} catch(exception &e) {
+			sendErrMsg(cptr, e.what());
+			LOG(Logger::Error, "Exception while receiving: %s", e.what());
+			return;
+		}
+
+		//LOG(Logger::VerboseDebug, "Allocating new storage for data %zu - %zu", data->size, dataOffset);
+		// TODO: improve it, so it won't need copying
+		auto_ptr<anyData> rawData = allocData(data->size - dataOffset);
+		memcpy(rawData->data, data->data + dataOffset, data->size - dataOffset);
+		rawData->size = data->size - dataOffset;
+		writer.writeData(position, rawData);
 
 		/*fprintf(stderr, "Received %u bytes of data.\n", data->size);
 		fflush(stderr);*/
 	}
 	D("Connection terminated");
-	writer.decRC();
 }
 
 void DataReceiver::run() {

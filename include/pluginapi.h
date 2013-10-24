@@ -11,7 +11,11 @@
 #include "json.h"
 
 #ifndef DMAXSIZE
-	#define DMAXSIZE 1024
+	#define DMAXSIZE 65545 // It's 65536 + 8 + 1, so files can be read in multiples of 4096 (usual sector size); 8 is sizeof(File::Size) 1 is for leading 0
+#endif
+
+#ifndef OLD_DMAXSIZE
+	#define OLD_DMAXSIZE 1024 // Old maximum size for backward compatibility
 #endif
 
 namespace InstantSend {
