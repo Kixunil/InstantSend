@@ -77,6 +77,28 @@ class fileWriter_t : public fileController_t, thread_t {
 		~fileWriter_t();
 };
 
+class FileWriterPtr {
+	public:
+		inline FileWriterPtr(fileWriter_t &fw) : mFW(&fw) { mFW->incRC(); }
+		inline FileWriterPtr(const FileWriterPtr &other) : mFW(other.mFW) { mFW->incRC(); }
+		inline FileWriterPtr &operator=(const FileWriterPtr &other) {
+			other.mFW->incRC();
+			mFW->decRC();
+			mFW = other.mFW;
+			return *this;
+		}
+		inline ~FileWriterPtr() { mFW->decRC(); }
+		inline fileWriter_t &operator*() {
+			return *mFW;
+		}
+
+		inline fileWriter_t *operator->() {
+			return mFW;
+		}
+	private:
+		fileWriter_t *mFW;
+};
+
 }
 
 #endif
