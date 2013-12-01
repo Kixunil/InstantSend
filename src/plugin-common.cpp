@@ -6,6 +6,12 @@
 using namespace InstantSend;
 using namespace std;
 
+const char *EStopped::what() {
+	return "Stopped";
+}
+
+EStopped::~EStopped() throw() {}
+
 void PluginEnvironment::flog(Logger::Level level, const char *format, ...) {
 	va_list vl;
 	va_start(vl, format);

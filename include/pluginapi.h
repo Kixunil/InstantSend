@@ -38,9 +38,21 @@ inline std::auto_ptr<anyData> allocData(size_t size) {
 	return std::auto_ptr<anyData>((anyData *)operator new(sizeof(anyData) + size));
 }
 
+// Exceptions
+
+class EStopped : public std::exception {
+	public:
+		const char *what();
+		~EStopped() throw();
+};
+
+// Callbacks
+
 class pluginDestrCallback {
 	public:
 };
+
+// Interfaces
 
 class Logger {
 	public:
