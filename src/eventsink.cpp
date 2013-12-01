@@ -66,11 +66,11 @@ void EventSink::unloadAllEventPlugins() {
 	while(eventPlugins.size()) {
 		map<string, PluginPtr<EventHandlerCreator> >::iterator it(eventPlugins.begin());
 		string pluginName(it->first);
-		fprintf(stderr, "Unloading: %s\n", pluginName.c_str());
+		LOG(Logger::Debug, "Unloading: %s", pluginName.c_str());
 		it->second->unregEvents(*this);
 		eventPlugins.erase(it);
 		//pl.checkUnload(pluginName);
-		fprintf(stderr, "Unloaded.\n");
+		LOG(Logger::Debug, "Unloaded.");
 	}
 }
 
