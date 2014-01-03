@@ -151,4 +151,5 @@ int main(int argc, char **argv) {
 	}
 
 	onAppStop();
+	instantSend = NULL;
 }
