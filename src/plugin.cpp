@@ -1,5 +1,4 @@
 #include "plugin.h"
-#include <cstdio>
 
 using namespace std;
 using namespace InstantSend;
@@ -27,13 +26,17 @@ const std::string &InternalPluginEnvironment::userPluginDir() {
 
 void InternalPluginEnvironment::onInstanceCreated() {
 	LOG(Logger::VerboseDebug, "Created instance of plugin \"%s\".", mName.c_str());
+	mRCMutex.lock();
 	++instanceCount;
+	mRCMutex.unlock();
 }
 
 void InternalPluginEnvironment::onInstanceDestroyed() {
 	LOG(Logger::VerboseDebug, "Destroyed instance of plugin \"%s\".", mName.c_str());
+	mRCMutex.lock();
 	--instanceCount;
 	if(!instanceCount) LOG(Logger::VerboseDebug, "Instance count of plugin \"%s\" reached zero.", mName.c_str());
+	mRCMutex.unlock();
 }
 
 void InternalPluginEnvironment::log(Logger::Level level, const std::string &message) {

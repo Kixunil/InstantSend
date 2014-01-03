@@ -9,6 +9,7 @@
 #include "pluginapi.h"
 #include "securestorage.h"
 #include "appcontrol.h"
+#include "multithread.h"
 
 namespace InstantSend {
 
@@ -47,6 +48,7 @@ class InternalPluginEnvironment : public PluginEnvironment {
 	private:
 		const std::string mName;
 		RefCnt instanceCount;
+		Mutex mRCMutex;
 		std::auto_ptr<PluginStorageHandle> mStorageHandle;
 		std::auto_ptr<SecureStorageWrapper> mSecureStorage;
 };
