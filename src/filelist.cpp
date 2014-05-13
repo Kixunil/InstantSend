@@ -50,14 +50,14 @@ fileList_t &fileList_t::getList() {
 	return list;
 }
 
-fileController_t &fileList_t::getController(int id, const string &fileName, File::Size fileSize, const string &machineID) {
+fileController_t &fileList_t::getController(int id, const string &fileName, File::Size fileSize, const string &machineID, jsonObj_t *extras) {
 	fileController_t *controller;
 	D("getController");
 	if(id) {
 		listmutex.lock();
 		map<int, fileController_t *>::iterator it = identifiers.find(id);
 		if(it == identifiers.end()) {
-			controller = insertController(id, fileName, fileSize, machineID);
+			controller = insertController(id, fileName, fileSize, machineID, extras);
 		} else controller = it->second;
 		listmutex.unlock();
 	} else {
@@ -70,7 +70,7 @@ fileController_t &fileList_t::getController(int id, const string &fileName, File
 			fflush(stderr);
 		} while(identifiers.count(id));
 		D("inserting controller");
-		controller = insertController(id, fileName, fileSize, machineID);
+		controller = insertController(id, fileName, fileSize, machineID, extras);
 		D("Releasing mutex");
 		listmutex.unlock();
 	}

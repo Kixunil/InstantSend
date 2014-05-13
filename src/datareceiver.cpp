@@ -37,6 +37,7 @@ void DataReceiver::parseHeader(jsonObj_t &h) {
 	string fname(dynamic_cast<jsonStr_t &>(h.gie("filename")).getVal());
 	File::Size fsize = dynamic_cast<jsonInt_t &>(h.gie("filesize")).getVal();
 	int protocolVersion;
+	jsonObj_t *extras;
 	try {
 		protocolVersion = dynamic_cast<jsonInt_t &>(h["version"]).getVal();
 	}
@@ -46,6 +47,13 @@ void DataReceiver::parseHeader(jsonObj_t &h) {
 
 	if(protocolVersion > maxProtocolVersion) {
 		protocolVersion = maxProtocolVersion;
+	}
+
+	try {
+		extras = &dynamic_cast<jsonObj_t &>(h["extras"]);
+	}
+	catch(...) {
+		extras = NULL;
 	}
 
 	//for(unsigned int i = 0; i < fname.size(); ++i) if(fname[i] == '/') fname[i] = '-'; //strip slashes TODO: use OS independent function
@@ -63,7 +71,7 @@ void DataReceiver::parseHeader(jsonObj_t &h) {
 
 	LOG(Logger::Note, "Receiving file %s (%zu bytes)\n", fname.c_str(), (size_t)fsize);
 
-	FileWriterPtr writer(dynamic_cast<fileWriter_t &>(fileList_t::getList().getController(0, destPath, (File::Size)fsize, cptr->getMachineIdentifier())));
+	FileWriterPtr writer(dynamic_cast<fileWriter_t &>(fileList_t::getList().getController(0, destPath, (File::Size)fsize, cptr->getMachineIdentifier(), extras)));
 	LOG(Logger::Debug, "Writer created");
 
 	jsonObj_t response("{ \"service\" : \"filetransfer\", \"action\" : \"accept\" }");

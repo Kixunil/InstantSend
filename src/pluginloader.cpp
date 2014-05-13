@@ -29,5 +29,5 @@ auto_ptr<LibraryHandle> PluginLoader::loadPlugin(const string &name, auto_ptr<In
 			LOG(Logger::Note, "Failed to load plugin %s from path %s (%s)", name.c_str(), getFullName(paths[i], name).c_str(), e.what());
 		}
 	}
-	throw runtime_error("Failed to load plugin %s");
+	throw runtime_error("Failed to load plugin " + name);
 }

@@ -291,6 +291,9 @@ class FileStatus {
 		/*! \brief Resumes file transfer if it was paused by pauseTransfer() call */
 		virtual void resumeTransfer() = 0;
 
+		/*! \return Extra information provided by client, or NULL if nothing provided */
+		virtual const jsonObj_t *getExtras() = 0;
+
 		virtual ~FileStatus();
 };
 

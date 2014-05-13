@@ -58,8 +58,10 @@ class fileWriter_t : public fileController_t, thread_t {
 		void zeroReferences();
 		bool cleanupCheck(bool calledByThisThread = false);
 		void writeBuffer();
+
+		std::auto_ptr<jsonObj_t> mExtras;
 	public:
-		fileWriter_t(int id, const std::string &fileName, File::Size fileSize, const std::string &machineId);
+		fileWriter_t(int id, const std::string &fileName, File::Size fileSize, const std::string &machineId, jsonObj_t *extras);
 		std::string getFileName();
 		File::Size getFileSize();
 		std::string getMachineId();
@@ -70,6 +72,7 @@ class fileWriter_t : public fileController_t, thread_t {
 		File::Size getTransferredBytes();
 		int getTransferStatus();
 		char getDirection();
+		const jsonObj_t *getExtras();
 
 		void pauseTransfer(); 
 		void resumeTransfer();

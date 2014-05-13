@@ -62,11 +62,12 @@ class StatusReporter : public thread_t {
 
 class FileReader : public FileStatus {
 	public:
-		FileReader(const string &name, const string &target) : mName(name), mTarget(target), mFile(name), mSize(mFile.size()), mBytes(0),
+		FileReader(const string &name, const string &target, const char *extras) : mName(name), mTarget(target), mFile(name), mSize(mFile.size()), mBytes(0),
 #ifndef WINDOWS
 		mId(getpid()),
 #endif
-		mStatus(IS_TRANSFER_CONNECTING)
+		mStatus(IS_TRANSFER_CONNECTING),
+		mExtras(extras?new jsonObj_t(extras):NULL)
 #ifndef WINDOWS
 		, mReporter(*new StatusReporter(*this))
 #endif
@@ -105,6 +106,10 @@ class FileReader : public FileStatus {
 			return IS_DIRECTION_UPLOAD;
 		}
 
+		const jsonObj_t *getExtras() {
+			return mExtras.get();
+		}
+
 		void pauseTransfer() {}
 		void resumeTransfer() {}
 
@@ -124,6 +129,7 @@ class FileReader : public FileStatus {
 				msgobj.insertNew("filesize", new jsonInt_t((intL_t)mSize));
 				msgobj.insertNew("max_msg_size", new jsonInt_t((intL_t)DMAXSIZE));
 				msgobj.insertNew("version", new jsonInt_t((intL_t)maxProtocolVersion));
+				if(mExtras.get()) msgobj.insertVal("extras", mExtras.get());
 				string msg = msgobj.toString();
 				strcpy(data->data, msg.c_str());
 				data->size = msg.size() + 1;
@@ -239,6 +245,7 @@ class FileReader : public FileStatus {
 		File::Size mSize, mBytes;
 		int mId, mStatus;
 		size_t mPeerMaxSize;
+		auto_ptr<jsonObj_t> mExtras;
 #ifndef WINDOWS
 		StatusReporter &mReporter;
 #endif
@@ -270,7 +277,7 @@ pluginInstanceAutoPtr<Peer> findWay(jsonArr_t &ways) {
 	throw runtime_error("No usable way found");
 }
 
-bool sendEntry(const string &entry, size_t ignored, const string &tname, Peer &client) {
+bool sendEntry(const string &entry, size_t ignored, const string &tname, Peer &client, const char *extras) {
 	LOG(Logger::Debug, "Sending %s", entry.c_str());
 	if(entry.size() > 1 && (entry.substr(entry.size() - 2) == "/." || entry.substr(entry.size() - 2) == "\\.")) return true;
 	if(entry.size() > 2 && (entry.substr(entry.size() - 3) == "/.."|| entry.substr(entry.size() - 3) == "\\..")) return true;
@@ -279,13 +286,13 @@ bool sendEntry(const string &entry, size_t ignored, const string &tname, Peer &c
 		Directory dir(entry);
 		LOG(Logger::Debug, "Sending directory %s", entry.c_str());
 		while(1) {
-			success = success && sendEntry(combinePath(entry, dir.next()), ignored, tname, client);
+			success = success && sendEntry(combinePath(entry, dir.next()), ignored, tname, client, extras);
 		}
 	}
 	catch(ENotDir &e) {
 		LOG(Logger::Debug, "Opening %s", entry.c_str());
 		// Open file
-		FileReader file(entry, tname);
+		FileReader file(entry, tname, extras);
 
 		// Send file
 		if(file.send(client, entry.substr(ignored))) {
@@ -296,6 +303,8 @@ bool sendEntry(const string &entry, size_t ignored, const string &tname, Peer &c
 	catch(Eod &e) {} // Ignore end of directory
 	return success;
 }
+
+const char *extras;
 
 int main(int argc, char **argv) {
 	auto_ptr<Application> app(new Application(argc, argv));
@@ -366,6 +375,15 @@ int main(int argc, char **argv) {
 				continue;
 			}
 
+			if(string(argv[i]) == string("-e")) {
+				if(!argv[++i]) {
+					fprintf(stderr, "Too few arguments after '-e'\n");
+					return 1;
+				}
+				extras = argv[i][0]?argv[i]:NULL;
+				continue;
+			}
+
 			if(string(argv[i]) == string("-f") && tname) {
 				if(!argv[++i]) {
 					LOG(Logger::Error, "Too few arguments after '-f'");
@@ -376,7 +394,7 @@ int main(int argc, char **argv) {
 				trimSlashes(fn);
 				
 				LOG(Logger::Debug, "Sending data...");
-				if(sendEntry(fn, getFileName(fn), tname, *client)) {
+				if(sendEntry(fn, getFileName(fn), tname, *client, extras)) {
 					LOG(Logger::Debug, "Sending successfull.");
 				} else failuredetected = 1;
 			}

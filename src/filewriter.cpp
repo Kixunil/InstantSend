@@ -28,7 +28,7 @@ bool dataFragment_t::writeData(WritableFile &file) const {
 	return true;
 }
 
-fileWriter_t::fileWriter_t(int id, const string &fileName, File::Size fileSize, const string &machineId) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT), file(fileName.c_str()) {
+fileWriter_t::fileWriter_t(int id, const string &fileName, File::Size fileSize, const string &machineId, jsonObj_t *extras) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT), file(fileName.c_str()), mExtras(static_cast<jsonObj_t *>(extras->clone())) {
 	fName = fileName;
 	fSize = fileSize;
 	mId = machineId;
@@ -81,6 +81,10 @@ int fileWriter_t::getTransferStatus() {
 
 char fileWriter_t::getDirection() {
 	return IS_DIRECTION_DOWNLOAD;
+}
+
+const jsonObj_t *fileWriter_t::getExtras() {
+	return mExtras.get();
 }
 
 bool fileWriter_t::empty() {
@@ -237,11 +241,11 @@ fileWriter_t::~fileWriter_t() {
 FileStatus::~FileStatus() {
 }
 
-fileController_t *fileList_t::insertController(int id, const string &fileName, File::Size fileSize, const string &machineID) {
+fileController_t *fileList_t::insertController(int id, const string &fileName, File::Size fileSize, const string &machineID, jsonObj_t *extras) {
 	jsonInt_t tmp((intL_t)fileSize);
 	fprintf(stderr, "Creating controller for file %s (%sB) with id %d\n", fileName.c_str(), tmp.toString().c_str(), id);
 	fflush(stderr);
-	fileController_t *writer = new fileWriter_t(id, fileName, fileSize, machineID);
+	fileController_t *writer = new fileWriter_t(id, fileName, fileSize, machineID, extras);
 	identifiers.insert(pair<int, fileController_t *>(id, writer));
 	return writer;
 }
