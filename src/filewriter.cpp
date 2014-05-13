@@ -28,7 +28,7 @@ bool dataFragment_t::writeData(WritableFile &file) const {
 	return true;
 }
 
-fileWriter_t::fileWriter_t(int id, const string &fileName, File::Size fileSize, const string &machineId, jsonObj_t *extras) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT), file(fileName.c_str()), mExtras(static_cast<jsonObj_t *>(extras->clone())) {
+fileWriter_t::fileWriter_t(int id, const string &fileName, File::Size fileSize, const string &machineId, jsonObj_t *extras) : fileController_t(id), inputSem(MAX_BUF_FRAGMENT_COUNT), file(fileName.c_str()), mExtras(extras?static_cast<jsonObj_t *>(extras->clone()):NULL) {
 	fName = fileName;
 	fSize = fileSize;
 	mId = machineId;
