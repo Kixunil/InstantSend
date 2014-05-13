@@ -106,7 +106,7 @@ class fileUnreadable : public std::exception {
 class jsonComponent_t
 {
 	public:
-		virtual std::string toString() = 0;
+		virtual std::string toString() const = 0;
 		virtual void fromString(std::string *str) = 0;
 		virtual jsonComponent_t *clone() const = 0;
 		virtual ~jsonComponent_t();
@@ -120,7 +120,7 @@ class jsonInt_t : public jsonComponent_t {
 		jsonInt_t(std::string *str);
 		~jsonInt_t();
 
-		std::string toString();
+		std::string toString() const;
 		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 		inline intL_t getVal() const {
@@ -168,7 +168,7 @@ class jsonFloat_t : public jsonComponent_t {
 		jsonFloat_t(floatL_t value);
 		jsonFloat_t(std::string *str);
 		~jsonFloat_t();
-		std::string toString();
+		std::string toString() const;
 		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 
@@ -203,7 +203,7 @@ class jsonStr_t : public jsonComponent_t {
 		inline jsonStr_t(const char *str) {
 			val = std::string(str);
 		}
-		std::string toString();
+		std::string toString() const;
 		void fromString(std::string *str);
 
 		std::string getVal() const {
@@ -250,7 +250,7 @@ class jsonBool_t : public jsonComponent_t {
 		jsonBool_t(bool value);
 		jsonBool_t(std::string *str);
 		~jsonBool_t();
-		std::string toString();
+		std::string toString() const;
 		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 
@@ -279,7 +279,7 @@ class jsonNull_t :  public jsonComponent_t {
 		~jsonNull_t();
 		jsonComponent_t *clone() const;
 
-		std::string toString() {
+		std::string toString() const {
 			return "null";
 		}
 
@@ -384,7 +384,7 @@ class jsonArr_t: public jsonStructuredComponent_t {
 		inline jsonArr_t(std::string *str) {
 			fromString(str);
 		}
-		std::string toString();
+		std::string toString() const;
 		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 
@@ -484,7 +484,7 @@ class jsonObj_t: public jsonStructuredComponent_t {
 			data[key] = itemContainer_t(value, false);
 		}
 
-		std::string toString();
+		std::string toString() const;
 		void fromString(std::string *str);
 		jsonComponent_t *clone() const;
 

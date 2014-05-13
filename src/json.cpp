@@ -14,7 +14,7 @@ using namespace std;
 
 #ifdef NOPURE
 
-string jsonComponent_t::toString() {
+string jsonComponent_t::toString() const {
 	throw runtime_error("Pure jsonComponent_t::toString called");
 }
 
@@ -114,7 +114,7 @@ jsonInt_t::jsonInt_t(string *str) {
 	fromString(str);
 }
 
-string jsonInt_t::toString() {
+string jsonInt_t::toString() const {
 	if(val == 0) return string("0");
 	char buf[3*sizeof(intL_t) + 2];
 	char *bptr = buf + 3*sizeof(intL_t) + 1;
@@ -189,7 +189,7 @@ void jsonFloat_t::fromString(string *str) {
 	setVal(res);
 }
 
-string jsonFloat_t::toString() {
+string jsonFloat_t::toString() const {
 	char buf[50];
 
 	snprintf(buf, 50, "%f", getVal());
@@ -316,7 +316,7 @@ void jsonStr_t::fromString(string *str) {
 	str->erase(0, i+1);
 }
 
-string jsonStr_t::toString() {
+string jsonStr_t::toString() const {
 	string res = "\"", in = getVal();
 	res.reserve(in.length() * 2 + 3);
 	for(unsigned int i = 0; i < in.length(); ++i) {
@@ -381,7 +381,7 @@ void jsonBool_t::fromString(string *str) {
 	} else throw jsonSyntaxErr(str, 0);
 }
 
-string jsonBool_t::toString() {
+string jsonBool_t::toString() const {
 	if(getVal()) return "true"; else return "false";
 }
 
@@ -396,7 +396,7 @@ jsonStructuredComponent_t::~jsonStructuredComponent_t() {}
 */
 
 // jsonArr_t
-string jsonArr_t::toString() {
+string jsonArr_t::toString() const {
 	string res = "[";
 	for(unsigned int i = 0; i < data.size(); ++i) {
 		res += data[i]->toString() + ", ";
@@ -482,7 +482,7 @@ void jsonObj_t::fromString(string *str) {
 	if(str->length()) str->erase(0, i + 1); else throw jsonSyntaxErr(str, -1);
 }
 
-string jsonObj_t::toString() {
+string jsonObj_t::toString() const {
 	string res = "{";
 	jsonStr_t tmp;
 	for (typeof(data.begin()) it = data.begin(); it != data.end(); ++it) {
